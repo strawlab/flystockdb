@@ -92,7 +92,25 @@ qx.Class.define("gazebo.Application",
 
       // Add an event listener
       button1.addListener("execute", function(e) {
-        alert("Hello World!");
+        alert("Sending RPC...");
+				
+				var rpc = new qx.io.remote.Rpc();
+				rpc.setTimeout(1000);
+				rpc.setUrl("http://127.0.0.1:8080");
+				rpc.setServiceName("gazebo.cgi");
+				
+				var that = this;
+				this.RpcRunning = rpc.callAsync(
+					function(result, ex, id)
+					{
+						that.RpcRunning = null;
+						if (ex == null) {
+							alert(result);
+						} else {
+							alert("Async(" + id + ") exception: " + ex);
+						}
+					},
+					"fss.getBaseDir");
       });
     }
   }
