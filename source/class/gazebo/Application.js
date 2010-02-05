@@ -96,7 +96,7 @@ qx.Class.define("gazebo.Application",
 				
 				var rpc = new qx.io.remote.Rpc();
 				rpc.setTimeout(1000);
-				rpc.setUrl("http://127.0.0.1:8080");
+				rpc.setUrl("http://127.0.0.1:8080/gazebo.cgi");
 				rpc.setServiceName("gazebo.cgi");
 				
 				var that = this;
