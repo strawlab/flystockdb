@@ -105,12 +105,12 @@ qx.Class.define("gazebo.Application",
 					{
 						that.RpcRunning = null;
 						if (ex == null) {
-							alert(result);
+							alert("Async(" + id + ") result: " + result);
 						} else {
 							alert("Async(" + id + ") exception: " + ex);
 						}
 					},
-					"fss.getBaseDir");
+					"A Method...");
       });
     }
   }
