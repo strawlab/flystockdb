@@ -61,13 +61,24 @@ qx.Class.define("gazebo.Application",
 
       // Create a button
       var button1 = new qx.ui.form.Button("First Button", "gazebo/test.png");
-
+			button1.setAlignX("center");
+			button1.setAlignY("middle");
+			
       // Document is the application root
       var doc = this.getRoot();
 			
+			var layout = new qx.ui.layout.VBox();
+			layout.setSpacing(4);
+			
+			var container = new qx.ui.container.Composite(layout);
+			
       // Add button to document at fixed coordinates
-      doc.add(button1, {left: 100, top: 50});
+      container.add(button1);
+			container.add(new qx.ui.form.Button("Test", "gazebo/test.png"));
 
+			var containerX = doc.width / 2 - container.width / 2;
+			doc.add(container, { left: containerX });
+			
 			var tableWindow = new qx.ui.window.Window("Table Window");
 			var tableModel = new qx.ui.table.model.Simple();
 			
@@ -88,11 +99,9 @@ qx.Class.define("gazebo.Application",
 			
 			table.updateContent();
 
-			doc.add(new qx.ui.form.Button("Test", "gazebo/test.png"), {left:100, top: 200});
-
       // Add an event listener
       button1.addListener("execute", function(e) {
-        alert("Sending RPC...");
+        //alert("Sending RPC...");
 				
 				var rpc = new qx.io.remote.Rpc();
 				rpc.setTimeout(1000);
