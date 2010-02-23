@@ -23,8 +23,6 @@ qx.Class.define("gazebo.Application",
 {
   extend : qx.application.Standalone,
 
-
-
   /*
   *****************************************************************************
      MEMBERS
