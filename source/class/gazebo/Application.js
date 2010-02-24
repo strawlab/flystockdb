@@ -59,23 +59,23 @@ qx.Class.define("gazebo.Application",
 
       // Create a button
       var button1 = new qx.ui.form.Button("First Button", "gazebo/test.png");
-			button1.setAlignX("center");
-			button1.setAlignY("middle");
 			
       // Document is the application root
       var doc = this.getRoot();
-			
+									
 			var layout = new qx.ui.layout.VBox();
 			layout.setSpacing(4);
 			
 			var container = new qx.ui.container.Composite(layout);
 			
+			container.setAlignX("center");
+			container.setAlignY("middle");
+			
       // Add button to document at fixed coordinates
       container.add(button1);
 			container.add(new qx.ui.form.Button("Test", "gazebo/test.png"));
-
-			var containerX = doc.width / 2 - container.width / 2;
-			doc.add(container, { left: containerX });
+			
+			doc.add(container); //, { left: "45%", top: "45%" });
 			
 			var tableWindow = new qx.ui.window.Window("Table Window");
 			var tableModel = new qx.ui.table.model.Simple();
@@ -94,6 +94,12 @@ qx.Class.define("gazebo.Application",
 			// doc.add(table, {left: 50, top: 100, right: 500, bottom: 300});
 			// tableWindow.add(table);
 			tableWindow.add(new gazebo.ui.ConnectionDialog("Hm"));
+			tableWindow.setResizable(false, false, false, false);
+			tableWindow.setMovable(false);
+			tableWindow.setShowClose(true);
+			tableWindow.setShowMaximize(false);
+			tableWindow.setShowMinimize(false);
+			tableWindow.addListener("resize", tableWindow.center, tableWindow);
 			
 			table.updateContent();
 
