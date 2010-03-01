@@ -41,12 +41,12 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		var form = new qx.ui.form.Form();
 		
 		form.addGroupHeader("Host Settings");
-		var host = new qx.ui.form.TextField();
-		host.setRequired(true);
-		form.add(host, "Host", qx.util.Validate.string());
-		var port = new qx.ui.form.TextField();
-		port.setRequired(true);
-		form.add(port, "Port", qx.util.Validate.number());
+		this.host = new qx.ui.form.TextField("127.0.0.1");
+		this.host.setRequired(true);
+		form.add(this.host, "Host", qx.util.Validate.string());
+		this.port = new qx.ui.form.Spinner(1, 8080, 65535);
+		this.port.setRequired(true);
+		form.add(this.port, "Port");
 		
 		form.addGroupHeader("Authentication");
 		var username = new qx.ui.form.TextField();
@@ -56,14 +56,18 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		password.setRequired(false);
 		form.add(password, "Password");
 		
+		var dialog = this;
+		
 		var connectButton = new qx.ui.form.Button("Connect");
 		connectButton.addListener("execute", function() {
 			if (form.validate()) {
-				alert("Connect!");
-				
 				var rpc = new qx.io.remote.Rpc();
-				rpc.setTimeout(1000);
-				rpc.setUrl("http://127.0.0.1:8080/gazebo.cgi");
+				rpc.setTimeout(1000); // 1sec time-out, arbitrarily chosen.
+				rpc.setUrl("http://" +
+									 dialog.host.getValue() +
+									 ":" +
+									 dialog.port.getValue() +
+									 "/gazebo.cgi");
 				rpc.setServiceName("gazebo.cgi");
 				
 				var that = this;
