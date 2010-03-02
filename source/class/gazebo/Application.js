@@ -22,7 +22,7 @@
 qx.Class.define("gazebo.Application",
 {
   extend : qx.application.Standalone,
-	
+
   /*
   *****************************************************************************
      MEMBERS
@@ -43,7 +43,7 @@ qx.Class.define("gazebo.Application",
       this.base(arguments);
 
       // Enable logging in debug variant
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      //if (qx.core.Variant.isSet("qx.debug", "on"))
       {
         // support native logging capabilities, e.g. Firebug for Firefox
         qx.log.appender.Native;
@@ -51,10 +51,6 @@ qx.Class.define("gazebo.Application",
         qx.log.appender.Console;
       }
 						
-			var connectionWindow = new qx.ui.window.Window("Database Connection");
-			
-			connectionWindow.setLayout(new qx.ui.layout.HBox(10));
-
 			// Remember how to work with tables for later...
 			// var tableModel = new qx.ui.table.model.Simple();			
 			// tableModel.setColumns(['a', 'b']);
@@ -64,16 +60,55 @@ qx.Class.define("gazebo.Application",
 			// tableWindow.add(table);
 			// table.updateContent();
 
-			connectionWindow.add(new gazebo.ui.ConnectionDialog());
-			connectionWindow.setResizable(false, false, false, false);
-			connectionWindow.setMovable(false);
-			connectionWindow.setShowClose(false);
-			connectionWindow.setShowMaximize(false);
-			connectionWindow.setShowMinimize(false);
-			connectionWindow.addListener("resize", connectionWindow.center, connectionWindow);
-			this.getRoot().add(connectionWindow);
-			connectionWindow.open();
+			this.generateConnectionDialog();
 
-    }
+			this.debug("Main Application Up and Running: " + this.connectionWindow);
+    },
+
+		generateConnectionDialog : function ()
+		{
+			var connectionDialog = new gazebo.ui.ConnectionDialog();
+			connectionDialog.addListener("connect", this.establishConnection, this);
+
+			this.connectionWindow = new qx.ui.window.Window("Database Connection");
+			this.connectionWindow.setLayout(new qx.ui.layout.HBox(10));
+			this.connectionWindow.add(connectionDialog);
+			this.connectionWindow.setResizable(false, false, false, false);
+			this.connectionWindow.setMovable(false);
+			this.connectionWindow.setShowClose(false);
+			this.connectionWindow.setShowMaximize(false);
+			this.connectionWindow.setShowMinimize(false);
+
+			this.connectionWindow.addListener("resize", this.connectionWindow.center, this.connectionWindow);
+			
+			this.getRoot().add(this.connectionWindow);
+			this.connectionWindow.open();
+		},
+
+		generateDatabaseInterface : function ()
+		{
+			this.dbiComposite = new qx.ui.container.Composite();
+			this.dbiComposite.setLayout(new qx.ui.layout.Canvas());
+			this.dbiComposite.setPadding(5, 5, 5, 5);
+
+			this.databaseWindow = new qx.ui.window.Window("Databases");
+			this.databaseWindow.setLayout(new qx.ui.layout.HBox(10));
+			this.databaseWindow.setResizable(false, false, false, false);
+			this.databaseWindow.setMovable(false);
+			this.databaseWindow.setShowClose(false);
+			this.databaseWindow.setShowMaximize(false);
+			this.databaseWindow.setShowMinimize(false);
+
+			this.dbiComposite.add(this.databaseWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
+			this.getRoot().add(this.dbiComposite, { left: "0%", top: "0%", right: "75%", bottom: "0%" });
+			this.databaseWindow.open();
+		},
+
+		establishConnection : function()
+		{
+			this.debug("Connection Established, " + this.connectionWindow);
+			this.connectionWindow.close();
+			this.generateDatabaseInterface();
+		}
   }
 });

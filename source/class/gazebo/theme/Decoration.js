@@ -35,7 +35,7 @@ qx.Theme.define("gazebo.theme.Decoration",
       decorator : qx.ui.decoration.Grid,
 
       style : {
-        baseImage : "decoration/window/captionbar-inactive.png"
+        baseImage : "gazebo/decoration/window/captionbar-inactive.png"
       }
     }
   }

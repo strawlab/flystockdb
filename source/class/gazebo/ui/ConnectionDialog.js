@@ -23,6 +23,11 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 {
   extend : qx.ui.container.Composite,
 
+	events :
+	{
+		"connect" : "qx.event.type.Event"
+	},
+
   /*
   *****************************************************************************
      CONSTRUCTOR
@@ -69,7 +74,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 									 dialog.port.getValue() +
 									 "/gazebo.cgi");
 				rpc.setServiceName("gazebo.cgi");
-				
+
 				var that = this;
 				this.RpcRunning = rpc.callAsync(
 					function(result, ex, id)
@@ -77,6 +82,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 						that.RpcRunning = null;
 						if (ex == null) {
 							alert("Async(" + id + ") result: " + result);
+							that.fireEvent("connect");
 						} else {
 							alert("Async(" + id + ") exception: " + ex);
 						}
