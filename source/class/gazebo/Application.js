@@ -87,10 +87,14 @@ qx.Class.define("gazebo.Application",
 
 		generateDatabaseInterface : function ()
 		{
-			this.dbiComposite = new qx.ui.container.Composite();
-			this.dbiComposite.setLayout(new qx.ui.layout.Canvas());
-			this.dbiComposite.setPadding(5, 5, 5, 5);
-
+			this.dbComposite = new qx.ui.container.Composite();
+			this.dbComposite.setLayout(new qx.ui.layout.Canvas());
+			this.dbComposite.setPadding(5, 5, 5, 5);
+			
+			this.wfComposite = new qx.ui.container.Composite();
+			this.wfComposite.setLayout(new qx.ui.layout.Canvas());
+			this.wfComposite.setPadding(5, 5, 5, 5);
+			
 			this.databaseWindow = new qx.ui.window.Window("Databases");
 			this.databaseWindow.setLayout(new qx.ui.layout.HBox(10));
 			this.databaseWindow.setResizable(false, false, false, false);
@@ -99,9 +103,20 @@ qx.Class.define("gazebo.Application",
 			this.databaseWindow.setShowMaximize(false);
 			this.databaseWindow.setShowMinimize(false);
 
-			this.dbiComposite.add(this.databaseWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
-			this.getRoot().add(this.dbiComposite, { left: "0%", top: "0%", right: "75%", bottom: "0%" });
+			this.workflowWindow = new qx.ui.window.Window("Workflow");
+			this.workflowWindow.setLayout(new qx.ui.layout.HBox(10));
+			this.workflowWindow.setResizable(false, false, false, false);
+			this.workflowWindow.setMovable(false);
+			this.workflowWindow.setShowClose(false);
+			this.workflowWindow.setShowMaximize(false);
+			this.workflowWindow.setShowMinimize(false);
+			
+			this.dbComposite.add(this.databaseWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
+			this.wfComposite.add(this.workflowWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
+			this.getRoot().add(this.dbComposite, { left: "0%", top: "0%", right: "75%", bottom: "0%" });
+			this.getRoot().add(this.wfComposite, { left: "80%", top: "0%", right: "0%", bottom: "0%" });
 			this.databaseWindow.open();
+			this.workflowWindow.open();
 		},
 
 		establishConnection : function()
