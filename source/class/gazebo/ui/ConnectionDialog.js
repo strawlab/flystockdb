@@ -46,7 +46,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		var form = new qx.ui.form.Form();
 		
 		form.addGroupHeader("Host Settings");
-		this.host = new qx.ui.form.TextField("127.0.0.1");
+		this.host = new qx.ui.form.TextField("localhost");
 		this.host.setRequired(true);
 		form.add(this.host, "Host", qx.util.Validate.string());
 		this.port = new qx.ui.form.Spinner(1, 8080, 65535);
@@ -87,7 +87,9 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 							alert("Async(" + id + ") exception: " + ex);
 						}
 					},
-					"A Method..."
+					"A Method...",
+					"One",
+					"Two"
 				);
 				
 			}
