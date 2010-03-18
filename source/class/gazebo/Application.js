@@ -103,6 +103,8 @@ qx.Class.define("gazebo.Application",
 			this.databaseWindow.setShowMaximize(false);
 			this.databaseWindow.setShowMinimize(false);
 
+			this.databaseWindow.add(new qx.ui.tree.Tree());
+
 			this.workflowWindow = new qx.ui.window.Window("Workflow");
 			this.workflowWindow.setLayout(new qx.ui.layout.HBox(10));
 			this.workflowWindow.setResizable(false, false, false, false);
@@ -110,7 +112,7 @@ qx.Class.define("gazebo.Application",
 			this.workflowWindow.setShowClose(false);
 			this.workflowWindow.setShowMaximize(false);
 			this.workflowWindow.setShowMinimize(false);
-			
+
 			this.dbComposite.add(this.databaseWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
 			this.wfComposite.add(this.workflowWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
 			this.getRoot().add(this.dbComposite, { left: "0%", top: "0%", right: "75%", bottom: "0%" });
