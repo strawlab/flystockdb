@@ -87,7 +87,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 							alert("Async(" + id + ") exception: " + ex);
 						}
 					},
-					"A Method...",
+					"connect",
 					"One",
 					"Two"
 				);
