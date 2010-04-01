@@ -37,7 +37,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
   /**
    * @param value {String} Text for an example.
    */
-  construct : function()
+  construct : function(queryMachineSettings)
   {
     this.base(arguments);
 
@@ -45,15 +45,17 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		
 		var form = new qx.ui.form.Form();
 		
-		form.addGroupHeader("Host Settings");
-		this.host = new qx.ui.form.TextField("localhost");
-		this.host.setRequired(true);
-		form.add(this.host, "Host", qx.util.Validate.string());
-		this.port = new qx.ui.form.Spinner(1, 8080, 65535);
-		this.port.setRequired(true);
-		form.add(this.port, "Port");
-		
-		form.addGroupHeader("Authentication");
+		if (queryMachineSettings) {
+			form.addGroupHeader("Host Settings");
+			this.host = new qx.ui.form.TextField("localhost");
+			this.host.setRequired(true);
+			form.add(this.host, "Host", qx.util.Validate.string());
+			this.port = new qx.ui.form.Spinner(1, 8080, 65535);
+			this.port.setRequired(true);
+			form.add(this.port, "Port");
+
+			form.addGroupHeader("Authentication");
+		}
 		var username = new qx.ui.form.TextField();
 		username.setRequired(true);
 		form.add(username, "Username", qx.util.Validate.string());
@@ -68,11 +70,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 			if (form.validate()) {
 				var rpc = new qx.io.remote.Rpc();
 				rpc.setTimeout(1000); // 1sec time-out, arbitrarily chosen.
-				rpc.setUrl("http://" +
-									 dialog.host.getValue() +
-									 ":" +
-									 dialog.port.getValue() +
-									 "/gazebo.cgi");
+				rpc.setUrl(gazebo.Application.getServerURL());
 				rpc.setServiceName("gazebo.cgi");
 
 				var that = this;

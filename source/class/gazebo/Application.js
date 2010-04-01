@@ -23,6 +23,24 @@ qx.Class.define("gazebo.Application",
 {
   extend : qx.application.Standalone,
 
+	statics :
+	{
+		// Hostname of the application's server
+		hostname : "localhost",
+		// HTTP port on the application's server, which might be null
+		port : "8080",
+
+		// Generates the application's server URL
+		getServerURL : function()
+		{
+			if (this.port) {
+				return "http://" + this.hostname + ":" + this.port + "/gazebo.cgi";
+			} else {
+				return "http://" + this.hostname + "/gazebo.cgi";
+			}
+		}
+	},
+
   /*
   *****************************************************************************
      MEMBERS
@@ -60,14 +78,35 @@ qx.Class.define("gazebo.Application",
 			// tableWindow.add(table);
 			// table.updateContent();
 
-			this.generateConnectionDialog();
+			// this.generateConnectionDialog();
+			this.generateAuthenticationDialog();
 
 			this.debug("Main Application Up and Running: " + this.connectionWindow);
     },
 
+		generateAuthenticationDialog : function ()
+		{
+			var authenticationDialog = new gazebo.ui.ConnectionDialog(false);
+			authenticationDialog.addListener("connect", this.establishConnection, this);
+
+			this.authenticationWindow = new qx.ui.window.Window("Authentication");
+			this.authenticationWindow.setLayout(new qx.ui.layout.HBox(10));
+			this.authenticationWindow.add(authenticationDialog);
+			this.authenticationWindow.setResizable(false, false, false, false);
+			this.authenticationWindow.setMovable(false);
+			this.authenticationWindow.setShowClose(false);
+			this.authenticationWindow.setShowMaximize(false);
+			this.authenticationWindow.setShowMinimize(false);
+
+			this.authenticationWindow.addListener("resize", this.authenticationWindow.center, this.authenticationWindow);
+			
+			this.getRoot().add(this.authenticationWindow);
+			this.authenticationWindow.open();
+		},
+
 		generateConnectionDialog : function ()
 		{
-			var connectionDialog = new gazebo.ui.ConnectionDialog();
+			var connectionDialog = new gazebo.ui.ConnectionDialog(true);
 			connectionDialog.addListener("connect", this.establishConnection, this);
 
 			this.connectionWindow = new qx.ui.window.Window("Database Connection");
