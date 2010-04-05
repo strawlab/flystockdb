@@ -74,13 +74,15 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 				this.RpcRunning = rpc.callAsync(
 					function(result, ex, id)
 					{
-						that.RpcRunning = null;
-						if (ex == null) {
-							alert("Async(" + id + ") result: " + result);
-							that.fireEvent("connect");
-						} else {
-							alert("Async(" + id + ") exception: " + ex);
-						}
+            if (that.RpcRunning) {
+              that.RpcRunning = null;
+              if (ex == null) {
+                alert("Async(" + id + ") result: " + result);
+                that.fireEvent("connect");
+              } else {
+                alert("Async(" + id + ") exception: " + ex);
+              }
+            }
 					},
 					"connect",
 					"One",
@@ -94,13 +96,6 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		this.add(new qx.ui.form.renderer.Single(form));
 		
   },
-
-
-  /*
-  *****************************************************************************
-     MEMBERS
-  *****************************************************************************
-  */
 
   members :
   {

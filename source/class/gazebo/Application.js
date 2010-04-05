@@ -13,9 +13,6 @@
 
 ************************************************************************ */
 
-/**
- * This is the main application class of your custom application "Gazebo"
- */
 qx.Class.define("gazebo.Application",
 {
   extend : qx.application.Standalone,
@@ -37,12 +34,6 @@ qx.Class.define("gazebo.Application",
 			}
 		}
 	},
-
-  /*
-  *****************************************************************************
-     MEMBERS
-  *****************************************************************************
-  */
 
   members :
   {
@@ -139,7 +130,7 @@ qx.Class.define("gazebo.Application",
 			this.databaseWindow.setShowMaximize(false);
 			this.databaseWindow.setShowMinimize(false);
 
-			this.databaseWindow.add(new qx.ui.tree.Tree());
+			this.databaseWindow.add(new qx.ui.tree.Tree(), { width: "100%" });
 
 			this.workflowWindow = new qx.ui.window.Window("Workflow");
 			this.workflowWindow.setLayout(new qx.ui.layout.HBox(10));
@@ -160,7 +151,8 @@ qx.Class.define("gazebo.Application",
 		establishConnection : function()
 		{
 			this.debug("Connection Established, " + this.connectionWindow);
-			this.connectionWindow.close();
+			// this.connectionWindow.close();
+      this.authenticationWindow.close();
 			this.generateDatabaseInterface();
 		}
   }
