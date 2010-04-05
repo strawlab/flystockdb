@@ -1,10 +1,9 @@
 /* ************************************************************************
 
-   Copyright:
+   Copyright and License: see LICENSE file
 
-   License:
-
-   Authors:
+   Contributors:
+	   * Joachim Baran
 
 ************************************************************************ */
 

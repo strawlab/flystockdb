@@ -1,11 +1,8 @@
 /* ************************************************************************
 
-   Copyright:
-		 2010 Joachim Baran, http://joachimbaran.wordpress.com
-		 
-   License: GPL, Version 3, http://www.gnu.org/licenses/gpl.html
+   Copyright and License: see LICENSE file
 
-   Authors:
+   Contributors:
 	   * Joachim Baran
 
 ************************************************************************ */
