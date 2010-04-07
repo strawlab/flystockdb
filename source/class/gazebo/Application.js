@@ -151,6 +151,9 @@ qx.Class.define("gazebo.Application",
 		establishConnection : function()
 		{
 			this.debug("Connection Established, " + this.connectionWindow);
+      this.debug("connectionWindow: " + this['connectionWindow']);
+      this.debug("authenticationWindow: " + this['authenticationWindow']);
+      this.debug("Class:" + (new eval('gazebo.ui.ConnectionDialog')()));
 			// this.connectionWindow.close();
       this.authenticationWindow.close();
 			this.generateDatabaseInterface();
