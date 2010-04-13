@@ -78,7 +78,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
               that.RpcRunning = null;
               if (ex == null) {
                 alert("Async(" + id + ") result: " + result);
-                that.fireEvent("connect");
+                that.fireEvent("connect", qx.event.type.Data, [ "def" ]);
               } else {
                 alert("Async(" + id + ") exception: " + ex);
               }

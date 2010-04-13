@@ -148,12 +148,13 @@ qx.Class.define("gazebo.Application",
 			this.workflowWindow.open();
 		},
 
-		establishConnection : function()
+		establishConnection : function(dataEvent)
 		{
-			this.debug("Connection Established, " + this.connectionWindow);
-      this.debug("connectionWindow: " + this['connectionWindow']);
-      this.debug("authenticationWindow: " + this['authenticationWindow']);
-      this.debug("Class:" + (new eval('gazebo.ui.ConnectionDialog')()));
+      alert("Msg: " + dataEvent.getData());
+			//this.debug("Connection Established, " + this.connectionWindow);
+      //this.debug("connectionWindow: " + this['connectionWindow']);
+      //this.debug("authenticationWindow: " + this['authenticationWindow']);
+      //this.debug("Class:" + (new eval('gazebo.ui.ConnectionDialog')()));
 			// this.connectionWindow.close();
       this.authenticationWindow.close();
 			this.generateDatabaseInterface();
