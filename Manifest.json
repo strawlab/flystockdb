@@ -3,7 +3,7 @@
   {
     "name" : "Gazebo",
 
-    "summary" : "",
+    "summary" : "A web-interface for everyone.",
     "description" : "",
     
     "homepage" : "http://github.com/joejimbo/Gazebo",
@@ -13,7 +13,7 @@
     [
       {
         "name" : "Joachim Baran",
-        "email" : "joachim.baran@gmail.com"
+        "email" : "joachim.baran@DELETETHIS.gmail.com"
       }
     ],
 

@@ -30,7 +30,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
   */
 
   /**
-   * @param value {String} Text for an example.
+   * @param queryMachineSettings {Boolean} Show host/port .
    */
   construct : function(queryMachineSettings)
   {
