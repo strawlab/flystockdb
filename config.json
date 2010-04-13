@@ -37,12 +37,12 @@
     "LOCALES"      : [ "en" ],
     "CACHE"        : "${TMPDIR}/cache",
     "ROOT"         : "."
-  }
+  },
 
   // You only need to edit the remainder of this file, if you want to customize
   // specific jobs, or add own job definitions.
 
-  /*
+  
   "jobs" :
   {
     // Uncomment the following entry to add a contrib or library to your
@@ -54,11 +54,20 @@
       "library" :
       [
         {
-          "manifest" : "contrib://SkeletonApplication/trunk/Manifest.json"
+          "manifest" : "/Users/joachim/src/Fly/fly/trunk/Manifest.json"
         }
       ]
     },
 
+    "build-script" :
+    {
+      "settings" :
+      {
+        "gazebo.contributions" : [ "fly.Contribution" ]
+      }
+    }
+    
+    /*
     // If you want to tweak a job setting, see the following sample where
     // the "format" feature of the "build-script" job is overridden.
     // To see a list of available jobs, invoke 'generate.py x'.
@@ -71,7 +80,7 @@
           "format" : false
         }
       }
-    }
+    } */
   }
-  */
+  
 }

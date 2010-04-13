@@ -3,21 +3,21 @@
   {
     "name" : "Gazebo",
 
-    "summary" : "Custom Application",
-    "description" : "This is a skeleton for a custom application with qooxdoo.",
+    "summary" : "",
+    "description" : "",
     
-    "homepage" : "http://some.homepage.url/",
+    "homepage" : "http://github.com/joejimbo/Gazebo",
 
-    "license" : "SomeLicense",
+    "license" : "Simplified BSD license (a.k.a. 2-clause BSD license)",
     "authors" : 
     [
       {
-        "name" : "First Author (uid)",
-        "email" : "first.author@some.domain"
+        "name" : "Joachim Baran",
+        "email" : "joachim.baran@gmail.com"
       }
     ],
 
-    "version" : "trunk",
+    "version" : "master",
     "qooxdoo-versions": ["1.0"]
   },
   

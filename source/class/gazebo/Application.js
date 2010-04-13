@@ -1,11 +1,9 @@
-/* ************************************************************************
-
+/*
    Copyright and License: see LICENSE file
 
    Contributors:
 	   * Joachim Baran
-
-************************************************************************ */
+ */
 
 /* ************************************************************************
 
@@ -69,7 +67,37 @@ qx.Class.define("gazebo.Application",
 			// this.generateConnectionDialog();
 			this.generateAuthenticationDialog();
 
-			this.debug("Main Application Up and Running: " + this.connectionWindow);
+			this.debug("Main Application Up and Running");
+        
+      var contributionArray = qx.core.Setting.get("gazebo.contributions");
+      if (contributionArray) {
+        for (var i = 0; i < contributionArray.length; i++) {
+          this.debug("Inspecting contribution: " + contributionArray[i]);
+          this.validateAndLoadContribution(contributionArray[i]);
+        }
+      }
+    },
+
+    validateAndLoadContribution : function (classname)
+    {
+      //new fly.Contribution();
+      if (qx.Bootstrap.classIsDefined(classname) == false) {
+        this.debug("Contribution class not defined: " + classname);
+        return;
+      }
+
+      this.debug("Class is defined.");
+      var contributionClass = qx.Class.getByName(classname);
+
+      this.debug("Got the class.");
+      if (!qx.Class.hasInterface(contributionClass, gazebo.IDelegator)) {
+        this.debug("Contribution class " + classname +
+          " does not extend interface gazebo.IDelegator!");
+        return;
+      }
+
+      this.debug("Interface is good too.");
+      contributionClass.ping();
     },
 
 		generateAuthenticationDialog : function ()
