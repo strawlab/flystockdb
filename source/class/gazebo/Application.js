@@ -80,8 +80,7 @@ qx.Class.define("gazebo.Application",
 
     validateAndLoadContribution : function (classname)
     {
-      //new fly.Contribution();
-      if (qx.Bootstrap.classIsDefined(classname) == false) {
+      if (qx.Class.isDefined(classname) == false) {
         this.debug("Contribution class not defined: " + classname);
         return;
       }
@@ -97,7 +96,8 @@ qx.Class.define("gazebo.Application",
       }
 
       this.debug("Interface is good too.");
-      contributionClass.ping();
+      var contributionInstance = new contributionClass();
+      contributionInstance.ping();
     },
 
 		generateAuthenticationDialog : function ()

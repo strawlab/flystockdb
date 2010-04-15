@@ -11,5 +11,6 @@ qx.Theme.define("gazebo.theme.Color",
 
   colors :
   {
+    "background-application" : "#FFFFFF"
   }
 });
