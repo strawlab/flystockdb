@@ -12,7 +12,8 @@
 ************************************************************************ */
 
 /**
- * Interface for setting up a database connection.
+ * Interface for setting up a database connection or dealing
+ * with use authentication.
  */
 qx.Class.define("gazebo.ui.ConnectionDialog",
 {
@@ -23,16 +24,10 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		"connect" : "qx.event.type.Event"
 	},
 
-  /*
-  *****************************************************************************
-     CONSTRUCTOR
-  *****************************************************************************
-  */
-
   /**
    * @param queryMachineSettings {Boolean} Show host/port .
    */
-  construct : function(queryMachineSettings)
+  construct : function(queryMachineSettings, passwordRequired)
   {
     this.base(arguments);
 
@@ -55,11 +50,13 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		username.setRequired(true);
 		form.add(username, "Username", qx.util.Validate.string());
 		var password = new qx.ui.form.PasswordField();
-		password.setRequired(false);
+    if (passwordRequired) {
+      password.setRequired(true);
+    } else {
+      password.setRequired(false);
+    }
 		form.add(password, "Password");
-		
-		var dialog = this;
-		
+				
 		var connectButton = new qx.ui.form.Button("Connect");
 		connectButton.addListener("execute", function() {
 			if (form.validate()) {
@@ -75,7 +72,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
             if (that.RpcRunning) {
               that.RpcRunning = null;
               if (ex == null) {
-                alert("Async(" + id + ") result: " + result);
+                alert("Async(" + id + ") result: " + result + " that: " + that);
                 that.fireEvent("connect", qx.event.type.Data, [ "def" ]);
               } else {
                 alert("Async(" + id + ") exception: " + ex);
@@ -83,8 +80,8 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
             }
 					},
 					"connect",
-					"One",
-					"Two"
+          username.getValue(),
+					gazebo.support.ChrisVenessSHA1.sha1Hash(password.getValue())
 				);
 				
 			}

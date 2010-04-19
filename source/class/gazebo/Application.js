@@ -65,7 +65,7 @@ qx.Class.define("gazebo.Application",
 			// table.updateContent();
 
 			// this.generateConnectionDialog();
-			this.generateAuthenticationDialog();
+			// this.generateAuthenticationDialog();
 
 			this.debug("Main Application Up and Running");
         
@@ -78,7 +78,7 @@ qx.Class.define("gazebo.Application",
       }
     },
 
-    validateAndLoadContribution : function (classname)
+    validateAndLoadContribution : function(classname)
     {
       if (qx.Class.isDefined(classname) == false) {
         this.debug("Contribution class not defined: " + classname);
@@ -97,14 +97,19 @@ qx.Class.define("gazebo.Application",
 
       this.debug("Interface is good too.");
       var contributionInstance = new contributionClass();
-      contributionInstance.ping();
+
+      alert("load: " + this)
+      
+      contributionInstance.registerInitialScreen(this);
+      this.fireEvent("screenTransition", null);
     },
 
-		generateAuthenticationDialog : function ()
+		generateAuthenticationDialog : function()
 		{
-			var authenticationDialog = new gazebo.ui.ConnectionDialog(false);
+			var authenticationDialog = new gazebo.ui.ConnectionDialog(false, true);
 			authenticationDialog.addListener("connect", this.establishConnection, this);
 
+      alert("connect: " + this);
 			this.authenticationWindow = new qx.ui.window.Window("Authentication");
 			this.authenticationWindow.setLayout(new qx.ui.layout.HBox(10));
 			this.authenticationWindow.add(authenticationDialog);
@@ -116,13 +121,20 @@ qx.Class.define("gazebo.Application",
 
 			this.authenticationWindow.addListener("resize", this.authenticationWindow.center, this.authenticationWindow);
 			
-			this.getRoot().add(this.authenticationWindow);
 			this.authenticationWindow.open();
+      this.disposeScreen = this.disposeAuthenticationDialog;
+      
+      this.getRoot().add(authenticationWindow);
 		},
 
-		generateConnectionDialog : function ()
+    disposeAuthenticationDialog : function()
+    {
+      this.authenticationWindow.close();
+    },
+
+		generateConnectionDialog : function()
 		{
-			var connectionDialog = new gazebo.ui.ConnectionDialog(true);
+			var connectionDialog = new gazebo.ui.ConnectionDialog(true, false);
 			connectionDialog.addListener("connect", this.establishConnection, this);
 
 			this.connectionWindow = new qx.ui.window.Window("Database Connection");
@@ -136,11 +148,18 @@ qx.Class.define("gazebo.Application",
 
 			this.connectionWindow.addListener("resize", this.connectionWindow.center, this.connectionWindow);
 			
-			this.getRoot().add(this.connectionWindow);
-			this.connectionWindow.open();
+      this.connectionWindow.open();
+      this.disposeScreen = this.disposeConnectionDialog;
+      
+      this.getRoot().add(connectionWindow);
 		},
 
-		generateDatabaseInterface : function ()
+    disposeConnectionDialog : function()
+    {
+      this.connectionWindow.close();
+    },
+
+		generateDatabaseInterface : function()
 		{
 			this.dbComposite = new qx.ui.container.Composite();
 			this.dbComposite.setLayout(new qx.ui.layout.Canvas());
@@ -183,9 +202,14 @@ qx.Class.define("gazebo.Application",
       //this.debug("connectionWindow: " + this['connectionWindow']);
       //this.debug("authenticationWindow: " + this['authenticationWindow']);
       //this.debug("Class:" + (new eval('gazebo.ui.ConnectionDialog')()));
-			// this.connectionWindow.close();
-      this.authenticationWindow.close();
+      //this.authenticationWindow.close();
+      this.disposeScreen();
 			this.generateDatabaseInterface();
-		}
+		},
+
+    screenTransition : function(dataEvent)
+    {
+      alert("Screen transition...");
+    }
   }
 });
