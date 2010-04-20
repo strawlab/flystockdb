@@ -72,7 +72,6 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
             if (that.RpcRunning) {
               that.RpcRunning = null;
               if (ex == null) {
-                alert("Async(" + id + ") result: " + result + " that: " + that);
                 that.fireEvent("connect", qx.event.type.Data, [ "def" ]);
               } else {
                 alert("Async(" + id + ") exception: " + ex);
@@ -83,7 +82,6 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
           username.getValue(),
 					gazebo.support.ChrisVenessSHA1.sha1Hash(password.getValue())
 				);
-				
 			}
 		}, this);
 		form.addButton(connectButton);

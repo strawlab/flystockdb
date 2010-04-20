@@ -81,27 +81,19 @@ qx.Class.define("gazebo.Application",
     validateAndLoadContribution : function(classname)
     {
       if (qx.Class.isDefined(classname) == false) {
-        this.debug("Contribution class not defined: " + classname);
         return;
       }
 
-      this.debug("Class is defined.");
       var contributionClass = qx.Class.getByName(classname);
 
-      this.debug("Got the class.");
       if (!qx.Class.hasInterface(contributionClass, gazebo.IDelegator)) {
-        this.debug("Contribution class " + classname +
-          " does not extend interface gazebo.IDelegator!");
         return;
       }
 
-      this.debug("Interface is good too.");
-      var contributionInstance = new contributionClass();
-
-      alert("load: " + this)
+      this.contributionInstance = new contributionClass();
       
-      contributionInstance.registerInitialScreen(this);
-      this.fireEvent("screenTransition", null);
+      this.contributionInstance.registerInitialScreen(this);
+      this.fireEvent("screen.open", null);
     },
 
 		generateAuthenticationDialog : function()
@@ -120,11 +112,9 @@ qx.Class.define("gazebo.Application",
 			this.authenticationWindow.setShowMinimize(false);
 
 			this.authenticationWindow.addListener("resize", this.authenticationWindow.center, this.authenticationWindow);
-			
+
 			this.authenticationWindow.open();
-      this.disposeScreen = this.disposeAuthenticationDialog;
-      
-      this.getRoot().add(authenticationWindow);
+      this.getRoot().add(this.authenticationWindow);
 		},
 
     disposeAuthenticationDialog : function()
@@ -147,16 +137,38 @@ qx.Class.define("gazebo.Application",
 			this.connectionWindow.setShowMinimize(false);
 
 			this.connectionWindow.addListener("resize", this.connectionWindow.center, this.connectionWindow);
-			
-      this.connectionWindow.open();
-      this.disposeScreen = this.disposeConnectionDialog;
-      
-      this.getRoot().add(connectionWindow);
+
+      this.connectionWindow.open();      
+      this.getRoot().add(this.connectionWindow);
 		},
 
     disposeConnectionDialog : function()
     {
       this.connectionWindow.close();
+    },
+
+    generateSearchDialog : function()
+    {
+      var searchDialog = new gazebo.ui.SuggestionTextField();
+
+      this.searchWindow = new qx.ui.window.Window("Search");
+      this.searchWindow.setLayout(new qx.ui.layout.HBox(10));
+      this.searchWindow.add(searchDialog);
+      this.searchWindow.setResizable(false, false, false, false);
+			this.searchWindow.setMovable(false);
+			this.searchWindow.setShowClose(false);
+			this.searchWindow.setShowMaximize(false);
+			this.searchWindow.setShowMinimize(false);
+
+			this.searchWindow.addListener("resize", this.searchWindow.center, this.searchWindow);
+
+      this.searchWindow.open();
+      this.getRoot().add(this.searchWindow);
+    },
+
+    disposeSearchDialog : function()
+    {
+      this.searchWindow.close();
     },
 
 		generateDatabaseInterface : function()
@@ -203,8 +215,9 @@ qx.Class.define("gazebo.Application",
       //this.debug("authenticationWindow: " + this['authenticationWindow']);
       //this.debug("Class:" + (new eval('gazebo.ui.ConnectionDialog')()));
       //this.authenticationWindow.close();
-      this.disposeScreen();
-			this.generateDatabaseInterface();
+      this.fireEvent("screen.close", null);
+			this.contributionInstance.registerNextScreen(this);
+      this.fireEvent("screen.open", null);
 		},
 
     screenTransition : function(dataEvent)
