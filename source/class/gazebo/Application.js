@@ -18,7 +18,7 @@ qx.Class.define("gazebo.Application",
 	statics :
 	{
 		// Hostname of the application's server
-		hostname : "localhost",
+		hostname : "130.88.90.152",
 		// HTTP port on the application's server, which might be null
 		port : "8080",
 

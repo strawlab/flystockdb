@@ -30,7 +30,6 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
   construct : function(queryMachineSettings, passwordRequired)
   {
     this.base(arguments);
-
 		this.setLayout(new qx.ui.layout.HBox(5));
 		
 		var form = new qx.ui.form.Form();
