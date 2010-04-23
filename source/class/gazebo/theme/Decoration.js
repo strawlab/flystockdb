@@ -16,6 +16,15 @@ qx.Theme.define("gazebo.theme.Decoration",
 	
   decorations :
   {
+    "shadow-window" :
+    {
+      decorator : qx.ui.decoration.Single,
+
+      style : {
+        // No shadows.
+      }
+    },
+    
 		"window-captionbar-active" :
     {
       decorator : qx.ui.decoration.Grid,

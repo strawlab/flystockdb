@@ -12,7 +12,7 @@ qx.Theme.define("gazebo.theme.Theme",
     color : gazebo.theme.Color,
     decoration : gazebo.theme.Decoration,
     font : gazebo.theme.Font,
-    icon : qx.theme.icon.Tango,
+    icon : gazebo.theme.Icon,
     appearance : gazebo.theme.Appearance
   }
 });
