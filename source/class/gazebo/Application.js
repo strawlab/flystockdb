@@ -69,7 +69,11 @@ qx.Class.define("gazebo.Application",
 
 			this.debug("Main Application Up and Running");
         
-      var contributionArray = qx.core.Setting.get("gazebo.contributions");
+      var contributionArray = null;
+      try {
+        contributionArray = qx.core.Setting.get("gazebo.contributions");
+      }
+      catch(e) {}
       if (contributionArray) {
         for (var i = 0; i < contributionArray.length; i++) {
           this.debug("Inspecting contribution: " + contributionArray[i]);
