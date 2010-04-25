@@ -18,7 +18,7 @@ qx.Class.define("gazebo.Application",
 	statics :
 	{
 		// Hostname of the application's server
-		hostname : "130.88.90.152",
+		hostname : "localhost",
 		// HTTP port on the application's server, which might be null
 		port : "8080",
 
@@ -95,7 +95,7 @@ qx.Class.define("gazebo.Application",
       }
 
       this.contributionInstance = new contributionClass();
-      
+
       this.contributionInstance.registerInitialScreen(this);
       this.fireEvent("screen.open", null);
     },
@@ -105,7 +105,6 @@ qx.Class.define("gazebo.Application",
 			var authenticationDialog = new gazebo.ui.ConnectionDialog(false, true);
 			authenticationDialog.addListener("connect", this.establishConnection, this);
 
-      alert("connect: " + this);
 			this.authenticationWindow = new qx.ui.window.Window("Authentication");
 			this.authenticationWindow.setLayout(new qx.ui.layout.HBox(10));
 			this.authenticationWindow.add(authenticationDialog);

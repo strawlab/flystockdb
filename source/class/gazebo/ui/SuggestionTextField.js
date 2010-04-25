@@ -28,8 +28,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     
     this.dataSource = dataSource;
 
-    var form = new qx.ui.form.Form();
-
     this.textField = new qx.ui.form.TextField();
     this.textField.setMinWidth(300);
     this.textField.addListener("input", this.generateSuggestions, this);
@@ -46,7 +44,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           this.suggestionTree.activate();
         }
     }, this);
-    form.add(this.textField, "Search");
 
     this.suggestionTree = new qx.ui.tree.Tree();
     this.suggestionTree.setMinHeight(400);
@@ -67,7 +64,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.treeRoot.setOpen(true);
     this.suggestionTree.setRoot(this.treeRoot);
 
-    //this.add(new qx.ui.form.renderer.Single(form));
     this.add(this.textField);
     this.add(this.suggestionTree);
   },
