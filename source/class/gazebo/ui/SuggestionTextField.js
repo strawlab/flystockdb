@@ -73,7 +73,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     generateSuggestions : function(dataEvent)
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(1000); // 1sec time-out, arbitrarily chosen.
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -89,15 +89,25 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         {
           if (that.RpcRunning) {
             that.RpcRunning = null;
-            //that.suggestionList.setVisibility(true);
             that.treeRoot.removeAll();
             var folder, file;
             for (i = 0; i < result.length; i++) {
               if (result[i][1] > 1) {
-                folder = new qx.ui.tree.TreeFolder(result[i][0] + " (" + result[i][1] + " matches)");
+                var abstraction = result[i][0];
+                folder = new qx.ui.tree.TreeFolder();
                 folder.addState("small"); // Small icons.
                 folder.setOpenSymbolMode("always");
                 folder.addListener("changeOpen", that.openFolder, that);
+
+                folder.addSpacer();
+                folder.addOpenButton();
+                folder.addLabel(abstraction);
+                folder.addWidget(new qx.ui.core.Spacer(), {flex: 1});
+                folder.addWidget(
+                  new qx.ui.basic.Label(
+                    "(" + result[i][1] + " matches)"
+                  ).set({ appearance: "annotation", rich: true }));
+
                 that.treeRoot.add(folder);
               } else  {
                 file = new qx.ui.tree.TreeFile(result[i][0]);
@@ -123,28 +133,29 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     },
 
     openFolder : function(folderEvent) {
+      var folder;
       if (folderEvent.getData()) {
         // Folder opened.
-        if (this.isSelectionEmpty()) {
+        if (this.suggestionTree.isSelectionEmpty()) {
           // No folder selected. Weird. Why did we get an event then?
           return;
         }
 
-        var selectedItems = this.getSelection();
-        var folder = selectedItems[0];
+        var selectedItems = this.suggestionTree.getSelection();
+        folder = selectedItems[0];
 
         if (folder.hasChildren()) {
           // We already populated the folder.
           return;
         }
-
+      
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(1000); // 1sec time-out, arbitrarily chosen.
+      rpc.setTimeout(5000); // 5sec time-out, arbitrarily chosen.
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
-      var textValue = dataEvent.getData();
-
+      var textValue = folder.getLabel();
+      
       if (!textValue) {
         return;
       }
@@ -155,33 +166,34 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         {
           if (that.RpcRunning) {
             that.RpcRunning = null;
+
+            if (!result) {
+              // No result.
+              return;
+            }
+
+            var childFolder, childFile;
             for (i = 0; i < result.length; i++) {
-              if (result[i][1] > 1) {
-                folder = new qx.ui.tree.TreeFolder(result[i][0] + " (" + result[i][1] + " matches)");
-                folder.addState("small"); // Small icons.
-                folder.setOpenSymbolMode("always");
-                folder.addListener("changeOpen", that.openFolder, that);
-                that.treeRoot.add(folder);
+              if (result[i][1].match(/\.\.\./)) {
+                childFolder = new qx.ui.tree.TreeFolder(result[i][1]);
+                childFolder.addState("small"); // Small icons.
+                childFolder.setOpenSymbolMode("always");
+                childFolder.addListener("changeOpen", that.openFolder, that);
+                folder.add(childFolder);
               } else  {
-                file = new qx.ui.tree.TreeFile(result[i][0]);
-                file.addState("small");
-                that.treeRoot.add(file);
+                childFile = new qx.ui.tree.TreeFile(result[i][1]);
+                childFile.addState("small");
+                folder.add(childFile);
               }
             }
             that.suggestionTree.show();
-            /*
-            if (ex == null) {
-              that.fireEvent("connect", qx.event.type.Data, [ "def" ]);
-            } else {
-              alert("Async(" + id + ") exception: " + ex);
-            } */
           }
         },
         "query",
         "fb2010_03",
-        [ "searchable", "occurrences" ],
-        [ "synonym" ],
-        "searchable like '" + textValue + "%'"
+        [ "abstraction", "concretisation", "occurrences" ],
+        [ "x_transitions" ],
+        "abstraction == '" + textValue + "'"
       );
       }
     }

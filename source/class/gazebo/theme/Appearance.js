@@ -35,6 +35,17 @@ qx.Theme.define("gazebo.theme.Appearance",
           marginRight : 12
         };
       }
+    },
+
+    "annotation" :
+    {
+      style : function(states)
+      {
+        return {
+          textColor : "text-gray"
+        };
+      }
     }
+
   }
 });

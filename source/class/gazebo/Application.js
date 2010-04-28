@@ -18,9 +18,9 @@ qx.Class.define("gazebo.Application",
 	statics :
 	{
 		// Hostname of the application's server
-		hostname : "localhost",
+		hostname : qx.core.Setting.get("gazebo.server.hostname"),
 		// HTTP port on the application's server, which might be null
-		port : "8080",
+		port : qx.core.Setting.get("gazebo.server.port"),
 
 		// Generates the application's server URL
 		getServerURL : function()
@@ -84,18 +84,22 @@ qx.Class.define("gazebo.Application",
 
     validateAndLoadContribution : function(classname)
     {
+      this.debug("A");
       if (qx.Class.isDefined(classname) == false) {
         return;
       }
 
+      this.debug("B");
       var contributionClass = qx.Class.getByName(classname);
 
       if (!qx.Class.hasInterface(contributionClass, gazebo.IDelegator)) {
         return;
       }
+      this.debug("C");
 
       this.contributionInstance = new contributionClass();
 
+      this.debug("D");
       this.contributionInstance.registerInitialScreen(this);
       this.fireEvent("screen.open", null);
     },

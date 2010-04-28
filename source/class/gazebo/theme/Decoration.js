@@ -50,7 +50,6 @@ qx.Theme.define("gazebo.theme.Decoration",
       decorator : qx.ui.decoration.Double,
 
       style : {
-        //baseImage : "gazebo/decoration/window/captionbar-inactive.png"
         backgroundColor : "background-pane",
         innerColor : "background-pane",
         colorBottom : "background-pane",
@@ -62,25 +61,31 @@ qx.Theme.define("gazebo.theme.Decoration",
       }
     },
 
-    "Ywindow-captionbar" :
+    "scrollbar-slider-horizontal" :
     {
       decorator : qx.ui.decoration.Beveled,
 
       style : {
-        backgroundColor : "#FF00FF",
-        innerColor : "#AA0099",
-        innerOpacity : 0.6,
-        outerColor : "#0000FF"
+        backgroundImage : "decoration/scrollbar/scrollbar-button-bg-horizontal.png",
+        backgroundRepeat : "scale",
+        outerColor : "border-separator",
+        innerColor : "white",
+        innerOpacity : 0.5
       }
     },
 
-		"Xwindow-captionbar" :
+    "scrollbar-slider-vertical" :
     {
-      decorator : qx.ui.decoration.Grid,
+      decorator : qx.ui.decoration.Beveled,
 
       style : {
-        baseImage : "gazebo/decoration/window/captionbar-inactive.png"
+        backgroundImage : "decoration/scrollbar/scrollbar-button-bg-vertical.png",
+        backgroundRepeat : "scale",
+        outerColor : "border-separator",
+        innerColor : "white",
+        innerOpacity : 0.5
       }
     }
+
   }
 });
