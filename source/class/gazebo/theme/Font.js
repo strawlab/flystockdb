@@ -11,5 +11,14 @@ qx.Theme.define("gazebo.theme.Font",
 
   fonts :
   {
+    "heading" :
+    {
+      size: 18,
+      lineHeight : 1.4,
+      family : qx.bom.client.Platform.MAC ? [ "Lucida Console", "Monaco" ] :
+        (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
+        [ "Consolas" ] :
+        [ "Consolas", "DejaVu Sans Mono", "Courier New", "monospace" ]
+    }
   }
 });

@@ -171,6 +171,8 @@ qx.Class.define("gazebo.Application",
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
+
+      searchDialog.focus();
     },
 
     disposeSearchDialog : function()

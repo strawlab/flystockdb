@@ -70,6 +70,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
   members :
   {
+    focus : function()
+    {
+      this.textField.focus();
+    },
+
     generateSuggestions : function(dataEvent)
     {
       var rpc = new qx.io.remote.Rpc();
@@ -191,8 +196,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         },
         "query",
         "fb2010_03",
-        [ "abstraction", "concretisation", "occurrences" ],
-        [ "x_transitions" ],
+        [ "abstraction", "concretisation" ],
+        [ "x_fast_transitions" ],
         "abstraction == '" + textValue + "'"
       );
       }

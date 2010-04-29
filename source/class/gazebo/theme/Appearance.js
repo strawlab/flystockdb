@@ -30,7 +30,7 @@ qx.Theme.define("gazebo.theme.Appearance",
       {
         return {
           alignY      : "middle",
-          font        : "monospace",
+          font        : "heading",
           marginLeft  : 0,
           marginRight : 12
         };
