@@ -24,12 +24,19 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
   construct : function(dataSource)
   {
     this.base(arguments);
+
+    this.rpcRunning = null;
+
     this.setLayout(new qx.ui.layout.VBox(0));
     
     this.dataSource = dataSource;
 
     this.textField = new qx.ui.form.TextField();
-    this.textField.setMinWidth(300);
+
+    // Bugfix for qooxdoo 1.0.1 and Chrome/Safari on OSX:
+    this.textField.getContentElement().setAttribute("spellcheck", "false");
+
+    this.textField.setMinWidth(400);
     this.textField.addListener("input", this.generateSuggestions, this);
     this.textField.addListener("keypress", function(keyEvent) {
         if (keyEvent.getKeyIdentifier() == "Down") {
@@ -84,18 +91,32 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
       var textValue = dataEvent.getData();
 
-      if (!textValue) {
+      if (!textValue || textValue.length == 0) {
+        this.treeRoot.removeAll();
         return;
       }
 
       var that = this;
-      this.RpcRunning = rpc.callAsync(
+      this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
         {
-          if (that.RpcRunning) {
-            that.RpcRunning = null;
+          if (that.rpcRunning && that.rpcRunning.getSequenceNumber() == id) {
+            that.debug("This: " + this + " That: " + that + " RPC: " + that.rpcRunning +
+               " Seq: " + that.rpcRunning.getSequenceNumber() + " Id: " + id);
+            that.debug("treeRoot: " + that.treeRoot);
             that.treeRoot.removeAll();
+
             var folder, file;
+
+            if (result.length == 0) {
+              file = new qx.ui.tree.TreeFile();
+              file.addWidget(
+                new qx.ui.basic.Label(
+                  "(no matches)"
+                ).set({ appearance: "annotation", rich: true }));
+              that.treeRoot.add(file);
+            }
+
             for (i = 0; i < result.length; i++) {
               if (result[i][1] > 1) {
                 var abstraction = result[i][0];
@@ -121,12 +142,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               }
             }
             that.suggestionTree.show();
-            /*
-            if (ex == null) {
-              that.fireEvent("connect", qx.event.type.Data, [ "def" ]);
-            } else {
-              alert("Async(" + id + ") exception: " + ex);
-            } */
           }
         },
         "query",
@@ -165,12 +180,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         return;
       }
 
+      this.debug("Searching for: " + textValue);
+
       var that = this;
-      this.RpcRunning = rpc.callAsync(
+      this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
         {
-          if (that.RpcRunning) {
-            that.RpcRunning = null;
+          if (that.rpcRunning && that.rpcRunning.getSequenceNumber() == id) {
 
             if (!result) {
               // No result.

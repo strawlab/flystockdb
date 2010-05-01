@@ -84,22 +84,21 @@ qx.Class.define("gazebo.Application",
 
     validateAndLoadContribution : function(classname)
     {
-      this.debug("A");
       if (qx.Class.isDefined(classname) == false) {
         return;
       }
 
-      this.debug("B");
       var contributionClass = qx.Class.getByName(classname);
 
       if (!qx.Class.hasInterface(contributionClass, gazebo.IDelegator)) {
         return;
       }
-      this.debug("C");
 
       this.contributionInstance = new contributionClass();
 
-      this.debug("D");
+      this.contributionName = this.contributionInstance.registerContributionName();
+      qx.bom.History.getInstance().addToHistory("welcome", this.contributionName);
+
       this.contributionInstance.registerInitialScreen(this);
       this.fireEvent("screen.open", null);
     },
@@ -219,11 +218,6 @@ qx.Class.define("gazebo.Application",
 		establishConnection : function(dataEvent)
 		{
       alert("Msg: " + dataEvent.getData());
-			//this.debug("Connection Established, " + this.connectionWindow);
-      //this.debug("connectionWindow: " + this['connectionWindow']);
-      //this.debug("authenticationWindow: " + this['authenticationWindow']);
-      //this.debug("Class:" + (new eval('gazebo.ui.ConnectionDialog')()));
-      //this.authenticationWindow.close();
       this.fireEvent("screen.close", null);
 			this.contributionInstance.registerNextScreen(this);
       this.fireEvent("screen.open", null);
