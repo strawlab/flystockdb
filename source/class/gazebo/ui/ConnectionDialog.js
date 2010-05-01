@@ -47,14 +47,23 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		}
 		var username = new qx.ui.form.TextField();
 		username.setRequired(true);
-		form.add(username, "Username", qx.util.Validate.string());
+		form.add(username, "Username",  function(text) {
+      if (text == null) { return false; }
+      var reg = /^[A-Za-z0-9_\-\.]+$/;
+      return reg.test(text);
+    });
+    username.setInvalidMessage("Please enter a valid username.");
 		var password = new qx.ui.form.PasswordField();
     if (passwordRequired) {
       password.setRequired(true);
     } else {
       password.setRequired(false);
     }
-		form.add(password, "Password");
+    form.add(password, "Password", function(text) {
+      if (text == null || text.length == 0) { return false; }
+      return true;
+    });
+    password.setInvalidMessage("Please enter your password.");
 				
 		var connectButton = new qx.ui.form.Button("Connect");
 		connectButton.addListener("execute", function() {
@@ -86,7 +95,6 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		form.addButton(connectButton);
 			
 		this.add(new qx.ui.form.renderer.Single(form));
-		
   },
 
   members :
