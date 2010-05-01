@@ -108,13 +108,14 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
             var folder, file;
 
-            if (result.length == 0) {
+            if (!result || result.length == 0) {
               file = new qx.ui.tree.TreeFile();
               file.addWidget(
                 new qx.ui.basic.Label(
                   "(no matches)"
                 ).set({ appearance: "annotation", rich: true }));
               that.treeRoot.add(file);
+              return;
             }
 
             for (i = 0; i < result.length; i++) {
@@ -148,7 +149,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         "fb2010_03",
         [ "searchable", "occurrences" ],
         [ "x_searchables" ],
-        "searchable like '" + textValue + "%'"
+        "searchable like ?",
+        [ textValue + "%" ]
       );
     },
 
@@ -180,6 +182,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         return;
       }
 
+      textValue = textValue.replace("@", "@@");
+      textValue = textValue.replace("+", "@P");
       this.debug("Searching for: " + textValue);
 
       var that = this;
@@ -214,7 +218,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         "fb2010_03",
         [ "abstraction", "concretisation" ],
         [ "x_fast_transitions" ],
-        "abstraction == '" + textValue + "'"
+        "abstraction == ?",
+        [ textValue ]
       );
       }
     }

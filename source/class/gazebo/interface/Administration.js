@@ -22,6 +22,11 @@ qx.Class.define("gazebo.interface.Administration",
 
   members:
   {
+    registerContributionName : function()
+    {
+      return "Gazebo";
+    },
+
     registerInitialScreen : function(inquirer)
     {
       inquirer.addListenerOnce("screen.open", inquirer.generateAuthenticationDialog, inquirer);
