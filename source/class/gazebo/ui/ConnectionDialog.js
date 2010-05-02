@@ -25,7 +25,8 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 	},
 
   /**
-   * @param queryMachineSettings {Boolean} Show host/port .
+   * @param queryMachineSettings {Boolean} Show host and port?
+   * @param passwordRequired {Boolean} Is a password required?
    */
   construct : function(queryMachineSettings, passwordRequired)
   {
