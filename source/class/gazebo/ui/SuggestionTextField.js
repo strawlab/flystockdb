@@ -26,11 +26,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.base(arguments);
 
     this.rpcRunning = null;
+    this.openAll = false;
+    this.dataSource = dataSource;
 
     this.setLayout(new qx.ui.layout.VBox(0));
     
-    this.dataSource = dataSource;
-
     this.textField = new qx.ui.form.TextField();
 
     // Bugfix for qooxdoo 1.0.1 and Chrome/Safari on OSX:
@@ -39,7 +39,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.textField.setMinWidth(400);
     this.textField.addListener("input", this.generateSuggestions, this);
     this.textField.addListener("keypress", function(keyEvent) {
-        if (keyEvent.getKeyIdentifier() == "Down") {
+        if (keyEvent.getKeyIdentifier() == "Down" ||
+            keyEvent.getKeyIdentifier() == "PageDown") {
           if (this.suggestionTree.isSelectionEmpty()) {
             var rootNode = this.suggestionTree.getRoot();
             if (rootNode.hasChildren()) {
@@ -53,7 +54,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     }, this);
 
     this.suggestionTree = new qx.ui.tree.Tree();
-    this.suggestionTree.setMinHeight(400);
+    this.suggestionTree.setMinHeight(303);
     this.suggestionTree.setHideRoot(true);
     this.suggestionTree.hide();
     this.suggestionTree.setOpacity(0);
@@ -82,6 +83,9 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       this.textField.focus();
     },
 
+    /**
+     * @param dataEvent {qx.event.type.Data} Result of the database query.
+     */
     generateSuggestions : function(dataEvent)
     {
       var rpc = new qx.io.remote.Rpc();
@@ -96,6 +100,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         return;
       }
 
+      var options;
+      if (this.openAll) {
+        options = { count : true }; // Count is not needed here, but simplifies code below.
+      } else {
+        options = { count : true, limit : 13 }; // On OSX 14 rows fit. On Windows only 13.
+      }
+
       var that = this;
       this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
@@ -104,11 +115,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             that.debug("This: " + this + " That: " + that + " RPC: " + that.rpcRunning +
                " Seq: " + that.rpcRunning.getSequenceNumber() + " Id: " + id);
             that.debug("treeRoot: " + that.treeRoot);
+            that.openAll = false; // Always default back to a short list of suggestions.
             that.treeRoot.removeAll();
 
             var folder, file;
 
-            if (!result || result.length == 0) {
+            if (!result) {
+              return;
+            }
+
+            if (result.length == 0) {
               file = new qx.ui.tree.TreeFile();
               file.addWidget(
                 new qx.ui.basic.Label(
@@ -117,6 +133,9 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               that.treeRoot.add(file);
               return;
             }
+
+            count = result[0];
+            result = result[1];
 
             for (i = 0; i < result.length; i++) {
               if (result[i][1] > 1) {
@@ -142,12 +161,31 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                 that.treeRoot.add(file);
               }
             }
+
+            moreMatches = count[0] - result.length;
+
+            if (moreMatches > 0) {
+              file = new qx.ui.tree.TreeFile(" ");
+              file.addWidget(
+                new qx.ui.basic.Label(
+                  "(" + moreMatches + " more matches - click to view)"
+                ).set({ appearance: "annotation", rich: true }));
+              file.addListener("changeOpen", function(dataEvent) {
+                that.openAll = true;
+                var newDataEvent = new qx.event.type.Data().init(that.textField.getValue());
+                that.generateSuggestions(newDataEvent);
+              }, that);
+              file.setOpenSymbolMode("always");
+              that.treeRoot.add(file);
+            }
+
             that.suggestionTree.show();
           }
         },
         "query",
+        options,
         "fb2010_03",
-        [ "searchable", "occurrences" ],
+        [ "*" ],
         [ "x_searchables" ],
         "searchable like ?",
         [ textValue + "%" ]
@@ -182,6 +220,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         return;
       }
 
+      // Workaround: For some reason, '+' does not make it to the server.
       textValue = textValue.replace("@", "@@");
       textValue = textValue.replace("+", "@P");
       this.debug("Searching for: " + textValue);
@@ -215,6 +254,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           }
         },
         "query",
+        {},
         "fb2010_03",
         [ "abstraction", "concretisation" ],
         [ "x_fast_transitions" ],

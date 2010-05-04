@@ -166,7 +166,7 @@ qx.Class.define("gazebo.Application",
 			this.searchWindow.setShowMaximize(false);
 			this.searchWindow.setShowMinimize(false);
 
-			this.searchWindow.addListener("resize", this.searchWindow.center, this.searchWindow);
+			this.searchWindow.addListenerOnce("resize", this.searchWindow.center, this.searchWindow);
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
