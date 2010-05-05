@@ -156,8 +156,9 @@ qx.Class.define("gazebo.Application",
     generateSearchDialog : function()
     {
       var searchDialog = new gazebo.ui.SuggestionTextField();
-
+      
       this.searchWindow = new qx.ui.window.Window("Search");
+      this.searchWindow.setMaxWidth(500);
       this.searchWindow.setLayout(new qx.ui.layout.HBox(10));
       this.searchWindow.add(searchDialog);
       this.searchWindow.setResizable(false, false, false, false);
@@ -166,10 +167,11 @@ qx.Class.define("gazebo.Application",
 			this.searchWindow.setShowMaximize(false);
 			this.searchWindow.setShowMinimize(false);
 
-			this.searchWindow.addListenerOnce("resize", this.searchWindow.center, this.searchWindow);
+      //this.searchWindow.addListenerOnce("resize", this.searchWindow.center, this.searchWindow);
 
       this.searchWindow.open();
-      this.getRoot().add(this.searchWindow);
+
+      this.getRoot().add(this.searchWindow, { top: 60, bottom: "0%" });
 
       searchDialog.focus();
     },

@@ -104,7 +104,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       if (this.openAll) {
         options = { count : true }; // Count is not needed here, but simplifies code below.
       } else {
-        options = { count : true, limit : 13 }; // On OSX 14 rows fit. On Windows only 13.
+        options = { count : true, limit : 14 }; // Some Firefox/Windows add a scrollbar for >13?
       }
 
       var that = this;

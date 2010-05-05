@@ -42,7 +42,7 @@ qx.Theme.define("gazebo.theme.Appearance",
       style : function(states)
       {
         return {
-          textColor : "text-gray"
+          textColor : states.selected ? "text-selected" : "text-gray"
         };
       }
     }
