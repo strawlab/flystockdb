@@ -67,8 +67,6 @@ qx.Class.define("gazebo.Application",
 			// this.generateConnectionDialog();
 			// this.generateAuthenticationDialog();
 
-			this.debug("Main Application Up and Running");
-        
       var contributionArray = null;
       try {
         contributionArray = qx.core.Setting.get("gazebo.contributions");
@@ -167,11 +165,25 @@ qx.Class.define("gazebo.Application",
 			this.searchWindow.setShowMaximize(false);
 			this.searchWindow.setShowMinimize(false);
 
-      //this.searchWindow.addListenerOnce("resize", this.searchWindow.center, this.searchWindow);
+      this.searchWindow.addListenerOnce("resize", function() {
+        var parent = this.getLayoutParent();
+
+        if (parent) {
+          var bounds = parent.getBounds();
+
+          if (bounds) {
+            var hint = this.getSizeHint();
+
+            var left = Math.round((bounds.width - hint.width) / 2);
+            var top = 60;
+
+            this.moveTo(left, top);
+          }
+        }
+      }, this.searchWindow);
 
       this.searchWindow.open();
-
-      this.getRoot().add(this.searchWindow, { top: 60, bottom: "0%" });
+      this.getRoot().add(this.searchWindow);
 
       searchDialog.focus();
     },

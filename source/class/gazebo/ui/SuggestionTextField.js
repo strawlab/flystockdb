@@ -58,11 +58,20 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.suggestionTree.setHideRoot(true);
     this.suggestionTree.hide();
     this.suggestionTree.setOpacity(0);
-    this.suggestionTree.addListenerOnce("appear", function() {
+    this.suggestionTree.addListener("appear", function() {
         animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
         animation.set({
           from : 0.0,
           to : 1.0,
+          duration : 0.8
+         });
+        animation.start();
+      }, this);
+    this.suggestionTree.addListener("disappear", function() {
+        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
+        animation.set({
+          from : 1.0,
+          to : 0.0,
           duration : 0.8
          });
         animation.start();
@@ -96,6 +105,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       var textValue = dataEvent.getData();
 
       if (!textValue || textValue.length == 0) {
+        that.suggestionTree.hide();
         this.treeRoot.removeAll();
         return;
       }
@@ -186,7 +196,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         options,
         "fb2010_03",
         [ "*" ],
-        [ "x_searchables" ],
+        [ "x_searchables_" + ( textValue.length - 1 ) ],
         "searchable like ?",
         [ textValue + "%" ]
       );
