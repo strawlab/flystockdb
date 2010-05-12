@@ -67,15 +67,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
          });
         animation.start();
       }, this);
-    this.suggestionTree.addListener("disappear", function() {
-        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
-        animation.set({
-          from : 1.0,
-          to : 0.0,
-          duration : 0.8
-         });
-        animation.start();
-      }, this);
+    // Fading out does not seem to work.
+//    this.suggestionTree.addListener("disappear", function() {
+//        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
+//        animation.set({
+//          from : 1.0,
+//          to : 0.0,
+//          duration : 0.8
+//         });
+//        animation.start();
+//      }, this);
 
     this.treeRoot = new qx.ui.tree.TreeFolder("Root");
     this.treeRoot.setOpen(true);
@@ -105,7 +106,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       var textValue = dataEvent.getData();
 
       if (!textValue || textValue.length == 0) {
-        that.suggestionTree.hide();
+        this.suggestionTree.hide();
         this.treeRoot.removeAll();
         return;
       }
@@ -268,7 +269,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         "fb2010_03",
         [ "abstraction", "concretisation" ],
         [ "x_fast_transitions" ],
-        "abstraction == ?",
+        "abstraction == ? ORDER BY concretisation ASC",
         [ textValue ]
       );
       }
