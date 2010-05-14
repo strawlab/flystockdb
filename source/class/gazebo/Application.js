@@ -17,6 +17,8 @@ qx.Class.define("gazebo.Application",
 
 	statics :
 	{
+    LEFT_SO_THAT_CENTERED : -1,
+
 		// Hostname of the application's server
 		hostname : qx.core.Setting.get("gazebo.server.hostname"),
 		// HTTP port on the application's server, which might be null
@@ -240,6 +242,16 @@ qx.Class.define("gazebo.Application",
     screenTransition : function(dataEvent)
     {
       alert("Screen transition...");
+    },
+
+    openScreen : function(call, context, parameters)
+    {
+      this.addListenerOnce("screen.open", inquirer.generateSearchDialog, inquirer);
+    },
+
+    closeScreen : function(call, context, parameters)
+    {
+
     }
   }
 });
