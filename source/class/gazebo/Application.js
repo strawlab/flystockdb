@@ -37,6 +37,9 @@ qx.Class.define("gazebo.Application",
 
   members :
   {
+    openingScreens : new Array(),
+    closingScreens : new Array(),
+
     /**
      * This method contains the initial application code and gets called 
      * during startup of the application
@@ -100,7 +103,8 @@ qx.Class.define("gazebo.Application",
       qx.bom.History.getInstance().addToHistory("welcome", this.contributionName);
 
       this.contributionInstance.registerInitialScreen(this);
-      this.fireEvent("screen.open", null);
+      //this.fireEvent("screen.open", null);
+      this.screenTransition();
     },
 
 		generateAuthenticationDialog : function()
@@ -241,17 +245,30 @@ qx.Class.define("gazebo.Application",
 
     screenTransition : function(dataEvent)
     {
-      alert("Screen transition...");
+      var screenParams;
+
+      for (i = 0; i < this.closingScreens.length; i++) {
+        screenParams = this.closingScreens[i];
+
+        screenParams['call'](screenParams['parameters']);
+      }
+
+      for (i = 0; i < this.openingScreens.length; i++) {
+        screenParams = this.openingScreens[i];
+
+        screenParams['context'].anonymousMethod = screenParams['call'];
+        screenParams['context'].anonymousMethod(screenParams['parameters']);
+      }
     },
 
     openScreen : function(call, context, parameters)
     {
-      this.addListenerOnce("screen.open", inquirer.generateSearchDialog, inquirer);
+      this.openingScreens.push({ call: call, context: context, parameters: parameters });
     },
 
     closeScreen : function(call, context, parameters)
     {
-
+      this.closingScreens.push({ call: call, context: context, parameters: parameters });
     }
   }
 });

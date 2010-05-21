@@ -107,6 +107,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
       if (!textValue || textValue.length == 0) {
         this.suggestionTree.hide();
+        this.suggestionTree.setOpacity(0);
         this.treeRoot.removeAll();
         return;
       }
