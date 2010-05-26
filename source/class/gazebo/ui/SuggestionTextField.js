@@ -21,13 +21,12 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
   /**
    * @param dataSource {String} Resource that is used for the pop-ups.
    */
-  construct : function(dataSource)
+  construct : function(listeners)
   {
     this.base(arguments);
 
     this.rpcRunning = null;
     this.openAll = false;
-    this.dataSource = dataSource;
 
     this.setLayout(new qx.ui.layout.VBox(0));
     
@@ -84,6 +83,17 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
     this.add(this.textField);
     this.add(this.suggestionTree);
+
+    // Install custom listeners:
+    var listener;
+    if (listeners['onKeyPress']) {
+      listener = listeners['onKeyPress'];
+      this.textField.addListener("keypress", listener['call'], listener['context']);
+    }
+    if (listeners['onInput']) {
+      listener = listeners['onInput'];
+      this.textField.addListener("input", listener['call'], listener['context']);
+    }
   },
 
   members :

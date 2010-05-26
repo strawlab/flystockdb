@@ -18,6 +18,7 @@ qx.Class.define("gazebo.Application",
 	statics :
 	{
     LEFT_SO_THAT_CENTERED : -1,
+    TOP_SO_THAT_CENTERED : -1,
 
 		// Hostname of the application's server
 		hostname : qx.core.Setting.get("gazebo.server.hostname"),
@@ -103,7 +104,6 @@ qx.Class.define("gazebo.Application",
       qx.bom.History.getInstance().addToHistory("welcome", this.contributionName);
 
       this.contributionInstance.registerInitialScreen(this);
-      //this.fireEvent("screen.open", null);
       this.screenTransition();
     },
 
@@ -157,9 +157,9 @@ qx.Class.define("gazebo.Application",
       this.connectionWindow.close();
     },
 
-    generateSearchDialog : function()
+    generateSearchDialog : function(parameters, listeners)
     {
-      var searchDialog = new gazebo.ui.SuggestionTextField();
+      var searchDialog = new gazebo.ui.SuggestionTextField(listeners);
       
       this.searchWindow = new qx.ui.window.Window("Search");
       this.searchWindow.setMaxWidth(500);
@@ -180,8 +180,16 @@ qx.Class.define("gazebo.Application",
           if (bounds) {
             var hint = this.getSizeHint();
 
-            var left = Math.round((bounds.width - hint.width) / 2);
-            var top = 60;
+            var left = parameters['left'];
+            var top = parameters['top'];
+
+            if (left == this.LEFT_SO_THAT_CENTERED) {
+              left = Math.round((bounds.width - hint.width) / 2);
+            }
+
+            if (top == this.TOP_SO_THAT_CENTERED) {
+              top = Math.round((bounds.height - hint.height) / 2);
+            }
 
             this.moveTo(left, top);
           }
@@ -197,6 +205,7 @@ qx.Class.define("gazebo.Application",
     disposeSearchDialog : function()
     {
       this.searchWindow.close();
+      this.searchWindow.destroy();
     },
 
 		generateDatabaseInterface : function()
@@ -243,32 +252,55 @@ qx.Class.define("gazebo.Application",
       this.fireEvent("screen.open", null);
 		},
 
-    screenTransition : function(dataEvent)
+    suggestScreenTransition : function()
+    {
+      // No intervention or post-poning yet.
+      this.screenTransition();
+    },
+
+    screenTransition : function()
     {
       var screenParams;
 
       for (i = 0; i < this.closingScreens.length; i++) {
         screenParams = this.closingScreens[i];
 
-        screenParams['call'](screenParams['parameters']);
+        screenParams['context'].anonymousMethod = screenParams['call'];
+        screenParams['context'].anonymousMethod(screenParams['parameters']);
       }
 
       for (i = 0; i < this.openingScreens.length; i++) {
         screenParams = this.openingScreens[i];
 
         screenParams['context'].anonymousMethod = screenParams['call'];
-        screenParams['context'].anonymousMethod(screenParams['parameters']);
+        screenParams['context'].anonymousMethod(screenParams['parameters'], screenParams['listeners']);
       }
+
+      qx.lang.Array.removeAll(this.closingScreens);
+      qx.lang.Array.removeAll(this.openingScreens);
+
+      this.contributionInstance.registerNextScreen(this);
     },
 
-    openScreen : function(call, context, parameters)
+    openScreen : function(call, context, parameters, listeners)
     {
-      this.openingScreens.push({ call: call, context: context, parameters: parameters });
+      this.openingScreens.push(
+        {
+          call: call,
+          context: context,
+          parameters: parameters,
+          listeners: listeners
+        });
     },
 
     closeScreen : function(call, context, parameters)
     {
-      this.closingScreens.push({ call: call, context: context, parameters: parameters });
+      this.closingScreens.push(
+        {
+          call: call,
+          context: context,
+          parameters: parameters
+        });
     }
   }
 });
