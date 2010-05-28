@@ -36,6 +36,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.textField.getContentElement().setAttribute("spellcheck", "false");
 
     this.textField.setMinWidth(400);
+    this.textField.setLiveUpdate(true);
     this.textField.addListener("input", this.generateSuggestions, this);
     this.textField.addListener("keypress", function(keyEvent) {
         if (keyEvent.getKeyIdentifier() == "Down" ||

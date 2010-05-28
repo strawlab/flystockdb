@@ -8,6 +8,7 @@
 /* ************************************************************************
 
 #asset(gazebo/*)
+#asset(qx/icon/Oxygen/64/actions/dialog-ok.png)
 
 ************************************************************************ */
 
@@ -107,6 +108,31 @@ qx.Class.define("gazebo.Application",
       this.screenTransition();
     },
 
+    getPositioningFunction : function(left, top)
+    {
+      return function() {
+        var parent = this.getLayoutParent();
+
+        if (parent) {
+          var bounds = parent.getBounds();
+
+          if (bounds) {
+            var hint = this.getSizeHint();
+
+            if (left == this.LEFT_SO_THAT_CENTERED) {
+              left = Math.round((bounds.width - hint.width) / 2);
+            }
+
+            if (top == this.TOP_SO_THAT_CENTERED) {
+              top = Math.round((bounds.height - hint.height) / 2);
+            }
+
+            this.moveTo(left, top);
+          }
+        }
+      };
+    },
+
 		generateAuthenticationDialog : function()
 		{
 			var authenticationDialog = new gazebo.ui.ConnectionDialog(false, true);
@@ -161,7 +187,11 @@ qx.Class.define("gazebo.Application",
     {
       var searchDialog = new gazebo.ui.SuggestionTextField(listeners);
       
-      this.searchWindow = new qx.ui.window.Window("Search");
+      var title = parameters['title'];
+      var left = parameters['left'];
+      var top = parameters['top'];
+
+      this.searchWindow = new qx.ui.window.Window(title ? title : "Search");
       this.searchWindow.setMaxWidth(500);
       this.searchWindow.setLayout(new qx.ui.layout.HBox(10));
       this.searchWindow.add(searchDialog);
@@ -171,30 +201,7 @@ qx.Class.define("gazebo.Application",
 			this.searchWindow.setShowMaximize(false);
 			this.searchWindow.setShowMinimize(false);
 
-      this.searchWindow.addListenerOnce("resize", function() {
-        var parent = this.getLayoutParent();
-
-        if (parent) {
-          var bounds = parent.getBounds();
-
-          if (bounds) {
-            var hint = this.getSizeHint();
-
-            var left = parameters['left'];
-            var top = parameters['top'];
-
-            if (left == this.LEFT_SO_THAT_CENTERED) {
-              left = Math.round((bounds.width - hint.width) / 2);
-            }
-
-            if (top == this.TOP_SO_THAT_CENTERED) {
-              top = Math.round((bounds.height - hint.height) / 2);
-            }
-
-            this.moveTo(left, top);
-          }
-        }
-      }, this.searchWindow);
+      this.searchWindow.addListenerOnce("resize", this.getPositioningFunction(left, top), this.searchWindow);
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
@@ -206,6 +213,80 @@ qx.Class.define("gazebo.Application",
     {
       this.searchWindow.close();
       this.searchWindow.destroy();
+    },
+
+    generateBasket : function(parameters, listeners)
+    {
+      var title = parameters['title'];
+      var left = parameters['left'];
+      var top = parameters['top'];
+      var populate = parameters['populate']
+      var titles = parameters['titles']
+
+      this.basketContainer = new qx.ui.container.Composite();
+      this.basketContainer.setLayout(new qx.ui.layout.HBox(5));
+      this.basketContainer.setAllowStretchX(false, false);
+      this.basketContainer.setWidth(600);
+
+      this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
+      this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
+      this.basketWindow.setResizable(false, false, false, false);
+			this.basketWindow.setMovable(false);
+			this.basketWindow.setShowClose(false);
+			this.basketWindow.setShowMaximize(false);
+			this.basketWindow.setShowMinimize(false);
+
+      this.basketWindow.addListener("resize", this.getPositioningFunction(left, top), this.basketWindow);
+
+      if (populate) {
+        for (var i = 0; i < populate; i++) {
+          var basketTitle = titles && titles.length > i ? titles[i] : null;
+
+          this.addBasketItem(basketTitle, new qx.ui.embed.Canvas(30, 30));
+        }
+      }
+
+      this.basketWindow.add(this.basketContainer);
+      this.basketWindow.add(new qx.ui.toolbar.Separator());
+      this.basketWindow.add(new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png"));
+
+      this.basketWindow.open();
+      this.getRoot().add(this.basketWindow);
+    },
+
+    addBasketItem : function(title, item)
+    {
+      var itemContainer = new qx.ui.groupbox.GroupBox();
+
+      if (title) {
+        itemContainer.setLegend(title);
+      }
+      
+      itemContainer.setLayout(new qx.ui.layout.VBox(5));
+      itemContainer.add(item, { flex: 1 });
+
+      this.basketContainer.add(itemContainer, { flex: 1 });
+    },
+
+    getBasketItem : function(index)
+    {
+      var baskets = this.basketContainer.getChildren();
+
+      return baskets[index].getChildren();
+    },
+
+    setBasketItem : function(index, item)
+    {
+      var baskets = this.basketContainer.getChildren();
+      var itemContainer = baskets[index];
+
+      itemContainer.removeAll();
+      itemContainer.add(item);
+    },
+
+    disposeBasket : function()
+    {
+      // ...
     },
 
 		generateDatabaseInterface : function()
