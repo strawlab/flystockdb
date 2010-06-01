@@ -161,8 +161,9 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             result = result[1];
 
             for (i = 0; i < result.length; i++) {
+              var abstraction = result[i][0];
+              var matches = result[i][1];
               if (result[i][1] > 1) {
-                var abstraction = result[i][0];
                 folder = new qx.ui.tree.TreeFolder();
                 folder.addState("small"); // Small icons.
                 folder.setOpenSymbolMode("always");
@@ -174,13 +175,35 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                 folder.addWidget(new qx.ui.core.Spacer(), {flex: 1});
                 folder.addWidget(
                   new qx.ui.basic.Label(
-                    "(" + result[i][1] + " matches)"
+                    "(" + matches + " matches)"
                   ).set({ appearance: "annotation", rich: true }));
 
                 that.treeRoot.add(folder);
               } else  {
-                file = new qx.ui.tree.TreeFile(result[i][0]);
-                file.addState("small");
+                if (result[i].length > 2) {
+                  file = new qx.ui.tree.TreeFile();
+                  file.addState("small"); // Small icons.
+
+                  file.addSpacer();
+                  file.addLabel(abstraction);
+                  file.addWidget(new qx.ui.core.Spacer(), {flex: 1});
+                  for (j = 2; j < result[i].length; j++) {
+                    var customAnnotation = result[i][j];
+                    if (j > 2) {
+                      file.addWidget(new qx.ui.basic.Label(
+                        ",&nbsp;"
+                      ).set({ appearance: "annotation", rich: true}));
+                    }
+                    file.addWidget(
+                      new qx.ui.basic.Label(
+                        customAnnotation
+                      ).set({ appearance: "annotation", rich: true }));
+                  }
+                } else {
+                  file = new qx.ui.tree.TreeFile(abstraction);
+                  file.addState("small"); // Small icons.
+                }
+
                 that.treeRoot.add(file);
               }
             }
