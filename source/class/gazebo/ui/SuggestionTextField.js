@@ -93,7 +93,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     }
     if (listeners['onInput']) {
       listener = listeners['onInput'];
-      this.textField.addListener("input", listener['call'], listener['context']);
+      this.addListener("inputRelay", listener['call'], listener['context']);
+      this.textField.addListener("input", this.onInputHandler, this);
     }
   },
 
@@ -102,6 +103,43 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     focus : function()
     {
       this.textField.focus();
+    },
+
+    prepareFileSuggestion : function(parameters)
+    {
+      var file;
+      var abstraction = parameters[0];
+      
+      // Simple case: no additional information except the suggestion itself.
+      if (parameters.length < 2) {
+        file = new qx.ui.tree.TreeFile(abstraction);
+        file.addState("small");
+
+        return file;
+      }
+
+      file = new qx.ui.tree.TreeFile();
+
+      file.addState("small"); // Small icons.
+
+      file.addSpacer();
+      file.addLabel(abstraction);
+      file.addWidget(new qx.ui.core.Spacer(), {flex: 1});
+      for (j = 2; j < parameters.length; j++) {
+        var customAnnotation = parameters[j];
+        if (j > 2) {
+          file.addWidget(new qx.ui.basic.Label(
+            ",&nbsp;"
+          ).set({ appearance: "annotation", rich: true}));
+        }
+        file.addWidget(
+          new qx.ui.basic.Label(
+            customAnnotation
+          ).set({ appearance: "annotation", rich: true }));
+      }
+
+      return file;
+
     },
 
     /**
@@ -180,29 +218,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
                 that.treeRoot.add(folder);
               } else  {
-                if (result[i].length > 2) {
-                  file = new qx.ui.tree.TreeFile();
-                  file.addState("small"); // Small icons.
-
-                  file.addSpacer();
-                  file.addLabel(abstraction);
-                  file.addWidget(new qx.ui.core.Spacer(), {flex: 1});
-                  for (j = 2; j < result[i].length; j++) {
-                    var customAnnotation = result[i][j];
-                    if (j > 2) {
-                      file.addWidget(new qx.ui.basic.Label(
-                        ",&nbsp;"
-                      ).set({ appearance: "annotation", rich: true}));
-                    }
-                    file.addWidget(
-                      new qx.ui.basic.Label(
-                        customAnnotation
-                      ).set({ appearance: "annotation", rich: true }));
-                  }
-                } else {
-                  file = new qx.ui.tree.TreeFile(abstraction);
-                  file.addState("small"); // Small icons.
-                }
+                file = that.prepareFileSuggestion(result[i]);
 
                 that.treeRoot.add(file);
               }
@@ -291,8 +307,14 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                 childFolder.addListener("changeOpen", that.openFolder, that);
                 folder.add(childFolder);
               } else  {
+                /*
                 childFile = new qx.ui.tree.TreeFile(result[i][1]);
                 childFile.addState("small");
+                folder.add(childFile);
+                 */
+                var childParameters = result[i];
+                childParameters.shift();
+                childFile = that.prepareFileSuggestion(childParameters);
                 folder.add(childFile);
               }
             }
@@ -308,6 +330,14 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         [ textValue ]
       );
       }
+    },
+
+    onInputHandler : function(dataEvent)
+    {
+      var input = dataEvent.getData();
+      var annotatedInput = input;
+
+      this.fireDataEvent("inputRelay", annotatedInput, input);
     }
   }
 });

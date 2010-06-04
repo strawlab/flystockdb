@@ -183,6 +183,16 @@ qx.Class.define("gazebo.Application",
       this.connectionWindow.close();
     },
 
+    generateLogo : function(parameters, listeners)
+    {
+      this.getRoot().add(new qx.ui.form.Button(null, "fly/test.png"));
+    },
+
+    disposeLogo : function()
+    {
+
+    },
+
     generateSearchDialog : function(parameters, listeners)
     {
       var searchDialog = new gazebo.ui.SuggestionTextField(listeners);
@@ -226,7 +236,7 @@ qx.Class.define("gazebo.Application",
       this.basketContainer = new qx.ui.container.Composite();
       this.basketContainer.setLayout(new qx.ui.layout.HBox(5));
       this.basketContainer.setAllowStretchX(false, false);
-      this.basketContainer.setWidth(600);
+      this.basketContainer.setWidth(700);
 
       this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
       this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
