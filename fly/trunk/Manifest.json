@@ -1,0 +1,34 @@
+{
+  "info" : 
+  {
+    "name" : "fly",
+
+    "summary" : "fly Contribution",
+    "description" : "This is a skeleton for a qooxdoo contribution.",
+    
+    "homepage" : "http://contrib.qooxdoo.org/project/fly",
+
+    "license" : "Simplified BSD License (a.k.a. 2-clause BSD License)",
+    "authors" : 
+    [
+      {
+        "name" : "Joachim Baran",
+        "email" : "joachim.baran@manchester.ac.uk"
+      }
+    ],
+
+    "version" : "trunk",
+    "qooxdoo-versions": ["1.1-pre"]
+  },
+  
+  "provides" : 
+  {
+    "namespace"   : "gazebo.fly",
+    "encoding"    : "utf-8",
+    "class"       : "source/class",
+    "resource"    : "source/resource",
+    "translation" : "source/translation",
+    "type"        : "contribution"
+  }
+}
+
