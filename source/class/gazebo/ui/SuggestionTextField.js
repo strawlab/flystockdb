@@ -21,7 +21,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
   /**
    * @param dataSource {String} Resource that is used for the pop-ups.
    */
-  construct : function(listeners)
+  construct : function(listeners, overrides)
   {
     this.base(arguments);
 
@@ -49,7 +49,14 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               this.suggestionTree.setSelection([ treeItems[0] ]);
             }
           }
+          this.suggestionTree.focus();
           this.suggestionTree.activate();
+        } else if (keyEvent.getKeyIdentifier() == "Enter") {
+            // Needs refinement..
+            var textValue = this.textField.getValue();
+            var treeItem = this.searchForTreeItem(textValue, this.suggestionTree.getRoot());
+
+            this.fireDataEvent("inputRelay", treeItem, textValue);
         }
     }, this);
 
@@ -94,7 +101,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     if (listeners['onInput']) {
       listener = listeners['onInput'];
       this.addListener("inputRelay", listener['call'], listener['context']);
-      this.textField.addListener("input", this.onInputHandler, this);
+    }
+
+    // Install overrides:
+    if (overrides['prepareFileSuggestion']) {
+      this.prepareFileSuggestion = overrides['prepareFileSuggestion'];
     }
   },
 
@@ -105,6 +116,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       this.textField.focus();
     },
 
+    setStripWhitespace : function(bool)
+    {
+      this.stripWhitespace = bool;
+    },
+
+    getStripWhitespace : function()
+    {
+      return this.stripWhitespace;
+    },
+    
     prepareFileSuggestion : function(parameters)
     {
       var file;
@@ -139,7 +160,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
 
       return file;
-
     },
 
     /**
@@ -161,6 +181,9 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         return;
       }
 
+      // Remove whitespace?
+      textValue = this.stripWhitespace?textValue.replace(/^\s+|\s+$/g, ""):textValue;
+
       var options;
       if (this.openAll) {
         options = { count : true }; // Count is not needed here, but simplifies code below.
@@ -181,17 +204,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
             var folder, file;
 
-            if (!result) {
-              return;
-            }
-
-            if (result.length == 0) {
+            if (!result || result.length == 0) {
               file = new qx.ui.tree.TreeFile();
               file.addWidget(
                 new qx.ui.basic.Label(
                   "(no matches)"
                 ).set({ appearance: "annotation", rich: true }));
               that.treeRoot.add(file);
+
+              // Event relaying on failure:
+              that.fireDataEvent("inputRelay", null, textValue);
               return;
             }
 
@@ -242,6 +264,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             }
 
             that.suggestionTree.show();
+            
+            // Event relaying on success:
+            var treeItem = that.searchForTreeItem(textValue, that.suggestionTree.getRoot());
+
+            that.fireDataEvent("inputRelay", treeItem, textValue);
           }
         },
         "query",
@@ -324,7 +351,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         "query",
         {},
         "fb2010_03",
-        [ "abstraction", "concretisation" ],
+        [ "*" ],
         [ "x_fast_transitions" ],
         "abstraction == ? ORDER BY concretisation ASC",
         [ textValue ]
@@ -332,12 +359,28 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
     },
 
-    onInputHandler : function(dataEvent)
+    searchForTreeItem : function(label, item)
     {
-      var input = dataEvent.getData();
-      var annotatedInput = input;
+      if (!item) { return null; }
 
-      this.fireDataEvent("inputRelay", annotatedInput, input);
+      // Found it! Bubble up...
+      if (item.getLabel() == label) {
+        this.suggestionTree.setSelection([item]);
+
+        return item;
+      }
+      
+      if (item.hasChildren()) {
+        var childItems = item.getChildren();
+        
+        for (var i = 0; i < childItems.length; i++) {
+          var result = this.searchForTreeItem(label, childItems[i]);
+          
+          if (result) { return result; } // Bubble up found item.
+        }
+      }
+      
+      return null; // Not Found.
     }
   }
 });

@@ -183,9 +183,10 @@ qx.Class.define("gazebo.Application",
       this.connectionWindow.close();
     },
 
+    // Only for testing purposes, yet.
     generateLogo : function(parameters, listeners)
     {
-      this.getRoot().add(new qx.ui.form.Button(null, "fly/test.png"));
+      this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
     },
 
     disposeLogo : function()
@@ -193,13 +194,17 @@ qx.Class.define("gazebo.Application",
 
     },
 
-    generateSearchDialog : function(parameters, listeners)
+    generateSearchDialog : function(parameters, listeners, overrides)
     {
-      var searchDialog = new gazebo.ui.SuggestionTextField(listeners);
+      var searchDialog = new gazebo.ui.SuggestionTextField(listeners, overrides);
       
       var title = parameters['title'];
       var left = parameters['left'];
       var top = parameters['top'];
+      
+      if (parameters['stripWhitespace']) {
+        searchDialog.setStripWhitespace(parameters['stripWhitespace']);
+      }
 
       this.searchWindow = new qx.ui.window.Window(title ? title : "Search");
       this.searchWindow.setMaxWidth(500);
@@ -225,7 +230,7 @@ qx.Class.define("gazebo.Application",
       this.searchWindow.destroy();
     },
 
-    generateBasket : function(parameters, listeners)
+    generateBasket : function(parameters, listeners, overrides)
     {
       var title = parameters['title'];
       var left = parameters['left'];
@@ -364,7 +369,11 @@ qx.Class.define("gazebo.Application",
         screenParams = this.openingScreens[i];
 
         screenParams['context'].anonymousMethod = screenParams['call'];
-        screenParams['context'].anonymousMethod(screenParams['parameters'], screenParams['listeners']);
+        screenParams['context'].anonymousMethod(
+          screenParams['parameters'],
+          screenParams['listeners'],
+          screenParams['overrides']
+        );
       }
 
       qx.lang.Array.removeAll(this.closingScreens);
@@ -373,14 +382,15 @@ qx.Class.define("gazebo.Application",
       this.contributionInstance.registerNextScreen(this);
     },
 
-    openScreen : function(call, context, parameters, listeners)
+    openScreen : function(call, context, parameters, listeners, overrides)
     {
       this.openingScreens.push(
         {
           call: call,
           context: context,
           parameters: parameters,
-          listeners: listeners
+          listeners: listeners,
+          overrides: overrides
         });
     },
 
