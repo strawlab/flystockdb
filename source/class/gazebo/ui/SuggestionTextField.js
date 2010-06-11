@@ -21,9 +21,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
   /**
    * @param dataSource {String} Resource that is used for the pop-ups.
    */
-  construct : function(listeners, overrides)
+  construct : function(parameters, listeners, overrides)
   {
     this.base(arguments);
+
+    var searchButtonTitle = parameters['searchButtonTitle'];
 
     this.rpcRunning = null;
     this.openAll = false;
@@ -51,17 +53,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           }
           this.suggestionTree.focus();
           this.suggestionTree.activate();
-        } else if (keyEvent.getKeyIdentifier() == "Enter") {
-            // Needs refinement..
-            var textValue = this.textField.getValue();
-            var treeItem = this.searchForTreeItem(textValue, this.suggestionTree.getRoot());
-
-            this.fireDataEvent("inputRelay", treeItem, textValue);
         }
     }, this);
 
     this.suggestionTree = new qx.ui.tree.Tree();
-    this.suggestionTree.setMinHeight(303);
+    this.suggestionTree.setHeight(0); // Pretend we do not exist.
     this.suggestionTree.setHideRoot(true);
     this.suggestionTree.hide();
     this.suggestionTree.setOpacity(0);
@@ -89,8 +85,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.treeRoot.setOpen(true);
     this.suggestionTree.setRoot(this.treeRoot);
 
+    this.searchButton = new qx.ui.form.Button(searchButtonTitle ? searchButtonTitle : 'Search');
+
     this.add(this.textField);
     this.add(this.suggestionTree);
+    this.add(this.searchButton);
 
     // Install custom listeners:
     var listener;
@@ -263,6 +262,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               that.treeRoot.add(file);
             }
 
+            that.suggestionTree.setMinHeight(303);
             that.suggestionTree.show();
             
             // Event relaying on success:
@@ -276,7 +276,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         "fb2010_03",
         [ "*" ],
         [ "x_searchables_" + ( textValue.length - 1 ) ],
-        "searchable like ?",
+        "searchable ilike ?",
         [ textValue + "%" ]
       );
     },

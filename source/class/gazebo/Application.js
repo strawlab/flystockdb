@@ -8,7 +8,7 @@
 /* ************************************************************************
 
 #asset(gazebo/*)
-#asset(qx/icon/Oxygen/64/actions/dialog-ok.png)
+#asset(qx/icon/Oxygen/32/actions/system-run.png)
 
 ************************************************************************ */
 
@@ -186,17 +186,20 @@ qx.Class.define("gazebo.Application",
     // Only for testing purposes, yet.
     generateLogo : function(parameters, listeners)
     {
-      this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
+      this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/32/actions/system-run.png"));
     },
 
     disposeLogo : function()
     {
+    },
 
+    disposeButton : function()
+    {
     },
 
     generateSearchDialog : function(parameters, listeners, overrides)
     {
-      var searchDialog = new gazebo.ui.SuggestionTextField(listeners, overrides);
+      var searchDialog = new gazebo.ui.SuggestionTextField(parameters, listeners, overrides);
       
       var title = parameters['title'];
       var left = parameters['left'];
@@ -220,8 +223,6 @@ qx.Class.define("gazebo.Application",
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
-
-      searchDialog.focus();
     },
 
     disposeSearchDialog : function()
@@ -241,7 +242,7 @@ qx.Class.define("gazebo.Application",
       this.basketContainer = new qx.ui.container.Composite();
       this.basketContainer.setLayout(new qx.ui.layout.HBox(5));
       this.basketContainer.setAllowStretchX(false, false);
-      this.basketContainer.setWidth(700);
+      //this.basketContainer.setWidth(700);
 
       this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
       this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
@@ -257,13 +258,15 @@ qx.Class.define("gazebo.Application",
         for (var i = 0; i < populate; i++) {
           var basketTitle = titles && titles.length > i ? titles[i] : null;
 
-          this.addBasketItem(basketTitle, new qx.ui.embed.Canvas(30, 30));
+          var canvas = new qx.ui.embed.Canvas(30, 30);
+          
+          this.addBasketItem(basketTitle, canvas);
         }
       }
 
       this.basketWindow.add(this.basketContainer);
       this.basketWindow.add(new qx.ui.toolbar.Separator());
-      this.basketWindow.add(new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png"));
+      this.basketWindow.add(new qx.ui.form.Button('Validate', "icon/32/actions/system-run.png"));
 
       this.basketWindow.open();
       this.getRoot().add(this.basketWindow);
@@ -279,8 +282,9 @@ qx.Class.define("gazebo.Application",
       
       itemContainer.setLayout(new qx.ui.layout.VBox(5));
       itemContainer.add(item, { flex: 1 });
+      itemContainer.setMinWidth(130);
 
-      this.basketContainer.add(itemContainer, { flex: 1 });
+      this.basketContainer.add(itemContainer, { flex: 0 });
     },
 
     getBasketItem : function(index)
