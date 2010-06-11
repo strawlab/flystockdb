@@ -42,6 +42,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
     registerInitialScreen : function(inquirer)
     {
+      var searchWindow;
+
       this.inquirer = inquirer;
 
       inquirer.openScreen(inquirer.generateBasket, inquirer,
@@ -51,20 +53,21 @@ qx.Class.define("gazebo.fly.Contribution",
           top: 20,
           populate: 6,
           titles: [ 'Chromosome X',
-                    'Chromosome Y',
                     'Chromosome 2',
                     'Chromosome 3',
                     'Chromosome 4',
+                    'Chromosome Y',
                     'Unknown'
                   ]
         }, {}, {});
         
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Add...',
+          title: 'Search...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 200,
-          stripWhitespace: true
+          top: 250,
+          stripWhitespace: true,
+          searchButtonTitle: 'Add'
         },
         {
           onKeyPress: { call: this.keyPressListener, context: this },
@@ -81,10 +84,11 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Add...',
+          title: 'Search...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 200,
-          stripWhitespace: true
+          top: 250,
+          stripWhitespace: true,
+          searchButtonTitle: 'All'
         },
         {
           onKeyPress: { call: this.keyPressListener, context: this },
@@ -97,7 +101,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
     keyPressListener : function(keyEvent)
     {
-      this.debug(' Key ID: ' + keyEvent.getKeyIdentifier());
+      this.debug('Key ID: ' + keyEvent.getKeyIdentifier());
       if (keyEvent.getKeyIdentifier() == 'Space' ||
           keyEvent.getKeyIdentifier() == 'Enter') {
         this.requestTransition = true;
@@ -109,23 +113,41 @@ qx.Class.define("gazebo.fly.Contribution",
       var treeItem = dataEvent.getData();
       var userInput = dataEvent.getOldData();
       var chromosome = 5 // Default placement: chromosome 'Unknown
-
+      
+      this.debug('Item: ' + treeItem + ' ' + userInput);
+      
       if (treeItem) {
         var parameters = treeItem.model_workaround;
 
         if (parameters[3].charAt(0) == 'X') { chromosome = 0; }
-        else if (parameters[3].charAt(0) == 'Y') { chromosome = 1; }
-        else if (parameters[3].charAt(0) == '2') { chromosome = 2; }
-        else if (parameters[3].charAt(0) == '3') { chromosome = 3; }
-        else if (parameters[3].charAt(0) == '4') { chromosome = 4; }
+        else if (parameters[3].charAt(0) == 'Y') { chromosome = 4; }
+        else if (parameters[3].charAt(0) == '2') { chromosome = 1; }
+        else if (parameters[3].charAt(0) == '3') { chromosome = 2; }
+        else if (parameters[3].charAt(0) == '4') { chromosome = 3; }
       }
 
       if (userInput.length > 0 && this.requestTransition) {
         this.requestTransition = false;
 
         userInput = userInput.replace(/^\s+|\s+$/g, "");
-        // Random number: 0..5
-        this.inquirer.setBasketItem(chromosome, new qx.ui.basic.Label(userInput));
+        
+        var container = new qx.ui.container.Composite();
+        var label = new qx.ui.basic.Label().set({
+          value: '<a href="http://www.guardian.co.uk">' + userInput + '</a>',
+          rich: true
+        });
+        var controlButton = new qx.ui.form.Button('A');
+
+        /*
+        controlBox.add(new qx.ui.form.ListItem('Move to X'));
+        controlBox.add(new qx.ui.form.ListItem('Move to 2'));
+        controlBox.add(new qx.ui.form.ListItem('Remove'));]*/
+
+        container.setLayout(new qx.ui.layout.HBox(5));
+        container.add(label, { flex: 1 });
+        container.add(controlButton, { flex: 0 });
+
+        this.inquirer.setBasketItem(chromosome, container);
         
         this.inquirer.suggestScreenTransition();
       }
