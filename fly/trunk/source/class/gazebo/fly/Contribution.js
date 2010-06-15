@@ -88,7 +88,7 @@ qx.Class.define("gazebo.fly.Contribution",
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 250,
           stripWhitespace: true,
-          searchButtonTitle: 'All'
+          searchButtonTitle: 'Add'
         },
         {
           onKeyPress: { call: this.keyPressListener, context: this },
@@ -102,8 +102,7 @@ qx.Class.define("gazebo.fly.Contribution",
     keyPressListener : function(keyEvent)
     {
       this.debug('Key ID: ' + keyEvent.getKeyIdentifier());
-      if (keyEvent.getKeyIdentifier() == 'Space' ||
-          keyEvent.getKeyIdentifier() == 'Enter') {
+      if (keyEvent.getKeyIdentifier() == 'Enter') {
         this.requestTransition = true;
       }
     },
@@ -113,40 +112,84 @@ qx.Class.define("gazebo.fly.Contribution",
       var treeItem = dataEvent.getData();
       var userInput = dataEvent.getOldData();
       var chromosome = 5 // Default placement: chromosome 'Unknown
-      
+      var chromosomeName = 'Unknown'
+      var flybaseId = null;
+
       this.debug('Item: ' + treeItem + ' ' + userInput);
       
       if (treeItem) {
         var parameters = treeItem.model_workaround;
 
-        if (parameters[3].charAt(0) == 'X') { chromosome = 0; }
-        else if (parameters[3].charAt(0) == 'Y') { chromosome = 4; }
-        else if (parameters[3].charAt(0) == '2') { chromosome = 1; }
-        else if (parameters[3].charAt(0) == '3') { chromosome = 2; }
-        else if (parameters[3].charAt(0) == '4') { chromosome = 3; }
+        chromosomeName = parameters[3].charAt(0);
+
+        if (chromosomeName == 'X') { chromosome = 0; }
+        else if (chromosomeName == 'Y') { chromosome = 4; }
+        else if (chromosomeName == '2') { chromosome = 1; }
+        else if (chromosomeName == '3') { chromosome = 2; }
+        else if (chromosomeName == '4') { chromosome = 3; }
+        else { chromosomeName = 'Unknown'; }
+
+        if (parameters[5] && parameters[5].match("^FB.+")) {
+          flybaseId = parameters[5];
+        }
       }
 
       if (userInput.length > 0 && this.requestTransition) {
         this.requestTransition = false;
 
-        userInput = userInput.replace(/^\s+|\s+$/g, "");
+        userInput = userInput.replace(/^\s+/, "");
+        userInput = userInput.replace(/\s+$/, " ")
         
         var container = new qx.ui.container.Composite();
-        var label = new qx.ui.basic.Label().set({
-          value: '<a href="http://www.guardian.co.uk">' + userInput + '</a>',
-          rich: true
-        });
-        var controlButton = new qx.ui.form.Button('A');
+        var label;
+        var controlButton = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/actions/help-about.png");
 
-        /*
-        controlBox.add(new qx.ui.form.ListItem('Move to X'));
-        controlBox.add(new qx.ui.form.ListItem('Move to 2'));
-        controlBox.add(new qx.ui.form.ListItem('Remove'));]*/
+        if (flybaseId) {
+          label = new qx.ui.basic.Label().set({
+            value: '<u>' + userInput + '</u>',
+            rich: true
+          });
+
+          label.addListener('click', function(mouseEvent) {
+            qx.bom.Window.open('http://www.flybase.org/reports/' + flybaseId + '.html',
+              'FlyBase Report',
+              {},
+              false);
+          }, this);
+        } else {
+          label = new qx.ui.basic.Label().set({
+            value: userInput,
+            rich: true
+          });
+        }
+
+        var that = this;
+        controlButton.addListener('click', function(mouseEvent) {
+          var popup = new qx.ui.popup.Popup(new qx.ui.layout.VBox(5)).set({
+            backgroundColor: "#EEEEEE",
+            padding: [2, 4],
+            offset : 3,
+            offsetBottom : 20
+          });
+
+          for (var i = 0; i < 6; i++) {
+            var chromosomeNames = [ 'X', '2', '3', '4', 'Y', 'Unknown'];
+
+            if (i != chromosome) {
+              var icon = that.getDirectionIcon(chromosome, i);
+              popup.add(new qx.ui.basic.Atom("Move to " + chromosomeNames[i], icon));
+            }
+          }
+          popup.add(new qx.ui.basic.Atom("Remove", 'qx/icon/Oxygen/16/actions/edit-delete.png'));
+          popup.placeToMouse(mouseEvent);
+          popup.show();
+        });
 
         container.setLayout(new qx.ui.layout.HBox(5));
-        container.add(label, { flex: 1 });
         container.add(controlButton, { flex: 0 });
+        container.add(label, { flex: 1 });
 
+        //qx.bom.Window.open('http://www.guardian.co.uk', 'Guardian', {}, false);
         this.inquirer.setBasketItem(chromosome, container);
         
         this.inquirer.suggestScreenTransition();
@@ -195,6 +238,14 @@ qx.Class.define("gazebo.fly.Contribution",
       file.model_workaround = parameters;
 
       return file;
+    },
+
+    getDirectionIcon : function(position, destination) {
+      if (position > destination) {
+        return 'qx/icon/Oxygen/16/actions/go-previous.png';
+      } else {
+        return 'qx/icon/Oxygen/16/actions/go-next.png';
+      }
     }
   }
 });
