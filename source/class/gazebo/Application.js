@@ -10,6 +10,11 @@
 #asset(gazebo/*)
 #asset(qx/icon/Oxygen/32/actions/system-run.png)
 
+#asset(qx/icon/Oxygen/16/actions/edit-delete.png)
+#asset(qx/icon/Oxygen/16/actions/help-about.png)
+#asset(qx/icon/Oxygen/16/actions/go-next.png)
+#asset(qx/icon/Oxygen/16/actions/go-previous.png)
+
 ************************************************************************ */
 
 qx.Class.define("gazebo.Application",
@@ -223,6 +228,8 @@ qx.Class.define("gazebo.Application",
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
+
+      return searchDialog;
     },
 
     disposeSearchDialog : function()
