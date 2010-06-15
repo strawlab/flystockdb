@@ -31,6 +31,7 @@ qx.Class.define("gazebo.fly.Contribution",
   {
     this.inquirer = null;
     this.requestTransition = false;
+    this.searchDialog = null;
   },
 
   members:
@@ -70,7 +71,7 @@ qx.Class.define("gazebo.fly.Contribution",
           searchButtonTitle: 'Add'
         },
         {
-          onKeyPress: { call: this.keyPressListener, context: this },
+          onSearch: { call: this.searchListener, context: this },
           onInput: { call: this.inputListener, context: this }
         },
         {
@@ -91,7 +92,7 @@ qx.Class.define("gazebo.fly.Contribution",
           searchButtonTitle: 'Add'
         },
         {
-          onKeyPress: { call: this.keyPressListener, context: this },
+          onSearch: { call: this.searchListener, context: this },
           onInput: { call: this.inputListener, context: this }
         },
         {
@@ -99,12 +100,10 @@ qx.Class.define("gazebo.fly.Contribution",
         });
     },
 
-    keyPressListener : function(keyEvent)
+    searchListener : function(dataEvent)
     {
-      this.debug('Key ID: ' + keyEvent.getKeyIdentifier());
-      if (keyEvent.getKeyIdentifier() == 'Enter') {
-        this.requestTransition = true;
-      }
+      this.requestTransition = true;
+      this.inputListener(dataEvent);
     },
 
     inputListener : function(dataEvent)
@@ -115,7 +114,7 @@ qx.Class.define("gazebo.fly.Contribution",
       var chromosomeName = 'Unknown'
       var flybaseId = null;
 
-      this.debug('Item: ' + treeItem + ' ' + userInput);
+      this.debug('Item: ' + treeItem + ' / ' + userInput);
       
       if (treeItem) {
         var parameters = treeItem.model_workaround;
