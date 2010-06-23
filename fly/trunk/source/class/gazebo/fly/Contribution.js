@@ -43,8 +43,6 @@ qx.Class.define("gazebo.fly.Contribution",
 
     registerInitialScreen : function(inquirer)
     {
-      var searchWindow;
-
       this.inquirer = inquirer;
 
       inquirer.openScreen(inquirer.generateBasket, inquirer,
@@ -52,21 +50,33 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 20,
-          populate: 6,
+          populate: 12,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
                     'Chromosome 3',
                     'Chromosome 4',
                     'Chromosome Y',
-                    'Unknown'
-                  ]
-        }, {}, {});
+                    'Unknown',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    ''
+                  ],
+          split: true,
+          wrapEvery: 6
+        },
+        {
+          onOpen: { call: this.basketOpenListener, context: this }
+        },
+        {});
         
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
           title: 'Search...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 250,
+          top: 510,
           stripWhitespace: true,
           searchButtonTitle: 'Add'
         },
@@ -87,7 +97,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Search...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 250,
+          top: 510,
           stripWhitespace: true,
           searchButtonTitle: 'Add'
         },
@@ -100,6 +110,17 @@ qx.Class.define("gazebo.fly.Contribution",
         });
     },
 
+    basketOpenListener : function(dataEvent) {
+      this.genotypeBasket = dataEvent.getData();
+
+      var label = new qx.ui.basic.Label().set({
+            value: '+',
+            rich: true
+          });
+
+      this.genotypeBasket.addBasketItem(0, label);
+    },
+
     searchListener : function(dataEvent)
     {
       this.requestTransition = true;
@@ -110,7 +131,7 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       var treeItem = dataEvent.getData();
       var userInput = dataEvent.getOldData();
-      var chromosome = 5 // Default placement: chromosome 'Unknown
+      var chromosome = 5 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
       var flybaseId = null;
 
@@ -139,9 +160,7 @@ qx.Class.define("gazebo.fly.Contribution",
         userInput = userInput.replace(/^\s+/, "");
         userInput = userInput.replace(/\s+$/, " ")
         
-        var container = new qx.ui.container.Composite();
         var label;
-        var controlButton = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/actions/help-about.png");
 
         if (flybaseId) {
           label = new qx.ui.basic.Label().set({
@@ -162,34 +181,8 @@ qx.Class.define("gazebo.fly.Contribution",
           });
         }
 
-        var that = this;
-        controlButton.addListener('click', function(mouseEvent) {
-          var popup = new qx.ui.popup.Popup(new qx.ui.layout.VBox(5)).set({
-            backgroundColor: "#EEEEEE",
-            padding: [2, 4],
-            offset : 3,
-            offsetBottom : 20
-          });
-
-          for (var i = 0; i < 6; i++) {
-            var chromosomeNames = [ 'X', '2', '3', '4', 'Y', 'Unknown'];
-
-            if (i != chromosome) {
-              var icon = that.getDirectionIcon(chromosome, i);
-              popup.add(new qx.ui.basic.Atom("Move to " + chromosomeNames[i], icon));
-            }
-          }
-          popup.add(new qx.ui.basic.Atom("Remove", 'qx/icon/Oxygen/16/actions/edit-delete.png'));
-          popup.placeToMouse(mouseEvent);
-          popup.show();
-        });
-
-        container.setLayout(new qx.ui.layout.HBox(5));
-        container.add(controlButton, { flex: 0 });
-        container.add(label, { flex: 1 });
-
-        //qx.bom.Window.open('http://www.guardian.co.uk', 'Guardian', {}, false);
-        this.inquirer.setBasketItem(chromosome, container);
+        this.genotypeBasket.addBasketItem(chromosome, label);
+        // this.inquirer.setBasketItem(chromosome, container);
         
         this.inquirer.suggestScreenTransition();
       }
@@ -208,6 +201,8 @@ qx.Class.define("gazebo.fly.Contribution",
       file.addSpacer();
       file.addLabel(abstraction);
       file.addWidget(new qx.ui.core.Spacer(), {flex: 1});
+
+      /* Debugging code:
       for (j = 2; j < parameters.length; j++) {
         var customAnnotation = parameters[j];
 
@@ -233,18 +228,28 @@ qx.Class.define("gazebo.fly.Contribution",
             customAnnotation
           ).set({appearance: "annotation", rich: true}));
       }
+      */
+
+      if (parameters[2] == 'gene') {
+        file.setIcon('fly/gene.png');
+      } else if (parameters[2] == 'single balancer') {
+        file.setIcon('fly/balancer.png');
+      } else if (parameters[2] == 'transgenic_transposon') {
+        file.setIcon('fly/transgenic.png');
+      } else if (parameters[2] == 'natural_transposable_element') {
+        file.setIcon('fly/transposon.png');
+      }
+
+      if (parameters[3] != '') {
+        file.addWidget(
+          new qx.ui.basic.Label(
+            'Chromosome ' + parameters[3]
+          ).set({appearance: "annotation", rich: true}));
+      }
 
       file.model_workaround = parameters;
 
       return file;
-    },
-
-    getDirectionIcon : function(position, destination) {
-      if (position > destination) {
-        return 'qx/icon/Oxygen/16/actions/go-previous.png';
-      } else {
-        return 'qx/icon/Oxygen/16/actions/go-next.png';
-      }
     }
   }
 });
