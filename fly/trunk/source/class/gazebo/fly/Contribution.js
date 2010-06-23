@@ -50,27 +50,43 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 20,
-          populate: 12,
+          populate: 11,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
                     'Chromosome 3',
                     'Chromosome 4',
-                    'Chromosome Y',
                     'Unknown',
-                    '',
+                    'Chromosome Y',
                     '',
                     '',
                     '',
                     '',
                     ''
                   ],
-          split: true,
-          wrapEvery: 6
+          labels: [ 'X, top',
+                    '2, top',
+                    '3, top',
+                    '4, top',
+                    'U, top',
+                    'Y',
+                    'X, bottom',
+                    '2, bottom',
+                    '3, bottom',
+                    '4, bottom',
+                    'U, bottom'
+          ]
         },
         {
           onOpen: { call: this.basketOpenListener, context: this }
         },
-        {});
+        { 
+          makeEmptyBasketLabel: function(index) {
+            return new qx.ui.basic.Label().set({
+              value: '+',
+              rich: true
+            });
+          }
+        });
         
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
@@ -112,13 +128,6 @@ qx.Class.define("gazebo.fly.Contribution",
 
     basketOpenListener : function(dataEvent) {
       this.genotypeBasket = dataEvent.getData();
-
-      var label = new qx.ui.basic.Label().set({
-            value: '+',
-            rich: true
-          });
-
-      this.genotypeBasket.addBasketItem(0, label);
     },
 
     searchListener : function(dataEvent)
@@ -131,7 +140,7 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       var treeItem = dataEvent.getData();
       var userInput = dataEvent.getOldData();
-      var chromosome = 5 // Default placement: chromosome 'Unknown'
+      var chromosome = 4 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
       var flybaseId = null;
 
@@ -143,7 +152,7 @@ qx.Class.define("gazebo.fly.Contribution",
         chromosomeName = parameters[3].charAt(0);
 
         if (chromosomeName == 'X') { chromosome = 0; }
-        else if (chromosomeName == 'Y') { chromosome = 4; }
+        else if (chromosomeName == 'Y') { chromosome = 5; }
         else if (chromosomeName == '2') { chromosome = 1; }
         else if (chromosomeName == '3') { chromosome = 2; }
         else if (chromosomeName == '4') { chromosome = 3; }
