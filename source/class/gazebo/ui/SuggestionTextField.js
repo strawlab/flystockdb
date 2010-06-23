@@ -87,7 +87,15 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.treeRoot.setOpen(true);
     this.suggestionTree.setRoot(this.treeRoot);
 
-    this.suggestionTree.addListener('dblclick', this.submitListener, this);
+    this.suggestionTree.addListener('dblclick', function() {
+      var selection = this.suggestionTree.getSelection();
+
+      if (selection &&
+          selection.length == 1 &&
+          !selection[0].getLabel().match(/\.\.\./)) {
+            this.submitListener();
+          }
+    }, this);
     this.suggestionTree.addListener('keypress', function(keyEvent) {
       if (keyEvent.getKeyIdentifier() == 'Enter') {
         this.submitListener();

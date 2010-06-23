@@ -228,8 +228,6 @@ qx.Class.define("gazebo.Application",
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
-
-      return searchDialog;
     },
 
     disposeSearchDialog : function()
@@ -240,16 +238,11 @@ qx.Class.define("gazebo.Application",
 
     generateBasket : function(parameters, listeners, overrides)
     {
+      this.basketContainer = new gazebo.ui.BasketContainer(parameters, listeners, overrides);
+
       var title = parameters['title'];
       var left = parameters['left'];
       var top = parameters['top'];
-      var populate = parameters['populate']
-      var titles = parameters['titles']
-
-      this.basketContainer = new qx.ui.container.Composite();
-      this.basketContainer.setLayout(new qx.ui.layout.HBox(5));
-      this.basketContainer.setAllowStretchX(false, false);
-      //this.basketContainer.setWidth(700);
 
       this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
       this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
@@ -261,53 +254,24 @@ qx.Class.define("gazebo.Application",
 
       this.basketWindow.addListener("resize", this.getPositioningFunction(left, top), this.basketWindow);
 
-      if (populate) {
-        for (var i = 0; i < populate; i++) {
-          var basketTitle = titles && titles.length > i ? titles[i] : null;
-
-          var canvas = new qx.ui.embed.Canvas(30, 30);
-          
-          this.addBasketItem(basketTitle, canvas);
-        }
-      }
-
       this.basketWindow.add(this.basketContainer);
       this.basketWindow.add(new qx.ui.toolbar.Separator());
       this.basketWindow.add(new qx.ui.form.Button('Validate', "icon/32/actions/system-run.png"));
 
       this.basketWindow.open();
       this.getRoot().add(this.basketWindow);
-    },
 
-    addBasketItem : function(title, item)
-    {
-      var itemContainer = new qx.ui.groupbox.GroupBox();
 
-      if (title) {
-        itemContainer.setLegend(title);
+      if (listeners['onOpen']) {
+        listener = listeners['onOpen'];
+        this.addListener('openRelay', listener['call'], listener['context']);
       }
-      
-      itemContainer.setLayout(new qx.ui.layout.VBox(5));
-      itemContainer.add(item, { flex: 1 });
-      itemContainer.setMinWidth(130);
-
-      this.basketContainer.add(itemContainer, { flex: 0 });
-    },
-
-    getBasketItem : function(index)
-    {
-      var baskets = this.basketContainer.getChildren();
-
-      return baskets[index].getChildren();
+      this.fireDataEvent('openRelay', this.basketContainer);
     },
 
     setBasketItem : function(index, item)
     {
-      var baskets = this.basketContainer.getChildren();
-      var itemContainer = baskets[index];
-
-      itemContainer.removeAll();
-      itemContainer.add(item);
+      this.basketContainer.setBasketItem(index, item);
     },
 
     disposeBasket : function()
