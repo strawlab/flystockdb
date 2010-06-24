@@ -8,6 +8,7 @@
 /* ************************************************************************
 
 #asset(gazebo/decoration/window/*)
+#asset(gazebo/decoration/groupbox/*)
 
 ************************************************************************ */
 
@@ -58,6 +59,24 @@ qx.Theme.define("gazebo.theme.Decoration",
         widthBottom : 10,
         innerWidthLeft : 10,
         widthRight : 10
+      }
+    },
+
+    "group" :
+    {
+      decorator : qx.ui.decoration.Grid,
+
+      style : {
+        baseImage : "gazebo/decoration/groupbox/groupbox.png"
+      }
+    },
+
+    "group-dark" :
+    {
+      decorator : qx.ui.decoration.Grid,
+
+      style : {
+        baseImage : "gazebo/decoration/groupbox/groupbox-dark.png"
       }
     },
 

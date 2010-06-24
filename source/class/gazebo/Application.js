@@ -8,7 +8,7 @@
 /* ************************************************************************
 
 #asset(gazebo/*)
-#asset(qx/icon/Oxygen/32/actions/system-run.png)
+#asset(qx/icon/Oxygen/64/actions/dialog-ok.png)
 
 #asset(qx/icon/Oxygen/16/actions/edit-delete.png)
 #asset(qx/icon/Oxygen/16/actions/help-about.png)
@@ -191,7 +191,7 @@ qx.Class.define("gazebo.Application",
     // Only for testing purposes, yet.
     generateLogo : function(parameters, listeners)
     {
-      this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/32/actions/system-run.png"));
+      this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
     },
 
     disposeLogo : function()
@@ -256,7 +256,9 @@ qx.Class.define("gazebo.Application",
 
       this.basketWindow.add(this.basketContainer);
       this.basketWindow.add(new qx.ui.toolbar.Separator());
-      this.basketWindow.add(new qx.ui.form.Button('Validate', "icon/32/actions/system-run.png"));
+
+      var proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
+      this.basketWindow.add(proceedButton);
 
       this.basketWindow.open();
       this.getRoot().add(this.basketWindow);

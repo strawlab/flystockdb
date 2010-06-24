@@ -25,6 +25,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     var populate = parameters['populate'];
     var titles = parameters['titles'];
+    var decorations = parameters['decorations'];
 
     this.labels = parameters['labels'];
 
@@ -35,13 +36,18 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     this.setLayout(new qx.ui.layout.Flow(5, 5));
     this.setAllowStretchX(false, false);
-    this.setWidth(850);
+    this.setWidth(806);
 
     if (populate) {
       for (var i = 0; i < populate; i++) {
         var basketTitle = titles && titles.length > i ? titles[i] : null;
 
-        this.addBasket(basketTitle);
+        var decoration = null;
+        if (decorations && i < decorations.length) {
+          decoration = decorations[i];
+        }
+
+        this.addBasket(basketTitle, decoration);
       }
       for (i = 0; i < populate; i++) {
         var emptyBasketLabel = this.makeEmptyBasketLabel(i);
@@ -55,17 +61,21 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
   members:
   {
-    addBasket : function(title)
+    addBasket : function(title, decoration)
     {
       var itemContainer = new qx.ui.groupbox.GroupBox();
 
+      if (decoration) {
+        itemContainer.getChildrenContainer().setDecorator(decoration);
+      }
+      
       if (title) {
         itemContainer.setLegend(title);
       }
 
       itemContainer.setLayout(new qx.ui.layout.VBox(5));
       itemContainer.setMinWidth(130);
-      itemContainer.setMinHeight(200);
+      itemContainer.setMinHeight(230);
 
       this.add(itemContainer, { flex: 0 });
     },
