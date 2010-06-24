@@ -74,7 +74,19 @@ qx.Class.define("gazebo.fly.Contribution",
                     '3, bottom',
                     '4, bottom',
                     'U, bottom'
-          ]
+                   ],
+          decorations: [ 'group-dark',
+                    'group',
+                    'group-dark',
+                    'group',
+                    'group-dark',
+                    'group',
+                    'group-dark',
+                    'group',
+                    'group-dark',
+                    'group',
+                    'group-dark'
+                   ]
         },
         {
           onOpen: { call: this.basketOpenListener, context: this }
@@ -92,7 +104,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Search...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 510,
+          top: 560,
           stripWhitespace: true,
           searchButtonTitle: 'Add'
         },
@@ -113,7 +125,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Search...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 510,
+          top: 560,
           stripWhitespace: true,
           searchButtonTitle: 'Add'
         },
