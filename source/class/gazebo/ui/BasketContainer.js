@@ -122,11 +122,9 @@ qx.Class.define("gazebo.ui.BasketContainer",
       itemComposite.setLayout(new qx.ui.layout.HBox(5));
 
       var that = this;
-      var controlButton = null; 
       if (flavor != gazebo.ui.BasketContainer.EMPTY_BASKET_ITEM) {
-        controlButton = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/actions/help-about.png");
-      }
-      if (controlButton) {
+        var controlButton = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/categories/development.png");
+
         controlButton.addListener('click', function(mouseEvent) {
           var popup = new qx.ui.popup.Popup(new qx.ui.layout.VBox(5)).set({
             backgroundColor: "#EEEEEE",
@@ -171,7 +169,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
           popup.add(remove);
           popup.placeToMouse(mouseEvent);
           popup.show();
-        });
+        }, this);
         
         itemComposite.add(controlButton, { flex: 0 });
       }

@@ -33,7 +33,7 @@ qx.Theme.define("gazebo.theme.Decoration",
 
       style :
       {
-        backgroundColor : "background-pane",
+        backgroundColor : null, // Transparent background.
         innerColor : "background-pane",
         color : "border-main",
         widthTop : 0,
@@ -42,7 +42,7 @@ qx.Theme.define("gazebo.theme.Decoration",
         widthRight : 0,
         innerWidthLeft : 0,
         innerWidthRight : 0,
-        innerWidthBottom : 6
+        innerWidthBottom : 0
       }
     },
 

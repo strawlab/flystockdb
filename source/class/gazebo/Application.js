@@ -15,6 +15,10 @@
 #asset(qx/icon/Oxygen/16/actions/go-next.png)
 #asset(qx/icon/Oxygen/16/actions/go-previous.png)
 
+#asset(qx/icon/Oxygen/16/actions/list-add.png)
+
+#asset(qx/icon/Oxygen/16/categories/development.png)
+
 ************************************************************************ */
 
 qx.Class.define("gazebo.Application",

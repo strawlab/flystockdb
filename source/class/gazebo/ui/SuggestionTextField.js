@@ -26,6 +26,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.base(arguments);
 
     var searchButtonTitle = parameters['searchButtonTitle'];
+    var searchButtonIcon = parameters['searchButtonIcon'];
 
     this.rpcRunning = null;
     this.openAll = false;
@@ -37,7 +38,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     // Bugfix for qooxdoo 1.0.1 and Chrome/Safari on OSX:
     this.textField.getContentElement().setAttribute("spellcheck", "false");
 
-    this.textField.setMinWidth(400);
+    this.textField.setMinWidth(300);
     this.textField.setLiveUpdate(true);
     this.textField.addListener("input", this.generateSuggestions, this);
     this.textField.addListener("keypress", function(keyEvent) {
@@ -102,7 +103,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
     }, this);
 
-    this.searchButton = new qx.ui.form.Button(searchButtonTitle ? searchButtonTitle : 'Search');
+    if (searchButtonTitle == null) { searchButtonTitle = 'Search'; }
+    this.searchButton = new qx.ui.form.Button(searchButtonTitle.length == 0? null : searchButtonTitle, searchButtonIcon);
 
     this.searchButton.addListener('execute', function() {
       this.searchForItem(this.textField.getValue());
