@@ -16,6 +16,8 @@
 #asset(fly/transgenic.png)
 #asset(fly/transposon.png)
 
+#asset(qx/icon/Oxygen/16/actions/list-add.png)
+
 ************************************************************************ */
 
 
@@ -32,6 +34,9 @@ qx.Class.define("gazebo.fly.Contribution",
     this.inquirer = null;
     this.requestTransition = false;
     this.searchDialog = null;
+
+    this.reader = new gazebo.fly.GenotypeReader();
+    this.reader.decompose("w/w ; x/CyO");
   },
 
   members:
@@ -49,7 +54,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 20,
+          top: 130,
           populate: 11,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
@@ -102,11 +107,12 @@ qx.Class.define("gazebo.fly.Contribution",
         
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Search...',
+          title: 'Find Gene, Allele, Balancer, ...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 560,
+          top: 30,
           stripWhitespace: true,
-          searchButtonTitle: 'Add'
+          searchButtonTitle: '',
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
         },
         {
           onSearch: { call: this.searchListener, context: this },
@@ -123,11 +129,12 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Search...',
+          title: 'Find Gene, Allele, Balancer, ...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 560,
+          top: 30,
           stripWhitespace: true,
-          searchButtonTitle: 'Add'
+          searchButtonTitle: '',
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
         },
         {
           onSearch: { call: this.searchListener, context: this },
