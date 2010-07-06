@@ -9,6 +9,7 @@
 
 #asset(gazebo/decoration/window/*)
 #asset(gazebo/decoration/groupbox/*)
+#asset(gazebo/decoration/form/*)
 
 ************************************************************************ */
 

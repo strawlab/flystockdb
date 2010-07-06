@@ -75,7 +75,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
       itemContainer.setLayout(new qx.ui.layout.VBox(5));
       itemContainer.setMinWidth(130);
-      itemContainer.setMinHeight(230);
+      itemContainer.setMinHeight(280);
 
       this.add(itemContainer, { flex: 0 });
     },
@@ -125,6 +125,16 @@ qx.Class.define("gazebo.ui.BasketContainer",
       if (flavor != gazebo.ui.BasketContainer.EMPTY_BASKET_ITEM) {
         var controlButton = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/categories/development.png");
 
+        controlButton.setWidth(20);
+        controlButton.setHeight(20);
+
+        controlButton.addListener('mouseover', function(mouseEvent) {
+          this.setDecorator('button-hovered');
+        }, controlButton);
+        controlButton.addListener('mouseout', function(mouseEvent) {
+          this.setDecorator(null);
+        }, controlButton);
+
         controlButton.addListener('click', function(mouseEvent) {
           var popup = new qx.ui.popup.Popup(new qx.ui.layout.VBox(5)).set({
             backgroundColor: "#EEEEEE",
@@ -153,6 +163,17 @@ qx.Class.define("gazebo.ui.BasketContainer",
                   popup.dispose();
                 }, moveTo)
 
+                moveTo.setRich(true);
+                moveTo.graphicalModel = moveTo.getLabel();
+
+                moveTo.addListener('mouseover', function(mouseEvent) {
+                  this.setLabel("<span style='color: #5070bf;'>" + this.graphicalModel + "</span>");
+                }, moveTo);
+
+                moveTo.addListener('mouseout', function(mouseEvent) {
+                  this.setLabel(this.graphicalModel);
+                }, moveTo);
+
                 popup.add(moveTo);
               }
             }
@@ -165,6 +186,16 @@ qx.Class.define("gazebo.ui.BasketContainer",
             popup.hide();
             popup.dispose();
           }, that);
+
+          remove.setRich(true);
+
+          remove.addListener('mouseover', function(mouseEvent) {
+            this.setLabel("<span style='color: #5070bf;'>Remove</span>");
+          }, remove);
+
+          remove.addListener('mouseout', function(mouseEvent) {
+            this.setLabel("Remove");
+          }, remove);
 
           popup.add(remove);
           popup.placeToMouse(mouseEvent);
