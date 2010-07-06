@@ -36,7 +36,7 @@ qx.Class.define("gazebo.fly.Contribution",
     this.searchDialog = null;
 
     this.reader = new gazebo.fly.GenotypeReader();
-    this.reader.decompose("w/w ; x/CyO");
+    this.reader.decompose("w/w ; P(abc;def), y / z ; x/CyO");
   },
 
   members:
@@ -164,7 +164,7 @@ qx.Class.define("gazebo.fly.Contribution",
       var flybaseId = null;
 
       this.debug('Item: ' + treeItem + ' / ' + userInput);
-      
+
       if (treeItem) {
         var parameters = treeItem.model_workaround;
 
@@ -187,12 +187,30 @@ qx.Class.define("gazebo.fly.Contribution",
 
         userInput = userInput.replace(/^\s+/, "");
         userInput = userInput.replace(/\s+$/, " ")
-        
+
+        // Simple test to see whether a complete genotype might have been entered:
+        if (userInput.indexOf(' ') != -1 ||
+            userInput.indexOf(',') != -1 ||
+            userInput.indexOf(';') != -1) {
+          
+        }
+
+        var container = new qx.ui.container.Composite();
+        container.setLayout(new qx.ui.layout.HBox(5));
+
         var label;
+
+        var displayText = userInput;
+        while (qx.bom.Label.getTextSize(displayText).width > 65) {
+          displayText = displayText.substring(0, displayText.length - 2);
+        }
+        if (displayText != userInput) {
+          displayText = displayText + '...';
+        }
 
         if (flybaseId) {
           label = new qx.ui.basic.Label().set({
-            value: '<u>' + userInput + '</u>',
+            value: '<u>' + displayText + '</u>',
             rich: true
           });
 
@@ -202,15 +220,97 @@ qx.Class.define("gazebo.fly.Contribution",
               {},
               false);
           }, this);
+
+          label.graphicalModel = label.getValue();
+
+          label.addListener('mouseover', function(mouseEvent) {
+            this.setValue("<span style='color: #5070bf;'>" + this.graphicalModel + "</span>");
+          }, label);
+          
+          label.addListener('mouseout', function(mouseEvent) {
+            this.setValue(this.graphicalModel);
+          }, label);
         } else {
           label = new qx.ui.basic.Label().set({
-            value: userInput,
+            value: displayText,
             rich: true
           });
         }
 
-        this.genotypeBasket.addBasketItem(chromosome, label);
-        // this.inquirer.setBasketItem(chromosome, container);
+        label.setToolTipText(userInput);
+
+        var commaSwitch = new qx.ui.basic.Label().set({
+          value: '<b style="color: #888;">,</b>',
+          rich: true,
+          textAlign: 'center',
+          width: 22,
+          height: 18
+        });
+
+        commaSwitch.addListener('click', function(mouseEvent) {
+          if (this.getValue() == '<b style="color: #888;">,</b>') {
+            this.setValue('<b style="color: #000;">,</b>');
+          } else {
+            this.setValue('<b style="color: #888;">,</b>');
+          }
+        }, commaSwitch);
+
+        // Highlighting
+        /*
+        commaSwitch.currentlyRunningTransition = false;
+        commaSwitch.addListener('mouseover', function(mouseEvent) {
+          // Should move into 'appear', where only one instance should
+          // be used for all commaSwitch instances.
+          if (this.currentlyRunningTransition) {
+            return;
+          }
+
+          this.currentlyRunningTransition = true;
+
+          var domElement = this.getContainerElement().getDomElement();
+          var colorFlow = new qx.fx.effect.combination.ColorFlow(domElement);
+
+          var parent = this.getContainerElement().getDomElement();
+          var status = qx.util.ColorUtil.cssStringToRgb(qx.bom.element.Style.get(parent, "backgroundColor")).toString();
+
+          this.debug("X: " + qx.bom.element.Style.get(domElement, "backgroundColor"));
+          this.debug("Y: " + qx.bom.element.Style.getCss(domElement));
+
+          colorFlow.set({
+            restoreBackground  : true,
+            startColor         : "#ffffff",
+            endColor           : "#dddddd",
+            duration           : 0.3,
+            backwardTransition : "none"
+          });
+
+          colorFlow.addListener('finish', function() {
+            this.currentlyRunningTransition = false;
+            qx.bom.element.Style.reset(domElement, "backgroundColor");
+            qx.bom.element.Style.set(domElement, "backgroundColor", "rgb(0, 128, 255)");
+            this.debug("ADASDASD");
+          }, this);
+
+          colorFlow.start();
+        }, commaSwitch);
+        */
+        commaSwitch.addListener('mouseover', function(mouseEvent) {
+          this.setDecorator('button-hovered');
+        }, commaSwitch);
+        commaSwitch.addListener('mousedown', function(mouseEvent) {
+          this.setDecorator('button-pressed');
+        }, commaSwitch);
+        commaSwitch.addListener('mouseup', function(mouseEvent) {
+          this.setDecorator('button-hovered');
+        }, commaSwitch);
+        commaSwitch.addListener('mouseout', function(mouseEvent) {
+          this.setDecorator(null);
+        }, commaSwitch);
+
+        container.add(label);
+        container.add(commaSwitch);
+
+        this.genotypeBasket.addBasketItem(chromosome, container);
         
         this.inquirer.suggestScreenTransition();
       }
