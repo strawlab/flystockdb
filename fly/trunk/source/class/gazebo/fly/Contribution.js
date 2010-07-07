@@ -36,7 +36,6 @@ qx.Class.define("gazebo.fly.Contribution",
     this.searchDialog = null;
 
     this.reader = new gazebo.fly.GenotypeReader();
-    this.reader.decompose("w/w ; P(abc;def), y / z ; x/CyO");
   },
 
   members:
@@ -94,7 +93,8 @@ qx.Class.define("gazebo.fly.Contribution",
                    ]
         },
         {
-          onOpen: { call: this.basketOpenListener, context: this }
+          onOpen: { call: this.basketOpenListener, context: this },
+          onProceed: { call: this.proceedListener, context: this }
         },
         { 
           makeEmptyBasketLabel: function(index) {
@@ -115,6 +115,7 @@ qx.Class.define("gazebo.fly.Contribution",
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
         },
         {
+          onOpen: { call: this.searchDialogOpenListener, context: this },
           onSearch: { call: this.searchListener, context: this },
           onInput: { call: this.inputListener, context: this }
         },
@@ -126,27 +127,18 @@ qx.Class.define("gazebo.fly.Contribution",
     registerNextScreen : function(inquirer)
     {
       inquirer.closeScreen(inquirer.disposeSearchDialog, inquirer, {});
+    },
 
-      inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
-        {
-          title: 'Find Gene, Allele, Balancer, ...',
-          left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 30,
-          stripWhitespace: true,
-          searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
-        },
-        {
-          onSearch: { call: this.searchListener, context: this },
-          onInput: { call: this.inputListener, context: this }
-        },
-        {
-          prepareFileSuggestion: this.prepareSuggestion
-        });
+    searchDialogOpenListener : function(dataEvent) {
+      this.searchDialog = dataEvent.getData();
     },
 
     basketOpenListener : function(dataEvent) {
       this.genotypeBasket = dataEvent.getData();
+    },
+
+    proceedListener : function() {
+      this.inquirer.suggestScreenTransition();
     },
 
     searchListener : function(dataEvent)
@@ -167,15 +159,16 @@ qx.Class.define("gazebo.fly.Contribution",
 
       if (treeItem) {
         var parameters = treeItem.model_workaround;
+        var bottom = treeItem.annotation ? treeItem.annotation[0] : false;
 
         chromosomeName = parameters[3].charAt(0);
 
-        if (chromosomeName == 'X') { chromosome = 0; }
+        if (chromosomeName == 'X') { chromosome = bottom ? 6 : 0; }
         else if (chromosomeName == 'Y') { chromosome = 5; }
-        else if (chromosomeName == '2') { chromosome = 1; }
-        else if (chromosomeName == '3') { chromosome = 2; }
-        else if (chromosomeName == '4') { chromosome = 3; }
-        else { chromosomeName = 'Unknown'; }
+        else if (chromosomeName == '2') { chromosome = bottom ? 7 : 1; }
+        else if (chromosomeName == '3') { chromosome = bottom ? 8 : 2; }
+        else if (chromosomeName == '4') { chromosome = bottom ? 9 : 3; }
+        else { chromosomeName = 'Unknown'; chromosome = bottom ? 10 : 4; }
 
         if (parameters[5] && parameters[5].match("^FB.+")) {
           flybaseId = parameters[5];
@@ -185,14 +178,40 @@ qx.Class.define("gazebo.fly.Contribution",
       if (userInput.length > 0 && this.requestTransition) {
         this.requestTransition = false;
 
-        userInput = userInput.replace(/^\s+/, "");
-        userInput = userInput.replace(/\s+$/, " ")
+        userInput = userInput.replace(/^\s+|\s+$/g, "");
 
         // Simple test to see whether a complete genotype might have been entered:
-        if (userInput.indexOf(' ') != -1 ||
-            userInput.indexOf(',') != -1 ||
-            userInput.indexOf(';') != -1) {
-          
+        if (!this.reader.isAtom(userInput)) {
+          var chromosomes = this.reader.decompose(userInput);
+
+          while (chromosomes.length > 0) {
+            var chromosomeBag = chromosomes.shift();
+            bottom = false;
+
+            while (chromosomeBag.length > 0) {
+              var token = chromosomeBag.shift();
+              var comma = false;
+
+              if (token == '/') {
+                bottom = true;
+                continue;
+              }
+
+              if (chromosomeBag.length > 0 && chromosomeBag[0] == ',') {
+                chromosomeBag.shift();
+                comma = true;
+              }
+
+              if (this.reader.isAtom(token)) {
+                this.debug('TOKEN ADDED:   ' + token);
+                this.searchDialog.searchForItem(token, [bottom, comma]);
+              } else {
+                this.debug('TOKEN IGNORED: ' + token);
+              }
+            }
+          }
+
+          return;
         }
 
         var container = new qx.ui.container.Composite();
@@ -201,7 +220,7 @@ qx.Class.define("gazebo.fly.Contribution",
         var label;
 
         var displayText = userInput;
-        while (qx.bom.Label.getTextSize(displayText).width > 65) {
+        while (qx.bom.Label.getTextSize(displayText).width > 58) {
           displayText = displayText.substring(0, displayText.length - 2);
         }
         if (displayText != userInput) {
@@ -246,6 +265,10 @@ qx.Class.define("gazebo.fly.Contribution",
           width: 22,
           height: 18
         });
+
+        if (treeItem && treeItem.annotation ? treeItem.annotation[1] : false) {
+          commaSwitch.setValue('<b style="color: #000;">,</b>');
+        }
 
         commaSwitch.addListener('click', function(mouseEvent) {
           if (this.getValue() == '<b style="color: #888;">,</b>') {
@@ -312,7 +335,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
         this.genotypeBasket.addBasketItem(chromosome, container);
         
-        this.inquirer.suggestScreenTransition();
+        this.searchDialog.clear();
       }
     },
 
@@ -329,34 +352,6 @@ qx.Class.define("gazebo.fly.Contribution",
       file.addSpacer();
       file.addLabel(abstraction);
       file.addWidget(new qx.ui.core.Spacer(), {flex: 1});
-
-      /* Debugging code:
-      for (j = 2; j < parameters.length; j++) {
-        var customAnnotation = parameters[j];
-
-        if (customAnnotation == '') {customAnnotation = '-';}
-
-        if (j == 2 && customAnnotation == 'gene') {
-          file.setIcon('fly/gene.png');
-        } else if (j == 2 && customAnnotation == 'single balancer') {
-          file.setIcon('fly/balancer.png');
-        } else if (j == 2 && customAnnotation == 'transgenic_transposon') {
-          file.setIcon('fly/transgenic.png');
-        } else if (j == 2 && customAnnotation == 'natural_transposable_element') {
-          file.setIcon('fly/transposon.png');
-        }
-
-        if (j > 2) {
-          file.addWidget(new qx.ui.basic.Label(
-            ",&nbsp;"
-          ).set({appearance: "annotation", rich: true}));
-        }
-        file.addWidget(
-          new qx.ui.basic.Label(
-            customAnnotation
-          ).set({appearance: "annotation", rich: true}));
-      }
-      */
 
       if (parameters[2] == 'gene') {
         file.setIcon('fly/gene.png');

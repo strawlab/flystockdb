@@ -21,6 +21,20 @@ qx.Class.define("gazebo.fly.GenotypeReader",
 
   members:
   {
+    isAtom : function(string) {
+      var decomposition = this.decompose(string);
+
+      if (decomposition.length == 1) {
+        var chromosomeBag = decomposition.shift();
+
+        if (chromosomeBag.length == 1) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+
     symmetricBrackets : function(string) {
       var stack = new Array();
 
@@ -63,8 +77,6 @@ qx.Class.define("gazebo.fly.GenotypeReader",
       var chromosomes = genotype.split(';');
       var mendedChromosomes = new Array();
 
-      this.debug('Matches: ' + chromosomes);
-
       for (var i = 0; i < chromosomes.length; i++) {
         var chromosome = chromosomes[i];
 
@@ -82,7 +94,6 @@ qx.Class.define("gazebo.fly.GenotypeReader",
         mendedChromosomes.push(chromosome);
       }
 
-      this.debug('Mended Chromosomes: ' + mendedChromosomes);
       chromosomes = mendedChromosomes;
 
       for (i = 0; i < chromosomes.length; i++) {
@@ -91,15 +102,16 @@ qx.Class.define("gazebo.fly.GenotypeReader",
         chromosome = chromosomes[i];
 
         // Isolate '/' and ',', so we split on them too (due to the spaces)
-        chromosome = chromosome.replace(/\//, ' / ');
-        chromosome = chromosome.replace(/,/, ' , ');
+        chromosome = chromosome.replace(/\//g, ' / ');
+        chromosome = chromosome.replace(/,/g, ' , ');
 
+        this.debug("CHROMOSOME: " + chromosome);
         // Tokens are symbols and names.
-        var tokens = chromosome.split(/\s|,/);
+        var tokens = chromosome.split(/\s/);
 
         this.debug('Split ' + chromosome + ' into ' + tokens);
         for (var j = 0; j < tokens.length; j++) {
-          var token = tokens[j].replace(/^\s/, '').replace(/\s$/, '');
+          var token = tokens[j].replace(/^\s+|\s+$/g, '');
 
           if (token.length == 0) {
             continue;
@@ -108,7 +120,7 @@ qx.Class.define("gazebo.fly.GenotypeReader",
           if (!this.symmetricBrackets(token)) {
             // More black magic. Still old skool.
             for (j++; j < tokens.length; j++) {
-              token = token + ' ' + tokens[j].replace(/^\s/, '').replace(/\s$/, '');
+              token = token + ' ' + tokens[j].replace(/^\s+|\s+$/g, '');
 
               if (this.symmetricBrackets(token)) {
                 break;
