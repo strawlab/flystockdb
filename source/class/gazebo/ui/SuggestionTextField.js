@@ -44,6 +44,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.textField.addListener("keypress", function(keyEvent) {
         if (keyEvent.getKeyIdentifier() == 'Down' ||
             keyEvent.getKeyIdentifier() == 'PageDown') {
+          if (!this.suggestionTree) { return; }
+
           if (this.suggestionTree.isSelectionEmpty()) {
             var rootNode = this.suggestionTree.getRoot();
             if (rootNode.hasChildren()) {
@@ -59,49 +61,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         }
     }, this);
 
-    this.suggestionTree = new qx.ui.tree.Tree();
-    this.suggestionTree.setHeight(0); // Pretend we do not exist.
-    this.suggestionTree.setHideRoot(true);
-    this.suggestionTree.hide();
-    this.suggestionTree.setOpacity(0);
-    this.suggestionTree.addListener("appear", function() {
-        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
-        animation.set({
-          from : 0.0,
-          to : 1.0,
-          duration : 0.8
-         });
-        animation.start();
-      }, this);
-    // Fading out does not seem to work.
-//    this.suggestionTree.addListener("disappear", function() {
-//        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
-//        animation.set({
-//          from : 1.0,
-//          to : 0.0,
-//          duration : 0.8
-//         });
-//        animation.start();
-//      }, this);
-
-    this.treeRoot = new qx.ui.tree.TreeFolder("Root");
-    this.treeRoot.setOpen(true);
-    this.suggestionTree.setRoot(this.treeRoot);
-
-    this.suggestionTree.addListener('dblclick', function() {
-      var selection = this.suggestionTree.getSelection();
-
-      if (selection &&
-          selection.length == 1 &&
-          !selection[0].getLabel().match(/\.\.\./)) {
-            this.submitListener();
-          }
-    }, this);
-    this.suggestionTree.addListener('keypress', function(keyEvent) {
-      if (keyEvent.getKeyIdentifier() == 'Enter') {
-        this.submitListener();
-      }
-    }, this);
+    this.suggestionTree = null;
 
     if (searchButtonTitle == null) { searchButtonTitle = 'Search'; }
     this.searchButton = new qx.ui.form.Button(searchButtonTitle.length == 0? null : searchButtonTitle, searchButtonIcon);
@@ -111,7 +71,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     }, this);
 
     this.add(this.textField, { row: 0, column: 0 });
-    this.add(this.suggestionTree, { row: 1, column: 0 });
     this.add(this.searchButton, { row: 0, column: 1 });
 
     // Install custom listeners:
@@ -137,6 +96,66 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
   members :
   {
+    makeSuggestionTree : function() {
+      this.suggestionTree = new qx.ui.tree.Tree();
+      this.suggestionTree.setHeight(0); // Pretend we do not exist.
+      this.suggestionTree.setHideRoot(true);
+      this.suggestionTree.hide();
+      this.suggestionTree.setOpacity(0);
+      this.suggestionTree.addListener("appear", function() {
+          animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
+          animation.set({
+            from : 0.0,
+            to : 1.0,
+            duration : 0.8
+           });
+          animation.start();
+      }, this);
+      // Fading out does not seem to work.
+      //    this.suggestionTree.addListener("disappear", function() {
+      //        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
+      //        animation.set({
+      //          from : 1.0,
+      //          to : 0.0,
+      //          duration : 0.8
+      //         });
+      //        animation.start();
+      //      }, this);
+
+      this.treeRoot = new qx.ui.tree.TreeFolder("Root");
+      this.treeRoot.setOpen(true);
+      this.suggestionTree.setRoot(this.treeRoot);
+
+      this.suggestionTree.addListener('dblclick', function() {
+        var selection = this.suggestionTree.getSelection();
+
+        if (selection &&
+            selection.length == 1 &&
+            !selection[0].getLabel().match(/\.\.\./)) {
+              this.submitListener();
+            }
+      }, this);
+      this.suggestionTree.addListener('keypress', function(keyEvent) {
+        if (keyEvent.getKeyIdentifier() == 'Enter') {
+          this.submitListener();
+        }
+      }, this);
+
+      this.add(this.suggestionTree, { row: 1, column: 0 });
+    },
+
+    clear : function() {
+      this.textField.setValue("");
+      this.generateSuggestions(new qx.event.type.Data().init(""));
+
+      if (this.suggestionTree) {
+        this.suggestionTree.destroy();
+        this.suggestionTree = null;
+      }
+
+      this.focus();
+    },
+
     submitListener : function() {
       var selection = this.suggestionTree.getSelection();
 
@@ -209,10 +228,19 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       var textValue = dataEvent.getData();
 
       if (!textValue || textValue.length == 0) {
-        this.suggestionTree.hide();
-        this.suggestionTree.setOpacity(0);
-        this.treeRoot.removeAll();
+        //this.suggestionTree.hide();
+        //this.suggestionTree.setOpacity(0);
+        if (this.suggestionTree) {
+          this.suggestionTree.destroy();
+          this.suggestionTree = null;
+        }
+
+        //this.treeRoot.removeAll();
         return;
+      }
+      
+      if (!this.suggestionTree) {
+        this.makeSuggestionTree();
       }
 
       // Remove whitespace?
@@ -297,6 +325,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               that.treeRoot.add(file);
             }
 
+            if (!that.suggestionTree) {
+              that.makeSuggestionTree();
+            }
+
             that.suggestionTree.setMinHeight(303);
             that.suggestionTree.show();
             
@@ -308,7 +340,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         },
         "query",
         options,
-        "fb2010_03",
+        "FB2010_05",
         [ "*" ],
         [ "x_searchables_" + ( textValue.length - 1 ) ],
         "searchable ilike ?",
@@ -386,7 +418,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           },
           "query",
           {},
-          "fb2010_03",
+          "FB2010_05",
           [ "*" ],
           [ "x_fast_transitions" ],
           "abstraction == ? ORDER BY concretisation ASC",
@@ -395,7 +427,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
     },
 
-    searchForItem : function(label)
+    searchForItem : function(label, annotation)
     {
       var rpc = new qx.io.remote.Rpc();
       rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
@@ -408,15 +440,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
       // Remove whitespace?
       label = this.stripWhitespace?label.replace(/^\s+|\s+$/g, ""):label;
-
-      this.debug('Searching for <' + label + '>');
       
       var that = this;
       this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
         {
           that.debug('Result: ' + result);
-          if (that.rpcRunning && that.rpcRunning.getSequenceNumber() == id) {
+          if (that.rpcRunning) { // && that.rpcRunning.getSequenceNumber() == id) {
 
             // No result returned.
             if (!result || result.length == 0) {
@@ -427,12 +457,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             that.debug('searchForItem: ' + result);
             var treeItem = new qx.ui.tree.TreeFile();
             treeItem.model_workaround = result[0];
+            treeItem.annotation = annotation;
             that.fireDataEvent("searchRelay", treeItem, result[0][0]);
           }
         },
         "query",
         { limit: 1 },
-        "fb2010_03",
+        "FB2010_05",
         [ "*" ],
         [ "x_searchables_" + ( label.length - 1 ) ],
         "searchable like ?", // TODO: Figure out why = is not working.

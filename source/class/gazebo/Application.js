@@ -232,6 +232,12 @@ qx.Class.define("gazebo.Application",
 
       this.searchWindow.open();
       this.getRoot().add(this.searchWindow);
+
+      if (listeners['onOpen']) {
+        listener = listeners['onOpen'];
+        this.addListener('openSearchDialogRelay', listener['call'], listener['context']);
+      }
+      this.fireDataEvent('openSearchDialogRelay', searchDialog);
     },
 
     disposeSearchDialog : function()
@@ -267,12 +273,16 @@ qx.Class.define("gazebo.Application",
       this.basketWindow.open();
       this.getRoot().add(this.basketWindow);
 
+      if (listeners['onProceed']) {
+        listener = listeners['onProceed'];
+        proceedButton.addListener('click', listener['call'], listener['context']);
+      }
 
       if (listeners['onOpen']) {
         listener = listeners['onOpen'];
-        this.addListener('openRelay', listener['call'], listener['context']);
+        this.addListener('openBasketRelay', listener['call'], listener['context']);
       }
-      this.fireDataEvent('openRelay', this.basketContainer);
+      this.fireDataEvent('openBasketRelay', this.basketContainer);
     },
 
     setBasketItem : function(index, item)
