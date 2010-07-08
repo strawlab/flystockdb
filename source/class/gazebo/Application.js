@@ -292,7 +292,53 @@ qx.Class.define("gazebo.Application",
 
     disposeBasket : function()
     {
-      // ...
+      this.basketWindow.close();
+      this.basketWindow.destroy();
+    },
+
+    generateForm : function()
+    {
+
+    },
+
+    disposeForm : function()
+    {
+
+    },
+
+    generateCustomInterface : function(parameters, listeners, overrides)
+    {
+      var customContainer = parameters['contents'];
+
+      var title = parameters['title'];
+      var left = parameters['left'];
+      var top = parameters['top'];
+
+      this.customWindow = new qx.ui.window.Window(title ? title : "Title");
+      this.customWindow.setLayout(new qx.ui.layout.HBox(5));
+      this.customWindow.setResizable(false, false, false, false);
+			this.customWindow.setMovable(false);
+			this.customWindow.setShowClose(false);
+			this.customWindow.setShowMaximize(false);
+			this.customWindow.setShowMinimize(false);
+
+      this.customWindow.addListener("resize", this.getPositioningFunction(left, top), this.customWindow);
+
+      this.customWindow.add(customContainer);
+
+      this.customWindow.open();
+      this.getRoot().add(this.customWindow);
+
+      if (listeners['onOpen']) {
+        listener = listeners['onOpen'];
+        this.addListener('openCustomRelay', listener['call'], listener['context']);
+      }
+      this.fireDataEvent('openCustomRelay', null);
+    },
+
+    disposeCustomInterface : function()
+    {
+
     },
 
 		generateDatabaseInterface : function()
