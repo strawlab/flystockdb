@@ -54,6 +54,7 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 130,
+          canProceedWithEmptyBasket: false,
           populate: 11,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
@@ -96,7 +97,7 @@ qx.Class.define("gazebo.fly.Contribution",
           onOpen: { call: this.basketOpenListener, context: this },
           onProceed: { call: this.proceedListener, context: this }
         },
-        { 
+        {
           makeEmptyBasketLabel: function(index) {
             return new qx.ui.basic.Label().set({
               value: '+',
@@ -127,6 +128,21 @@ qx.Class.define("gazebo.fly.Contribution",
     registerNextScreen : function(inquirer)
     {
       inquirer.closeScreen(inquirer.disposeSearchDialog, inquirer, {});
+      inquirer.closeScreen(inquirer.disposeBasket, inquirer, {});
+
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Genotype',
+          left : inquirer.LEFT_SO_THAT_CENTERED,
+          top: 30,
+          contents: new gazebo.fly.GenotypeViewer()
+        },
+        {
+
+        },
+        {
+
+        });
     },
 
     searchDialogOpenListener : function(dataEvent) {
