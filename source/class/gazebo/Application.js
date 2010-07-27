@@ -333,7 +333,7 @@ qx.Class.define("gazebo.Application",
         listener = listeners['onOpen'];
         this.addListener('openCustomRelay', listener['call'], listener['context']);
       }
-      this.fireDataEvent('openCustomRelay', null);
+      this.fireDataEvent('openCustomRelay', customContainer);
     },
 
     disposeCustomInterface : function()

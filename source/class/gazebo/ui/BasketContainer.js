@@ -80,11 +80,24 @@ qx.Class.define("gazebo.ui.BasketContainer",
       this.add(itemContainer, { flex: 0 });
     },
 
-    getBasketItem : function(index)
+    getBasketItems : function(index)
     {
       var baskets = this.getChildren();
+      var itemContainer = baskets[index];
+      var items = new Array();
+      
+      var contents = itemContainer.getChildren();
 
-      return baskets[index].getChildren();
+      if (!contents) {
+        return items;
+      }
+
+      for (var i = 0; i < contents.length; i++) {
+        this.debug("ITEM: " + i + " " + contents[i] + " - " + contents[i].itemReference);
+        items.push(contents[i].itemReference);
+      }
+
+      return items;
     },
 
     setBasketItem : function(index, item)
@@ -119,6 +132,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
       
       var itemComposite = new qx.ui.container.Composite();
       itemComposite.itemFlavor = flavor;
+      itemComposite.itemReference = item;
       itemComposite.setLayout(new qx.ui.layout.HBox(5));
 
       var that = this;

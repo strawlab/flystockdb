@@ -31,7 +31,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.rpcRunning = null;
     this.openAll = false;
 
-    this.setLayout(new qx.ui.layout.Grid(5, 0));
+    var layout = new qx.ui.layout.Grid(5,0);
+    this.setLayout(layout);
     
     this.textField = new qx.ui.form.TextField();
 
@@ -70,8 +71,23 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       this.searchForItem(this.textField.getValue());
     }, this);
 
+    layout.setRowAlign(0, "center", "middle");
     this.add(this.textField, { row: 0, column: 0 });
-    this.add(this.searchButton, { row: 0, column: 1 });
+
+    var helpAtom = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/actions/help-about.png");
+
+    helpAtom.setWidth(20);
+    helpAtom.setHeight(20);
+
+    helpAtom.addListener('mouseover', function(mouseEvent) {
+      this.setDecorator('button-hovered');
+    }, helpAtom);
+    helpAtom.addListener('mouseout', function(mouseEvent) {
+      this.setDecorator(null);
+    }, helpAtom);
+        
+    this.add(helpAtom, { row: 0, column: 1 });
+    this.add(this.searchButton, { row: 0, column: 3 });
 
     // Install custom listeners:
     var listener;
