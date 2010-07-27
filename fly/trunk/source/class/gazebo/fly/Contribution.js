@@ -138,11 +138,47 @@ qx.Class.define("gazebo.fly.Contribution",
           contents: new gazebo.fly.GenotypeViewer()
         },
         {
-
+          onOpen: { call: this.genotypeViewerOpenListener, context: this }
         },
         {
 
         });
+    },
+
+    genotypeViewerOpenListener : function(dataEvent) {
+      var chromosomes = new Array();
+
+      chromosomes.push(this.genotypeBasket.getBasketItems(0));
+      chromosomes.push(this.genotypeBasket.getBasketItems(1));
+      chromosomes.push(this.genotypeBasket.getBasketItems(2));
+      chromosomes.push(this.genotypeBasket.getBasketItems(3));
+      chromosomes.push(this.genotypeBasket.getBasketItems(4));
+      chromosomes.push(this.genotypeBasket.getBasketItems(5));
+      chromosomes.push(this.genotypeBasket.getBasketItems(6));
+      chromosomes.push(this.genotypeBasket.getBasketItems(7));
+      chromosomes.push(this.genotypeBasket.getBasketItems(8));
+      chromosomes.push(this.genotypeBasket.getBasketItems(9));
+      chromosomes.push(this.genotypeBasket.getBasketItems(10));
+
+      this.genotypeViewer = dataEvent.getData();
+
+      for (var chromosome = 0; chromosome < chromosomes.length; chromosome++) {
+        var bottom = chromosome < 6 ? false : true;
+        var chromosomeBox = chromosome % 6;
+
+        if (chromosomes[chromosome][0].getChildren) {
+          this.debug("YY");
+          for (var i = 0; i < chromosomes[chromosome].length; i++) {
+            var items = chromosomes[chromosome][i].getChildren();
+
+            for (var j = 0; j < items.length; j++) {
+              this.genotypeViewer.addChromosomeItem(chromosomeBox, bottom, items[j]);
+            }
+          }
+        } else {
+          this.genotypeViewer.addChromosomeItem(chromosomeBox, bottom, new qx.ui.basic.Label('+'));
+        }
+      }
     },
 
     searchDialogOpenListener : function(dataEvent) {

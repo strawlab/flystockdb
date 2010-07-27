@@ -36,9 +36,9 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
       height: 86
     });
 
-    var container = new qx.ui.container.Composite();
+    this.container = new qx.ui.container.Composite();
 
-    container.setLayout(new qx.ui.layout.HBox(2).set({ alignX: "center" }));
+    this.container.setLayout(new qx.ui.layout.HBox(2).set({ alignX: "center" }));
 
     for (var i = 0; i < 6; i++) {
       var chromosome = new qx.ui.groupbox.GroupBox(gazebo.fly.GenotypeViewer.chromosomeTitles[i]);
@@ -49,22 +49,45 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
         chromosome.getChildrenContainer().setDecorator('group-dark');
       }
 
-      chromosome.add(new qx.ui.basic.Label('+'));
+      var topContainer = new qx.ui.container.Composite();
+      var bottomContainer = new qx.ui.container.Composite();
 
-      var separator = new qx.ui.menu.Separator();
-      separator.setDecorator('separator-vertical');
-      chromosome.add(separator);
+      topContainer.setLayout(new qx.ui.layout.HBox(2).set({ alignX: "center" }));
+      bottomContainer.setLayout(new qx.ui.layout.HBox(2).set({ alignX: "center" }));
 
-      chromosome.add(new qx.ui.basic.Label('+'));
+      //topContainer.add(new qx.ui.basic.Label('+'));
+      chromosome.add(topContainer);
 
-      container.add(chromosome);
+      // Add separator and second chromosome for X, 2, 3, 4, U
+      if (i < 5) {
+        var separator = new qx.ui.menu.Separator();
+        separator.setDecorator('separator-vertical');
+        chromosome.add(separator);
+
+        //bottomContainer.add(new qx.ui.basic.Label('+'));
+        chromosome.add(bottomContainer);
+      }
+
+      this.container.add(chromosome);
     }
 
-    this.add(container);
+    this.add(this.container);
   },
 
   members:
   {
+    addChromosomeItem : function(index, bottom, item) {
+      var chromosomes = this.container.getChildren();
 
+      //item.setLayout(new qx.ui.layout.HBox(5));
+
+      var items = chromosomes[index].getChildren();
+
+      if (bottom) {
+        items[2].add(item);
+      } else {
+        items[0].add(item);
+      }
+    }
   }
 });
