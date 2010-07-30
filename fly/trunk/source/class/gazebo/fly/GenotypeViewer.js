@@ -79,8 +79,6 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
     addChromosomeItem : function(index, bottom, item) {
       var chromosomes = this.container.getChildren();
 
-      //item.setLayout(new qx.ui.layout.HBox(5));
-
       var items = chromosomes[index].getChildren();
 
       if (bottom) {

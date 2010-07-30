@@ -99,10 +99,14 @@ qx.Class.define("gazebo.fly.Contribution",
         },
         {
           makeEmptyBasketLabel: function(index) {
-            return new qx.ui.basic.Label().set({
+            var container = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+            container.add(
+            new qx.ui.basic.Label().set({
               value: '+',
               rich: true
-            });
+            })
+            );
+            return container;
           }
         });
         
@@ -166,17 +170,24 @@ qx.Class.define("gazebo.fly.Contribution",
         var bottom = chromosome < 6 ? false : true;
         var chromosomeBox = chromosome % 6;
 
-        if (chromosomes[chromosome][0].getChildren) {
-          this.debug("YY");
-          for (var i = 0; i < chromosomes[chromosome].length; i++) {
-            var items = chromosomes[chromosome][i].getChildren();
+        for (var i = 0; i < chromosomes[chromosome].length; i++) {
+          var items = chromosomes[chromosome][i].getChildren();
 
-            for (var j = 0; j < items.length; j++) {
-              this.genotypeViewer.addChromosomeItem(chromosomeBox, bottom, items[j]);
+          while (items.length) {
+            var item = items[0];
+
+            chromosomes[chromosome][i].remove(item);
+
+            if (item.isCommaSwitch) {
+              if (item.isSwitchedOn) {
+                item = new qx.ui.basic.Label(',');
+              } else {
+                item = new qx.ui.basic.Label(' ');
+              }
             }
+
+            this.genotypeViewer.addChromosomeItem(chromosomeBox, bottom, item);
           }
-        } else {
-          this.genotypeViewer.addChromosomeItem(chromosomeBox, bottom, new qx.ui.basic.Label('+'));
         }
       }
     },
@@ -318,15 +329,21 @@ qx.Class.define("gazebo.fly.Contribution",
           height: 18
         });
 
+        commaSwitch.isCommaSwitch = true;
+        commaSwitch.isSwitchedOn = false;
+
         if (treeItem && treeItem.annotation ? treeItem.annotation[1] : false) {
           commaSwitch.setValue('<b style="color: #000;">,</b>');
+          commaSwitch.isSwitchedOn = true;
         }
 
         commaSwitch.addListener('click', function(mouseEvent) {
           if (this.getValue() == '<b style="color: #888;">,</b>') {
             this.setValue('<b style="color: #000;">,</b>');
+            commaSwitch.isSwitchedOn = true;
           } else {
             this.setValue('<b style="color: #888;">,</b>');
+            commaSwitch.isSwitchedOn = false;
           }
         }, commaSwitch);
 
