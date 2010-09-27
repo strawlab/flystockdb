@@ -142,37 +142,14 @@ qx.Class.define("gazebo.Application",
       };
     },
 
-		generateAuthenticationDialog : function()
+		generateConnectionDialog : function(parameters, listeners, overrides)
 		{
-			var authenticationDialog = new gazebo.ui.ConnectionDialog(false, true);
-			authenticationDialog.addListener("connect", this.establishConnection, this);
+      var title = parameters['title'];
 
-			this.authenticationWindow = new qx.ui.window.Window("Authentication");
-			this.authenticationWindow.setLayout(new qx.ui.layout.HBox(10));
-			this.authenticationWindow.add(authenticationDialog);
-			this.authenticationWindow.setResizable(false, false, false, false);
-			this.authenticationWindow.setMovable(false);
-			this.authenticationWindow.setShowClose(false);
-			this.authenticationWindow.setShowMaximize(false);
-			this.authenticationWindow.setShowMinimize(false);
-
-			this.authenticationWindow.addListener("resize", this.authenticationWindow.center, this.authenticationWindow);
-
-			this.authenticationWindow.open();
-      this.getRoot().add(this.authenticationWindow);
-		},
-
-    disposeAuthenticationDialog : function()
-    {
-      this.authenticationWindow.close();
-    },
-
-		generateConnectionDialog : function()
-		{
-			var connectionDialog = new gazebo.ui.ConnectionDialog(true, false);
+			var connectionDialog = new gazebo.ui.ConnectionDialog(parameters, listeners, overrides);
 			connectionDialog.addListener("connect", this.establishConnection, this);
 
-			this.connectionWindow = new qx.ui.window.Window("Database Connection");
+			this.connectionWindow = new qx.ui.window.Window(title ? title :"Database Connection");
 			this.connectionWindow.setLayout(new qx.ui.layout.HBox(10));
 			this.connectionWindow.add(connectionDialog);
 			this.connectionWindow.setResizable(false, false, false, false);

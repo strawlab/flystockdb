@@ -28,11 +28,14 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
    * @param queryMachineSettings {Boolean} Show host and port?
    * @param passwordRequired {Boolean} Is a password required?
    */
-  construct : function(queryMachineSettings, passwordRequired)
+  construct : function(parameters, listeners, overrides)
   {
     this.base(arguments);
 		this.setLayout(new qx.ui.layout.HBox(5));
-		
+
+    var queryMachineSettings = parameters['queryMachineSettings'];
+    var passwordRequired = parameters['passwordRequired'];
+
 		var form = new qx.ui.form.Form();
 		
 		if (queryMachineSettings) {
@@ -46,25 +49,25 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 
 			form.addGroupHeader("Authentication");
 		}
-		var username = new qx.ui.form.TextField();
-		username.setRequired(true);
-		form.add(username, "Username",  function(text) {
+		this.username = new qx.ui.form.TextField();
+		this.username.setRequired(true);
+		form.add(this.username, "Username",  function(text) {
       if (text == null) { return false; }
       var reg = /^[A-Za-z0-9_\-\.]+$/;
       return reg.test(text);
     });
-    username.setInvalidMessage("Please enter a valid username.");
-		var password = new qx.ui.form.PasswordField();
+    this.username.setInvalidMessage("Please enter a valid username.");
+		this.password = new qx.ui.form.PasswordField();
     if (passwordRequired) {
-      password.setRequired(true);
+      this.password.setRequired(true);
     } else {
-      password.setRequired(false);
+      this.password.setRequired(false);
     }
-    form.add(password, "Password", function(text) {
+    form.add(this.password, "Password", function(text) {
       if (text == null || text.length == 0) { return false; }
       return true;
     });
-    password.setInvalidMessage("Please enter your password.");
+    this.password.setInvalidMessage("Please enter your password.");
 				
 		var connectButton = new qx.ui.form.Button("Connect");
 		connectButton.addListener("execute", function() {
@@ -88,8 +91,12 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
             }
 					},
 					"connect",
-          username.getValue(),
-					gazebo.support.ChrisVenessSHA1.sha1Hash(password.getValue())
+          {},
+          this.host ? this.host.getValue() : '',
+          this.port ? this.port.getValue() : '',
+          this.username.getValue(),
+					gazebo.support.ChrisVenessSHA1.sha1Hash(this.password.getValue()),
+          '' // TODO Database name..
 				);
 			}
 		}, this);
