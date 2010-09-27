@@ -29,6 +29,16 @@ qx.Class.define("gazebo.fly.Contribution",
   extend : qx.core.Object,
   implement : [ gazebo.IDelegator ],
 
+  statics :
+  {
+    UI_LOGIN : 0,
+    UI_DASHBOARD : 1,
+    UI_STOCKLIST : 2,
+    UI_GENOTYPE_SEARCH : 3,
+    UI_GENOTYPE_ENTRY : 4,
+    UI_METADATA_ENTRY : 5
+  },
+
   construct : function() 
   {
     this.inquirer = null;
@@ -40,6 +50,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
   members:
   {
+    uiState : this.UI_DASHBOARD,
+
     registerContributionName : function()
     {
       return "Fly Stock";
@@ -48,6 +60,35 @@ qx.Class.define("gazebo.fly.Contribution",
     registerInitialScreen : function(inquirer)
     {
       this.inquirer = inquirer;
+
+      //this.generateStockListUI(inquirer);
+      //return;
+
+      this.generateLoginUI(inquirer);
+
+    },
+
+    registerNextScreen : function(inquirer)
+    {
+      inquirer.closeScreen(inquirer.disposeSearchDialog, inquirer, {});
+      inquirer.closeScreen(inquirer.disposeBasket, inquirer, {});
+
+      this.generateMetaDataUI(inquirer);
+    },
+
+    generateLoginUI : function(inquirer) {
+
+      inquirer.openScreen(inquirer.generateConnectionDialog, inquirer,
+        {
+          title: 'Login',
+          passwordRequired: true
+        },
+        {},
+        {});
+
+    },
+
+    generateGenotypeInputUI : function(inquirer) {
 
       inquirer.openScreen(inquirer.generateBasket, inquirer,
         {
@@ -109,7 +150,7 @@ qx.Class.define("gazebo.fly.Contribution",
             return container;
           }
         });
-        
+
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
           title: 'Find Gene, Allele, Balancer, ...',
@@ -127,13 +168,25 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           prepareFileSuggestion: this.prepareSuggestion
         });
+
     },
 
-    registerNextScreen : function(inquirer)
-    {
-      inquirer.closeScreen(inquirer.disposeSearchDialog, inquirer, {});
-      inquirer.closeScreen(inquirer.disposeBasket, inquirer, {});
+    generateStockListUI : function(inquirer) {
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Stocks',
+          left : inquirer.LEFT_SO_THAT_CENTERED,
+          top: 30,
+          contents: new gazebo.fly.StockListViewer()
+        },
+        {
+        },
+        {
 
+        });
+    },
+
+    generateMetaDataUI : function(inquirer) {
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
           title: 'Genotype',
