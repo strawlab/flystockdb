@@ -36,6 +36,11 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
     var queryMachineSettings = parameters['queryMachineSettings'];
     var passwordRequired = parameters['passwordRequired'];
 
+    if (listeners['onConnect']) {
+      listener = listeners['onConnect'];
+      this.addListener('onConnectRelay', listener['call'], listener['context']);
+    }
+
 		var form = new qx.ui.form.Form();
 		
 		if (queryMachineSettings) {
@@ -84,7 +89,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
             if (that.RpcRunning) {
               that.RpcRunning = null;
               if (ex == null) {
-                that.fireEvent("connect", qx.event.type.Data, [ "def" ]);
+                that.fireDataEvent("onConnectRelay", result);
               } else {
                 alert("Async(" + id + ") exception: " + ex);
               }
@@ -95,8 +100,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
           this.host ? this.host.getValue() : '',
           this.port ? this.port.getValue() : '',
           this.username.getValue(),
-					gazebo.support.ChrisVenessSHA1.sha1Hash(this.password.getValue()),
-          '' // TODO Database name..
+					gazebo.support.ChrisVenessSHA1.sha1Hash(this.password.getValue())
 				);
 			}
 		}, this);

@@ -142,6 +142,45 @@ qx.Class.define("gazebo.Application",
       };
     },
 
+    generateAuthenticationDispatcher : function(parameters, listeners, overrides)
+    {
+      if (listeners['onAuthenticationSuccess']) {
+        listener = listeners['onAuthenticationSuccess'];
+        this.addListener('onAuthenticationSuccessRelay', listener['call'], listener['context']);
+      }
+      if (listeners['onAuthenticationFailure']) {
+        listener = listeners['onAuthenticationFailure'];
+        this.addListener('onAuthenticationFailure', listener['call'], listener['context']);
+      }
+
+      // TODO
+      var rpc = new qx.io.remote.Rpc();
+				rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+				rpc.setUrl(gazebo.Application.getServerURL());
+				rpc.setServiceName("gazebo.cgi");
+
+				var that = this;
+				this.RpcRunning = rpc.callAsync(
+					function(result, ex, id)
+					{
+            if (that.RpcRunning) {
+              that.RpcRunning = null;
+              if (ex == null) {
+                that.fireDataEvent("onAuthenticationSuccess", result);
+              } else {
+                that.fireDataEvent("onAuthenticationFailure", result);
+              }
+            }
+					},
+					"connect", // TODO: dummy authentication request?
+          {},
+          this.host ? this.host.getValue() : '',
+          this.port ? this.port.getValue() : '',
+          this.username.getValue(),
+					gazebo.support.ChrisVenessSHA1.sha1Hash(this.password.getValue())
+				);
+    },
+
 		generateConnectionDialog : function(parameters, listeners, overrides)
 		{
       var title = parameters['title'];
@@ -170,7 +209,7 @@ qx.Class.define("gazebo.Application",
     },
 
     // Only for testing purposes, yet.
-    generateLogo : function(parameters, listeners)
+    generateLogo : function(parameters, listeners, overrides)
     {
       this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
     },
