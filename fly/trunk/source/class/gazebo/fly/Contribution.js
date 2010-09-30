@@ -31,12 +31,14 @@ qx.Class.define("gazebo.fly.Contribution",
 
   statics :
   {
-    UI_LOGIN : 0,
-    UI_DASHBOARD : 1,
-    UI_STOCKLIST : 2,
-    UI_GENOTYPE_SEARCH : 3,
-    UI_GENOTYPE_ENTRY : 4,
-    UI_METADATA_ENTRY : 5
+    UI_BLANK : 0,
+    UI_LOGIN : 1,
+    UI_DASHBOARD : 2,
+    UI_STOCKLIST : 3,
+    UI_GENOTYPE_SEARCH : 4,
+    UI_GENOTYPE_ENTRY : 5,
+    UI_METADATA_ENTRY : 6,
+    UI_LOGOUT : 7
   },
 
   construct : function()
@@ -50,8 +52,6 @@ qx.Class.define("gazebo.fly.Contribution",
 
   members:
   {
-    uiState : this.UI_DASHBOARD,
-
     registerContributionName : function()
     {
       return "Fly-Stock Database";
@@ -61,25 +61,40 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       this.inquirer = inquirer;
 
-      //this.generateStockListUI(inquirer);
-      //return;
+      this.uiState = gazebo.fly.Contribution.UI_BLANK;
 
-      this.generateLoginUI(inquirer);
-      this.uiState = this.UI_LOGIN;
+      this.generateDispatcher(inquirer);
     },
 
     registerNextScreen : function(inquirer)
     {
       switch(this.uiState) {
-      case this.UI_LOGIN:
-        inquirer.closeScreen(inquirer.disposeConnectionDialog, inquirer, {});
+      case gazebo.fly.Contribution.UI_BLANK:
+        break;
+      case gazebo.fly.Contribution.UI_LOGIN:
+        //inquirer.closeScreen(inquirer.disposeConnectionDialog, inquirer, {});
         break;
       }
 
+      //this.generateLoginUI(inquirer);
       //inquirer.closeScreen(inquirer.disposeSearchDialog, inquirer, {});
       //inquirer.closeScreen(inquirer.disposeBasket, inquirer, {});
 
-      this.generateMetaDataUI(inquirer);
+      //this.generateMetaDataUI(inquirer);
+    },
+
+    generateDispatcher : function(inquirer) {
+
+      inquirer.openScreen(inquirer.generateAuthenticationDispatcher, inquirer,
+        {
+        },
+        {
+          'onAuthenticationSuccess': { call: this.dispatchListener, context: this },
+          'onAuthenticationFailure': { call: this.dispatchListener, context: this }
+        },
+        {
+        });
+
     },
 
     generateLoginUI : function(inquirer) {
@@ -93,6 +108,28 @@ qx.Class.define("gazebo.fly.Contribution",
           'onConnect': { call: this.loginListener, context: this }
         },
         {});
+
+    },
+
+    generateDashboardUI : function(inquirer) {
+
+      inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
+        {
+          title: 'Quick Search',
+          left: inquirer.LEFT_SO_THAT_CENTERED,
+          top: 30,
+          stripWhitespace: true,
+          searchButtonTitle: '',
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
+        },
+        {
+          onOpen: { call: this.searchDialogOpenListener, context: this },
+          onSearch: { call: this.searchListener, context: this },
+          onInput: { call: this.inputListener, context: this }
+        },
+        {
+          prepareFileSuggestion: this.prepareSuggestion
+        });
 
     },
 
@@ -210,8 +247,32 @@ qx.Class.define("gazebo.fly.Contribution",
         });
     },
 
+    generateLogoutUI : function(inquirer) {
+
+      inquirer.openScreen(inquirer.generateAuthenticationDispatcher, inquirer,
+        {
+          logout: true
+        },
+        {
+          'onAuthenticationSuccess': { call: this.logoutListener, context: this },
+          'onAuthenticationFailure': { call: this.logoutListener, context: this }
+        },
+        {});
+
+    },
+
+    dispatchListener : function(dataEvent) {
+      if (dataEvent.getData()) {
+        this.generateDashboardUI(this.inquirer);
+      } else {
+        this.generateLoginUI(this.inquirer);
+      }
+      this.inquirer.suggestScreenTransition();
+    },
+
     loginListener : function(dataEvent) {
       if (dataEvent.getData()) {
+        this.generateDashboardUI();
         this.inquirer.suggestScreenTransition();
       }
     },
@@ -219,17 +280,9 @@ qx.Class.define("gazebo.fly.Contribution",
     genotypeViewerOpenListener : function(dataEvent) {
       var chromosomes = new Array();
 
-      chromosomes.push(this.genotypeBasket.getBasketItems(0));
-      chromosomes.push(this.genotypeBasket.getBasketItems(1));
-      chromosomes.push(this.genotypeBasket.getBasketItems(2));
-      chromosomes.push(this.genotypeBasket.getBasketItems(3));
-      chromosomes.push(this.genotypeBasket.getBasketItems(4));
-      chromosomes.push(this.genotypeBasket.getBasketItems(5));
-      chromosomes.push(this.genotypeBasket.getBasketItems(6));
-      chromosomes.push(this.genotypeBasket.getBasketItems(7));
-      chromosomes.push(this.genotypeBasket.getBasketItems(8));
-      chromosomes.push(this.genotypeBasket.getBasketItems(9));
-      chromosomes.push(this.genotypeBasket.getBasketItems(10));
+      for (var i = 0; i < 11; i++) {
+        chromosomes.push(this.genotypeBasket.getBasketItems(i));
+      }
 
       this.genotypeViewer = dataEvent.getData();
 
@@ -237,7 +290,7 @@ qx.Class.define("gazebo.fly.Contribution",
         var bottom = chromosome < 6 ? false : true;
         var chromosomeBox = chromosome % 6;
 
-        for (var i = 0; i < chromosomes[chromosome].length; i++) {
+        for (i = 0; i < chromosomes[chromosome].length; i++) {
           var items = chromosomes[chromosome][i].getChildren();
 
           while (items.length) {
