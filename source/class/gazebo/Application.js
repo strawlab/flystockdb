@@ -144,6 +144,8 @@ qx.Class.define("gazebo.Application",
 
     generateAuthenticationDispatcher : function(parameters, listeners, overrides)
     {
+      var logout = parameters['logout'];
+
       if (listeners['onAuthenticationSuccess']) {
         listener = listeners['onAuthenticationSuccess'];
         this.addListener('onAuthenticationSuccessRelay', listener['call'], listener['context']);
@@ -165,19 +167,17 @@ qx.Class.define("gazebo.Application",
 					{
             if (that.RpcRunning) {
               that.RpcRunning = null;
-              if (ex == null) {
-                that.fireDataEvent("onAuthenticationSuccess", result);
+              if (ex) {
+                // TODO
+              }
+              if (result) {
+                that.fireDataEvent("onAuthenticationSuccessRelay", result);
               } else {
-                that.fireDataEvent("onAuthenticationFailure", result);
+                that.fireDataEvent("onAuthenticationFailureRelay", result);
               }
             }
 					},
-					"connect", // TODO: dummy authentication request?
-          {},
-          this.host ? this.host.getValue() : '',
-          this.port ? this.port.getValue() : '',
-          this.username.getValue(),
-					gazebo.support.ChrisVenessSHA1.sha1Hash(this.password.getValue())
+					logout ? "disconnect" : "validate_session"
 				);
     },
 
