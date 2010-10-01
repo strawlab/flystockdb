@@ -179,7 +179,6 @@ qx.Class.define("gazebo.Application",
       that = this;
       this.statusDisplayAuthenticationLink.addListener('click', function(mouseEvent) {
         that.contributionInstance.generateLogoutUI(that);
-        alert("1111");
         that.suggestScreenTransition();
       }, this);
 
@@ -242,7 +241,6 @@ qx.Class.define("gazebo.Application",
 					{
             if (that.RpcRunning) {
               that.RpcRunning = null;
-              alert("E" + ex + " R" + result);
               if (ex) {
                 // TODO
                 return;
