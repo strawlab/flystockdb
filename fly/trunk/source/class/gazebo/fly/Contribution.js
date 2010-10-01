@@ -31,6 +31,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
   statics :
   {
+    // States are not used yet.
     UI_BLANK : 0,
     UI_LOGIN : 1,
     UI_DASHBOARD : 2,
@@ -89,8 +90,13 @@ qx.Class.define("gazebo.fly.Contribution",
         {
         },
         {
-          'onAuthenticationSuccess': { call: this.dispatchListener, context: this },
-          'onAuthenticationFailure': { call: this.dispatchListener, context: this }
+          onAuthenticationSuccess: { call: this.dispatchListener, context: this },
+          onAuthenticationFailure: { call: this.dispatchListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeAuthenticationDispatcher,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {
         });
@@ -105,7 +111,12 @@ qx.Class.define("gazebo.fly.Contribution",
           passwordRequired: true
         },
         {
-          'onConnect': { call: this.loginListener, context: this }
+          onConnect: { call: this.loginListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeConnectionDialog,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {});
 
@@ -116,20 +127,41 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
           title: 'Quick Search',
-          left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 30,
+          left: 10,
+          top: 100,
+          textFieldMinimalWidth: 150,
           stripWhitespace: true,
           searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/dialog-ok.png'
         },
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
           onSearch: { call: this.searchListener, context: this },
-          onInput: { call: this.inputListener, context: this }
+          onInput: { call: this.inputListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeSearchDialog,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {
           prepareFileSuggestion: this.prepareSuggestion
         });
+
+      inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
+        {
+          title: 'Status',
+          left: 10,
+          top: 10
+        },
+        {
+          onTransitionCloseScreen: {
+            call: inquirer.disposeStatusDisplay,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {});
 
     },
 
@@ -254,15 +286,21 @@ qx.Class.define("gazebo.fly.Contribution",
           logout: true
         },
         {
-          'onAuthenticationSuccess': { call: this.logoutListener, context: this },
-          'onAuthenticationFailure': { call: this.logoutListener, context: this }
+          onAuthenticationSuccess: { call: this.logoutListener, context: this },
+          onAuthenticationFailure: { call: this.logoutListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeAuthenticationDispatcher,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {});
 
     },
 
     dispatchListener : function(dataEvent) {
-      if (dataEvent.getData()) {
+      var status = dataEvent.getData();
+      if (status && status['logged_in']) {
         this.generateDashboardUI(this.inquirer);
       } else {
         this.generateLoginUI(this.inquirer);
@@ -272,9 +310,15 @@ qx.Class.define("gazebo.fly.Contribution",
 
     loginListener : function(dataEvent) {
       if (dataEvent.getData()) {
-        this.generateDashboardUI();
+        this.generateDashboardUI(this.inquirer);
         this.inquirer.suggestScreenTransition();
       }
+    },
+
+    logoutListener : function(dataEvent) {
+      alert("logoutListener");
+      this.generateLoginUI(this.inquirer);
+      this.inquirer.suggestScreenTransition();
     },
 
     genotypeViewerOpenListener : function(dataEvent) {
