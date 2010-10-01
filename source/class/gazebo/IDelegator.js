@@ -18,6 +18,9 @@ qx.Interface.define("gazebo.IDelegator",
     registerContributionName : function() {},
 
     registerInitialScreen : function(inquirer) {},
-    registerNextScreen : function(inquirer) {}
+    registerNextScreen : function(inquirer) {},
+
+    generateLoginUI : function(inquirer) {},
+    generateLogoutUI : function(inquirer) {}
   }
 });

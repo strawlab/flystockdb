@@ -27,6 +27,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
     var searchButtonTitle = parameters['searchButtonTitle'];
     var searchButtonIcon = parameters['searchButtonIcon'];
+    var minWidth = parameters['textFieldMinimalWidth'] ? parameters['textFieldMinimalWidth'] : 300;
 
     this.rpcRunning = null;
     this.openAll = false;
@@ -39,7 +40,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     // Bugfix for qooxdoo 1.0.1 and Chrome/Safari on OSX:
     this.textField.getContentElement().setAttribute("spellcheck", "false");
 
-    this.textField.setMinWidth(300);
+    this.textField.setMinWidth(minWidth);
     this.textField.setLiveUpdate(true);
     this.textField.addListener("input", this.generateSuggestions, this);
     this.textField.addListener("keypress", function(keyEvent) {

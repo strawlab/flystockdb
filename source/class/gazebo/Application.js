@@ -8,6 +8,7 @@
 /* ************************************************************************
 
 #asset(gazebo/*)
+#asset(qx/icon/Oxygen/16/actions/dialog-ok.png)
 #asset(qx/icon/Oxygen/64/actions/dialog-ok.png)
 
 #asset(qx/icon/Oxygen/16/actions/edit-delete.png)
@@ -50,6 +51,8 @@ qx.Class.define("gazebo.Application",
   {
     openingScreens : new Array(),
     closingScreens : new Array(),
+
+    authenticationDispatcherSurrogate : new qx.core.Object(),
 
     /**
      * This method contains the initial application code and gets called 
@@ -142,20 +145,92 @@ qx.Class.define("gazebo.Application",
       };
     },
 
+    generateStatusDisplay : function(parameters, listeners, overrides)
+    {
+      var title = parameters['title'];
+      var left = parameters['left'];
+      var top = parameters['top'];
+
+      this.statusWindow = new qx.ui.window.Window(title ? title : "Status");
+      this.statusWindow.setMinWidth(150);
+      this.statusWindow.setMaxWidth(500);
+      this.statusWindow.setLayout(new qx.ui.layout.HBox(10));
+      this.statusWindow.setResizable(false, false, false, false);
+			this.statusWindow.setMovable(false);
+			this.statusWindow.setShowClose(false);
+			this.statusWindow.setShowMaximize(false);
+			this.statusWindow.setShowMinimize(false);
+
+      this.statusWindow.addListenerOnce("resize", this.getPositioningFunction(left, top), this.statusWindow);
+
+      this.statusDisplayUsername = new qx.ui.basic.Label().set({
+        value: '-',
+        rich: true
+      });
+      var separator = new qx.ui.basic.Label().set({
+        value: " | ",
+        rich: true
+      });
+      this.statusDisplayAuthenticationLink = new qx.ui.basic.Label().set({
+        value: '<u>Logout</u>',
+        rich: true
+      });
+
+      that = this;
+      this.statusDisplayAuthenticationLink.addListener('click', function(mouseEvent) {
+        that.contributionInstance.generateLogoutUI(that);
+        alert("1111");
+        that.suggestScreenTransition();
+      }, this);
+
+      this.statusWindow.add(this.statusDisplayUsername);
+      this.statusWindow.add(separator);
+      this.statusWindow.add(this.statusDisplayAuthenticationLink);
+
+      this.statusWindow.open();
+      this.getRoot().add(this.statusWindow);
+
+      this.generateAuthenticationDispatcher(
+        {},
+        {
+          'onAuthenticationSuccess': { call: this.updateStatusDisplay, context: this },
+          'onAuthenticationFailure': { call: this.updateStatusDisplay, context: this }
+        },
+        {});
+    },
+
+    updateStatusDisplay : function(dataEvent)
+    {
+      var status = dataEvent.getData();
+
+      if (status && status['logged_in']) {
+        this.statusDisplayUsername.setValue(status['username']);
+      } else {
+        qx.lang.Array.removeAll(this.openingScreens);
+        this.contributionInstance.generateLoginUI(this);
+        this.suggestScreenTransition();
+      }
+    },
+
+    disposeStatusDisplay : function(parameters)
+    {
+      this.statusWindow.close();
+      this.statusWindow.destroy();
+    },
+
     generateAuthenticationDispatcher : function(parameters, listeners, overrides)
     {
       var logout = parameters['logout'];
 
       if (listeners['onAuthenticationSuccess']) {
         listener = listeners['onAuthenticationSuccess'];
-        this.addListener('onAuthenticationSuccessRelay', listener['call'], listener['context']);
+        this.authenticationDispatcherSurrogate.addListenerOnce('onAuthenticationSuccessRelay', listener['call'], listener['context']);
       }
       if (listeners['onAuthenticationFailure']) {
         listener = listeners['onAuthenticationFailure'];
-        this.addListener('onAuthenticationFailure', listener['call'], listener['context']);
+        this.authenticationDispatcherSurrogate.addListenerOnce('onAuthenticationFailureRelay', listener['call'], listener['context']);
       }
 
-      // TODO
       var rpc = new qx.io.remote.Rpc();
 				rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
 				rpc.setUrl(gazebo.Application.getServerURL());
@@ -167,18 +242,29 @@ qx.Class.define("gazebo.Application",
 					{
             if (that.RpcRunning) {
               that.RpcRunning = null;
+              alert("E" + ex + " R" + result);
               if (ex) {
                 // TODO
+                return;
               }
-              if (result) {
-                that.fireDataEvent("onAuthenticationSuccessRelay", result);
+              if (!result) {
+                // TODO
+                return;
+              }
+              if (result['logged_in']) {
+                that.authenticationDispatcherSurrogate.fireDataEvent("onAuthenticationSuccessRelay", result);
               } else {
-                that.fireDataEvent("onAuthenticationFailureRelay", result);
+                that.authenticationDispatcherSurrogate.fireDataEvent("onAuthenticationFailureRelay", result);
               }
             }
 					},
-					logout ? "disconnect" : "validate_session"
+					logout ? "disconnect" : "status"
 				);
+    },
+
+    disposeAuthenticationDispatcher : function(parameters)
+    {
+      this.authenticationDispatcherSurrogate = new qx.core.Object();
     },
 
 		generateConnectionDialog : function(parameters, listeners, overrides)
@@ -203,9 +289,10 @@ qx.Class.define("gazebo.Application",
       this.getRoot().add(this.connectionWindow);
 		},
 
-    disposeConnectionDialog : function()
+    disposeConnectionDialog : function(parameters)
     {
       this.connectionWindow.close();
+      this.connectionWindow.destroy();
     },
 
     // Only for testing purposes, yet.
@@ -214,11 +301,11 @@ qx.Class.define("gazebo.Application",
       this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
     },
 
-    disposeLogo : function()
+    disposeLogo : function(parameters)
     {
     },
 
-    disposeButton : function()
+    disposeButton : function(parameters)
     {
     },
 
@@ -256,7 +343,7 @@ qx.Class.define("gazebo.Application",
       this.fireDataEvent('openSearchDialogRelay', searchDialog);
     },
 
-    disposeSearchDialog : function()
+    disposeSearchDialog : function(parameters)
     {
       this.searchWindow.close();
       this.searchWindow.destroy();
@@ -306,18 +393,18 @@ qx.Class.define("gazebo.Application",
       this.basketContainer.setBasketItem(index, item);
     },
 
-    disposeBasket : function()
+    disposeBasket : function(parameters)
     {
       this.basketWindow.close();
       this.basketWindow.destroy();
     },
 
-    generateForm : function()
+    generateForm : function(parameters)
     {
 
     },
 
-    disposeForm : function()
+    disposeForm : function(parameters)
     {
 
     },
@@ -352,7 +439,7 @@ qx.Class.define("gazebo.Application",
       this.fireDataEvent('openCustomRelay', customContainer);
     },
 
-    disposeCustomInterface : function()
+    disposeCustomInterface : function(parameters)
     {
 
     },
@@ -395,7 +482,6 @@ qx.Class.define("gazebo.Application",
 
 		establishConnection : function(dataEvent)
 		{
-      alert("Msg: " + dataEvent.getData());
       this.fireEvent("screen.close", null);
 			this.contributionInstance.registerNextScreen(this);
       this.fireEvent("screen.open", null);
@@ -411,7 +497,7 @@ qx.Class.define("gazebo.Application",
     {
       var screenParams;
 
-      for (i = 0; i < this.closingScreens.length; i++) {
+      for (var i = 0; i < this.closingScreens.length; i++) {
         screenParams = this.closingScreens[i];
 
         screenParams['context'].anonymousMethod = screenParams['call'];
@@ -430,6 +516,20 @@ qx.Class.define("gazebo.Application",
       }
 
       qx.lang.Array.removeAll(this.closingScreens);
+
+      for (i = 0; i < this.openingScreens.length; i++) {
+        screenParams = this.openingScreens[i];
+
+        if (screenParams['listeners']['onTransitionCloseScreen']) {
+          var autoCloseParams = screenParams['listeners']['onTransitionCloseScreen'];
+
+          this.closeScreen(autoCloseParams['call'],
+            autoCloseParams['context'],
+            autoCloseParams['parameters']
+          );
+        }
+      }
+
       qx.lang.Array.removeAll(this.openingScreens);
 
       this.contributionInstance.registerNextScreen(this);
@@ -437,6 +537,16 @@ qx.Class.define("gazebo.Application",
 
     openScreen : function(call, context, parameters, listeners, overrides)
     {
+      if (!parameters) {
+        parameters = {}
+      }
+      if (!listeners) {
+        listeners = {}
+      }
+      if (!overrides) {
+        overrides = {}
+      }
+
       this.openingScreens.push(
         {
           call: call,
@@ -449,6 +559,10 @@ qx.Class.define("gazebo.Application",
 
     closeScreen : function(call, context, parameters)
     {
+      if (!parameters) {
+        parameters = {}
+      }
+      
       this.closingScreens.push(
         {
           call: call,
