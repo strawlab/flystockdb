@@ -148,11 +148,53 @@ qx.Class.define("gazebo.fly.Contribution",
           prepareFileSuggestion: this.prepareSuggestion
         });
 
+      var linkContainer = new qx.ui.container.Composite();
+
+      var that = this;
+
+      homeLink = new qx.ui.basic.Atom().set({
+        label: '<u>Home</u>',
+        rich: true,
+        icon: 'qx/icon/Oxygen/16/actions/go-home.png',
+        padding: [2, 6, 2, 6]
+      });
+      homeLink.addListener('click', function(mouseEvent) {
+        // TODO
+      }, this);
+
+      searchLink = new qx.ui.basic.Atom().set({
+        label: '<u>Advanced Search</u>',
+        rich: true,
+        icon: 'qx/icon/Oxygen/16/actions/edit-find.png',
+        padding: [2, 6, 2, 6]
+      });
+      searchLink.addListener('click', function(mouseEvent) {
+        // TODO
+      }, this);
+
+      addLink = new qx.ui.basic.Atom().set({
+        label: '<u>Add Fly-Stock</u>',
+        rich: true,
+        icon: 'qx/icon/Oxygen/16/actions/list-add.png',
+        //backgroundColor: '#FF0000',
+        padding: [2, 6, 2, 6]
+      });
+      addLink.addListener('click', function(mouseEvent) {
+        that.generateGenotypeInputUI(that.inquirer);
+        that.inquirer.suggestScreenTransition();
+      }, this);
+
+      linkContainer.setLayout(new qx.ui.layout.HBox(10));
+      linkContainer.add(homeLink);
+      linkContainer.add(searchLink);
+      linkContainer.add(addLink);
+
       inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
         {
-          title: 'Status',
+          title: ' ',
           left: 10,
-          top: 10
+          top: 10,
+          customElements: linkContainer
         },
         {
           onTransitionCloseScreen: {
@@ -213,7 +255,12 @@ qx.Class.define("gazebo.fly.Contribution",
         },
         {
           onOpen: { call: this.basketOpenListener, context: this },
-          onProceed: { call: this.proceedListener, context: this }
+          onProceed: { call: this.proceedListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeBasket,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {
           makeEmptyBasketLabel: function(index) {
@@ -240,7 +287,12 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
           onSearch: { call: this.searchListener, context: this },
-          onInput: { call: this.inputListener, context: this }
+          onInput: { call: this.inputListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeSearchDialog,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {
           prepareFileSuggestion: this.prepareSuggestion
@@ -264,6 +316,7 @@ qx.Class.define("gazebo.fly.Contribution",
     },
 
     generateMetaDataUI : function(inquirer) {
+
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
           title: 'Genotype',
@@ -274,9 +327,24 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           onOpen: { call: this.genotypeViewerOpenListener, context: this }
         },
-        {
+        {}
+      );
 
-        });
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Metadata',
+          left: inquirer.LEFT_SO_THAT_CENTERED,
+          top: 200,
+          contents: new gazebo.fly.GenotypeMetadata()
+        },
+        {
+          
+        },
+        {
+          
+        }
+      );
+
     },
 
     generateLogoutUI : function(inquirer) {
@@ -316,7 +384,6 @@ qx.Class.define("gazebo.fly.Contribution",
     },
 
     logoutListener : function(dataEvent) {
-      alert("logoutListener");
       this.generateLoginUI(this.inquirer);
       this.inquirer.suggestScreenTransition();
     },
@@ -365,6 +432,7 @@ qx.Class.define("gazebo.fly.Contribution",
     },
 
     proceedListener : function() {
+      this.generateMetaDataUI(this.inquirer);
       this.inquirer.suggestScreenTransition();
     },
 
