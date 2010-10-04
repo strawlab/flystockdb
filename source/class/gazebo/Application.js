@@ -16,6 +16,11 @@
 #asset(qx/icon/Oxygen/16/actions/go-next.png)
 #asset(qx/icon/Oxygen/16/actions/go-previous.png)
 
+#asset(qx/icon/Oxygen/22/actions/go-next.png)
+#asset(qx/icon/Oxygen/22/actions/go-previous.png)
+
+#asset(qx/icon/Oxygen/16/actions/go-home.png)
+#asset(qx/icon/Oxygen/16/actions/edit-find.png)
 #asset(qx/icon/Oxygen/16/actions/list-add.png)
 
 #asset(qx/icon/Oxygen/16/categories/development.png)
@@ -150,11 +155,14 @@ qx.Class.define("gazebo.Application",
       var title = parameters['title'];
       var left = parameters['left'];
       var top = parameters['top'];
+      var customElements = parameters['customElements'];
 
       this.statusWindow = new qx.ui.window.Window(title ? title : "Status");
       this.statusWindow.setMinWidth(150);
       this.statusWindow.setMaxWidth(500);
-      this.statusWindow.setLayout(new qx.ui.layout.HBox(10));
+      this.statusWindow.setLayout(new qx.ui.layout.HBox(10).set({
+        alignY: 'middle'
+      }));
       this.statusWindow.setResizable(false, false, false, false);
 			this.statusWindow.setMovable(false);
 			this.statusWindow.setShowClose(false);
@@ -165,10 +173,6 @@ qx.Class.define("gazebo.Application",
 
       this.statusDisplayUsername = new qx.ui.basic.Label().set({
         value: '-',
-        rich: true
-      });
-      var separator = new qx.ui.basic.Label().set({
-        value: " | ",
         rich: true
       });
       this.statusDisplayAuthenticationLink = new qx.ui.basic.Label().set({
@@ -182,8 +186,20 @@ qx.Class.define("gazebo.Application",
         that.suggestScreenTransition();
       }, this);
 
+      // Placement of additional elements
+      if (customElements) {
+        this.statusWindow.add(customElements);
+        this.statusWindow.add(new qx.ui.basic.Label().set({
+          value: " | ",
+          rich: true
+        }));
+      }
+
       this.statusWindow.add(this.statusDisplayUsername);
-      this.statusWindow.add(separator);
+      this.statusWindow.add(new qx.ui.basic.Label().set({
+        value: " | ",
+        rich: true
+      }));
       this.statusWindow.add(this.statusDisplayAuthenticationLink);
 
       this.statusWindow.open();
