@@ -48,6 +48,8 @@ qx.Class.define("gazebo.fly.Contribution",
     this.requestTransition = false;
     this.searchDialog = null;
 
+    this.statusOpen = false;
+
     this.reader = new gazebo.fly.GenotypeReader();
   },
 
@@ -159,7 +161,8 @@ qx.Class.define("gazebo.fly.Contribution",
         padding: [2, 6, 2, 6]
       });
       homeLink.addListener('click', function(mouseEvent) {
-        // TODO
+        that.generateDashboardUI(that.inquirer);
+        that.inquirer.suggestScreenTransition();
       }, this);
 
       searchLink = new qx.ui.basic.Atom().set({
@@ -169,7 +172,8 @@ qx.Class.define("gazebo.fly.Contribution",
         padding: [2, 6, 2, 6]
       });
       searchLink.addListener('click', function(mouseEvent) {
-        // TODO
+        that.generateSearchUI(that.inquirer);
+        that.inquirer.suggestScreenTransition();
       }, this);
 
       addLink = new qx.ui.basic.Atom().set({
@@ -189,22 +193,30 @@ qx.Class.define("gazebo.fly.Contribution",
       linkContainer.add(searchLink);
       linkContainer.add(addLink);
 
-      inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
-        {
-          title: ' ',
-          left: 10,
-          top: 10,
-          customElements: linkContainer
-        },
-        {
-          onTransitionCloseScreen: {
-            call: inquirer.disposeStatusDisplay,
-            context: inquirer,
-            parameters: {}
-          }
-        },
-        {});
+      if (!this.statusOpen) {
 
+        this.statusOpen = true;
+
+        inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
+          {
+            title: ' ',
+            left: 10,
+            top: 10,
+            customElements: linkContainer
+          },
+          {
+            /* Make permanent.
+            // TODO Remove on log-out
+            onTransitionCloseScreen: {
+              call: inquirer.disposeStatusDisplay,
+              context: inquirer,
+              parameters: {}
+            }
+             */
+          },
+          {});
+
+      }
     },
 
     generateGenotypeInputUI : function(inquirer) {
@@ -213,7 +225,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 130,
+          top: 200,
           canProceedWithEmptyBasket: false,
           populate: 11,
           titles: [ 'Chromosome X',
@@ -277,9 +289,9 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Find Gene, Allele, Balancer, ...',
+          title: 'Add Gene, Allele, Balancer, ...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 30,
+          top: 100,
           stripWhitespace: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
@@ -297,6 +309,108 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           prepareFileSuggestion: this.prepareSuggestion
         });
+
+    },
+
+    // TODO Have to remove commas from baskets.
+    generateSearchUI : function(inquirer) {
+
+      inquirer.openScreen(inquirer.generateBasket, inquirer,
+        {
+          title: 'Genotype',
+          left: inquirer.LEFT_SO_THAT_CENTERED,
+          top: 190,
+          basketMinHeight: 150,
+          canProceedWithEmptyBasket: true,
+          populate: 6,
+          titles: [ 'Chromosome X',
+                    'Chromosome 2',
+                    'Chromosome 3',
+                    'Chromosome 4',
+                    'Unknown',
+                    'Chromosome Y'
+                  ],
+          labels: [ 'X',
+                    '2',
+                    '3',
+                    '4',
+                    'U',
+                    'Y'
+                   ],
+          decorations: [ 'group-dark',
+                    'group',
+                    'group-dark',
+                    'group',
+                    'group-dark',
+                    'group'
+                   ]
+        },
+        {
+          onOpen: { call: this.basketOpenListener, context: this },
+          onProceed: { call: this.proceedListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeBasket,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {
+          makeEmptyBasketLabel: function(index) {
+            var container = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+            container.add(
+              new qx.ui.basic.Label().set({
+                value: '<i>anything</i>',
+                rich: true
+              })
+            );
+            return container;
+          }
+        });
+
+      inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
+        {
+          title: 'Add Gene, Allele, Balancer, ...',
+          left: inquirer.LEFT_SO_THAT_CENTERED,
+          top: 100,
+          stripWhitespace: true,
+          searchButtonTitle: '',
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
+        },
+        {
+          onOpen: { call: this.searchDialogOpenListener, context: this },
+          onSearch: { call: this.searchListener, context: this },
+          onInput: { call: this.inputListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeSearchDialog,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {
+          prepareFileSuggestion: this.prepareSuggestion
+        });
+
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Metadata',
+          left: inquirer.LEFT_SO_THAT_CENTERED,
+          top: 430,
+          contents: new gazebo.fly.GenotypeMetadata({ search: true },
+            {},
+            {}
+          )
+        },
+        {
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {
+
+        }
+      );
 
     },
 
@@ -321,11 +435,16 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 30,
+          top: 100,
           contents: new gazebo.fly.GenotypeViewer()
         },
         {
-          onOpen: { call: this.genotypeViewerOpenListener, context: this }
+          onOpen: { call: this.genotypeViewerOpenListener, context: this },
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {}
       );
@@ -334,11 +453,15 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 200,
-          contents: new gazebo.fly.GenotypeMetadata()
+          top: 270,
+          contents: new gazebo.fly.GenotypeMetadata({}, {}, {})
         },
         {
-          
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {
           

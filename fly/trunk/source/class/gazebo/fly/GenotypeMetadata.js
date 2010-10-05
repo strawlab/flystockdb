@@ -23,6 +23,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
   {
     this.base(arguments);
 
+    var search = parameters['search'];
+
     this.setLayout(new qx.ui.layout.HBox(10));
 
     this.setMinWidth(800);
@@ -45,13 +47,16 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     idContainer4 = new qx.ui.container.Composite();
     idContainer4.setLayout(new qx.ui.layout.VBox(10));
 
+    idContainer5 = new qx.ui.container.Composite();
+    idContainer5.setLayout(new qx.ui.layout.VBox(10));
+
     idContainer1.add(new qx.ui.basic.Label().set({
       value: 'Internal Stock-ID',
       rich: true,
       appearance: 'annotation'
     }));
     idContainer1.add(new qx.ui.form.TextField().set({
-      width: 200
+      width: 160
     }));
 
     idContainer2.add(new qx.ui.basic.Label().set({
@@ -60,31 +65,40 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       appearance: 'annotation'
     }));
     idContainer2.add(new qx.ui.form.TextField().set({
+      width: 160
+    }));
+
+    idContainer3.add(new qx.ui.basic.Label().set({
+      value: 'Source / Donor',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    idContainer3.add(new qx.ui.form.TextField().set({
       width: 200
     }));
+
 
     var separator = new qx.ui.menu.Separator();
     separator.setDecorator('separator-horizontal');
     separator.setWidth(3);
     separator.setHeight(45);
-    idContainer3.add(separator);
+    idContainer4.add(separator);
 
-    idContainer4.add(new qx.ui.basic.Label().set({
-      value: 'Created By',
+    idContainer5.add(new qx.ui.basic.Label().set({
+      value: 'Stock Entered By',
       rich: true,
       appearance: 'annotation'
     }));
-    idContainer4.add(new qx.ui.form.TextField().set({
+    idContainer5.add(new qx.ui.form.TextField().set({
       readOnly: true,
       width: 200
     }));
 
     idContainer.add(idContainer1);
     idContainer.add(idContainer2);
-    idContainer.add(new qx.ui.core.Spacer(65));
     idContainer.add(idContainer3);
-    idContainer.add(new qx.ui.core.Spacer(42));
     idContainer.add(idContainer4);
+    idContainer.add(idContainer5);
 
     this.container.add(idContainer);
 
@@ -94,10 +108,14 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       appearance: 'annotation'
     }));
 
-    this.container.add(new qx.ui.form.TextArea().set({
-      maxLength: 65535,
-      height: 200
-    }));
+    if (search) {
+      this.container.add(new qx.ui.form.TextField());
+    } else {
+      this.container.add(new qx.ui.form.TextArea().set({
+        maxLength: 65535,
+        height: 200
+      }));
+    }
 
     this.container.add(new qx.ui.core.Spacer(10,20));
 
@@ -153,7 +171,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     assignedGroups.add(new qx.ui.basic.Atom("Publicly-Visible Stocks"));
 
     groupContainer3.add(new qx.ui.basic.Label().set({
-      value: 'Assigned Groups',
+      value: 'Search in these Groups',
       appearance: 'annotation'
     }));
     groupContainer3.add(assignedGroups);
