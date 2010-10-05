@@ -28,6 +28,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
     var decorations = parameters['decorations'];
 
     this.labels = parameters['labels'];
+    this.basketMinHeight = parameters['basketMinHeight'] ? parameters['basketMinHeight'] : 280;
 
     // Install overrides (needed when populating baskets):
     if (overrides['makeEmptyBasketLabel']) {
@@ -75,7 +76,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
       itemContainer.setLayout(new qx.ui.layout.VBox(5));
       itemContainer.setMinWidth(130);
-      itemContainer.setMinHeight(280);
+      itemContainer.setMinHeight(this.basketMinHeight);
 
       this.add(itemContainer, { flex: 0 });
     },

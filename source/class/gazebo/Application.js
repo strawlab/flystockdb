@@ -455,7 +455,8 @@ qx.Class.define("gazebo.Application",
 
     disposeCustomInterface : function(parameters)
     {
-
+      this.customWindow.close();
+      this.customWindow.destroy();
     },
 
 		generateDatabaseInterface : function()
