@@ -211,7 +211,8 @@ qx.Class.define("gazebo.Application",
           'onAuthenticationSuccess': { call: this.updateStatusDisplay, context: this },
           'onAuthenticationFailure': { call: this.updateStatusDisplay, context: this }
         },
-        {});
+        {}
+      );
     },
 
     updateStatusDisplay : function(dataEvent)
@@ -247,33 +248,33 @@ qx.Class.define("gazebo.Application",
       }
 
       var rpc = new qx.io.remote.Rpc();
-				rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
-				rpc.setUrl(gazebo.Application.getServerURL());
-				rpc.setServiceName("gazebo.cgi");
+			rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+			rpc.setUrl(gazebo.Application.getServerURL());
+			rpc.setServiceName("gazebo.cgi");
 
-				var that = this;
-				this.RpcRunning = rpc.callAsync(
-					function(result, ex, id)
-					{
-            if (that.RpcRunning) {
-              that.RpcRunning = null;
-              if (ex) {
-                // TODO
-                return;
-              }
-              if (!result) {
-                // TODO
-                return;
-              }
-              if (result['logged_in']) {
-                that.authenticationDispatcherSurrogate.fireDataEvent("onAuthenticationSuccessRelay", result);
-              } else {
-                that.authenticationDispatcherSurrogate.fireDataEvent("onAuthenticationFailureRelay", result);
-              }
+			var that = this;
+			this.RpcRunning = rpc.callAsync(
+				function(result, ex, id)
+				{
+          if (that.RpcRunning) {
+            that.RpcRunning = null;
+            if (ex) {
+              // TODO
+              return;
             }
-					},
-					logout ? "disconnect" : "status"
-				);
+            if (!result) {
+              // TODO
+              return;
+            }
+            if (result['logged_in']) {
+              that.authenticationDispatcherSurrogate.fireDataEvent("onAuthenticationSuccessRelay", result);
+            } else {
+              that.authenticationDispatcherSurrogate.fireDataEvent("onAuthenticationFailureRelay", result);
+            }
+          }
+        },
+				logout ? "disconnect" : "status"
+			);
     },
 
     disposeAuthenticationDispatcher : function(parameters)
@@ -432,6 +433,10 @@ qx.Class.define("gazebo.Application",
       var top = parameters['top'];
 
       this.customWindow = new qx.ui.window.Window(title ? title : "Title");
+
+      // TODO Introduce uid to all generate* calls where relays are used.
+      var uid = '' + this.customWindow.toHashCode();
+
       this.customWindow.setLayout(new qx.ui.layout.HBox(5));
       this.customWindow.setResizable(false, false, false, false);
 			this.customWindow.setMovable(false);
@@ -448,15 +453,28 @@ qx.Class.define("gazebo.Application",
 
       if (listeners['onOpen']) {
         listener = listeners['onOpen'];
-        this.addListener('openCustomRelay', listener['call'], listener['context']);
+        this.addListener('openCustomRelay' + uid, listener['call'], listener['context']);
       }
-      this.fireDataEvent('openCustomRelay', customContainer);
+      this.fireDataEvent('openCustomRelay' + uid, customContainer);
+
+      // TODO Make this smart and universal for all generate* calls.
+      var onTransitionCloseScreen = listeners['onTransitionCloseScreen'];
+      if (onTransitionCloseScreen) {
+        var onTransitionCloseScreenParameters = onTransitionCloseScreen['parameters'];
+        onTransitionCloseScreenParameters['windowHandle'] = this.customWindow;
+      }
     },
 
     disposeCustomInterface : function(parameters)
     {
-      this.customWindow.close();
-      this.customWindow.destroy();
+      var windowHandle = this.customWindow;
+
+      if (parameters && parameters['windowHandle']) {
+        windowHandle = parameters['windowHandle'];
+      }
+
+      windowHandle.close();
+      windowHandle.destroy();
     },
 
 		generateDatabaseInterface : function()
