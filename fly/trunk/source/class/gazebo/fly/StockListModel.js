@@ -19,13 +19,12 @@ qx.Class.define("gazebo.fly.StockListModel",
     this.base(arguments);
 
     this.setColumns([
-        "ID",
-        "External ID",
+        "Internal Stock-ID",
         "Genotype",
-        "Annotation",
-        "Notes",
-        "Donor",
-        "Creator",
+        "External Stock-ID",
+        "Source / Donor",
+        "Descriptions, Annotations and Notes",
+        "Entered By",
         "Groups"
       ], [
         "0",
@@ -34,8 +33,7 @@ qx.Class.define("gazebo.fly.StockListModel",
         "3",
         "4",
         "5",
-        "6",
-        "7"
+        "6"
       ]);
   },
 
@@ -76,8 +74,6 @@ qx.Class.define("gazebo.fly.StockListModel",
       rpc.setServiceName("gazebo.cgi");
 
       this.debug("requested: " + firstRow + " to " + lastRow);
-
-      this.debug("BLUB");
         
       var that = this;
       this.rpcRunning = rpc.callAsync(

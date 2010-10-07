@@ -194,7 +194,6 @@ qx.Class.define("gazebo.fly.Contribution",
       linkContainer.add(addLink);
 
       if (!this.statusOpen) {
-
         this.statusOpen = true;
 
         inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
@@ -215,8 +214,9 @@ qx.Class.define("gazebo.fly.Contribution",
              */
           },
           {});
-
       }
+
+      this.generateStockListUI(inquirer);
     },
 
     generateGenotypeInputUI : function(inquirer) {
@@ -395,7 +395,8 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 430,
-          contents: new gazebo.fly.GenotypeMetadata({ search: true },
+          contents: new gazebo.fly.GenotypeMetadata(
+            { inquirer: inquirer, search: true },
             {},
             {}
           )
@@ -419,10 +420,15 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Stocks',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 30,
+          top: 100,
           contents: new gazebo.fly.StockListViewer()
         },
         {
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
         },
         {
 
@@ -454,7 +460,15 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 270,
-          contents: new gazebo.fly.GenotypeMetadata({}, {}, {})
+          contents: new gazebo.fly.GenotypeMetadata(
+            {
+              inquirer: inquirer
+            },
+            {
+              onOpen: { call: this.metadataEditorOpenListener, context: this }
+            },
+            {}
+          )
         },
         {
           onTransitionCloseScreen: {
@@ -515,6 +529,7 @@ qx.Class.define("gazebo.fly.Contribution",
       var chromosomes = new Array();
 
       for (var i = 0; i < 11; i++) {
+        this.debug("Opening " + i);
         chromosomes.push(this.genotypeBasket.getBasketItems(i));
       }
 
@@ -544,6 +559,36 @@ qx.Class.define("gazebo.fly.Contribution",
           }
         }
       }
+    },
+
+    metadataEditorOpenListener : function(dataEvent) {
+
+      var genotypeMetadataUI = dataEvent.getData();
+
+      var rpc = new qx.io.remote.Rpc();
+			rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+			rpc.setUrl(gazebo.Application.getServerURL());
+			rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      this.rpcRunning = rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (that.rpcRunning && that.rpcRunning.getSequenceNumber() == id) {
+              var id = result;
+
+              genotypeMetadataUI.updateInternalStockID("" + id);
+          }
+        },
+        "create_data",
+        {},
+        "FB2010_05",
+        "x_stocks",
+        [ "xref", "genotype", "description", "donor" ],
+        [ "", "", "", "" ]
+      );
+
     },
 
     searchDialogOpenListener : function(dataEvent) {
