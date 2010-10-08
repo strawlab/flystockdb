@@ -227,14 +227,13 @@ qx.Class.define("gazebo.fly.Contribution",
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 200,
           canProceedWithEmptyBasket: false,
-          populate: 11,
+          populate: 10,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
                     'Chromosome 3',
                     'Chromosome 4',
-                    'Unknown',
                     'Chromosome Y',
-                    '',
+                    'Unknown',
                     '',
                     '',
                     '',
@@ -244,13 +243,12 @@ qx.Class.define("gazebo.fly.Contribution",
                     '2, top',
                     '3, top',
                     '4, top',
-                    'U, top',
                     'Y',
+                    'U',
                     'X, bottom',
                     '2, bottom',
                     '3, bottom',
-                    '4, bottom',
-                    'U, bottom'
+                    '4, bottom'
                    ],
           decorations: [ 'group-dark',
                     'group',
@@ -261,8 +259,7 @@ qx.Class.define("gazebo.fly.Contribution",
                     'group-dark',
                     'group',
                     'group-dark',
-                    'group',
-                    'group-dark'
+                    'group'
                    ]
         },
         {
@@ -327,15 +324,15 @@ qx.Class.define("gazebo.fly.Contribution",
                     'Chromosome 2',
                     'Chromosome 3',
                     'Chromosome 4',
-                    'Unknown',
-                    'Chromosome Y'
+                    'Chromosome Y',
+                    'Unknown'
                   ],
           labels: [ 'X',
                     '2',
                     '3',
                     '4',
-                    'U',
-                    'Y'
+                    'Y',
+                    'U'
                    ],
           decorations: [ 'group-dark',
                     'group',
@@ -419,7 +416,7 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
           title: 'Stocks',
-          left : inquirer.LEFT_SO_THAT_CENTERED,
+          left : 300,
           top: 100,
           contents: new gazebo.fly.StockListViewer()
         },
@@ -528,7 +525,7 @@ qx.Class.define("gazebo.fly.Contribution",
     genotypeViewerOpenListener : function(dataEvent) {
       var chromosomes = new Array();
 
-      for (var i = 0; i < 11; i++) {
+      for (var i = 0; i < 10; i++) {
         this.debug("Opening " + i);
         chromosomes.push(this.genotypeBasket.getBasketItems(i));
       }
@@ -614,7 +611,7 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       var treeItem = dataEvent.getData();
       var userInput = dataEvent.getOldData();
-      var chromosome = 4 // Default placement: chromosome 'Unknown'
+      var chromosome = 5 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
       var flybaseId = null;
 
@@ -627,11 +624,11 @@ qx.Class.define("gazebo.fly.Contribution",
         chromosomeName = parameters[3].charAt(0);
 
         if (chromosomeName == 'X') { chromosome = bottom ? 6 : 0; }
-        else if (chromosomeName == 'Y') { chromosome = 5; }
+        else if (chromosomeName == 'Y') { chromosome = 4; }
         else if (chromosomeName == '2') { chromosome = bottom ? 7 : 1; }
         else if (chromosomeName == '3') { chromosome = bottom ? 8 : 2; }
         else if (chromosomeName == '4') { chromosome = bottom ? 9 : 3; }
-        else { chromosomeName = 'Unknown'; chromosome = bottom ? 10 : 4; }
+        else { chromosomeName = 'Unknown'; chromosome = 5; }
 
         if (parameters[5] && parameters[5].match("^FB.+")) {
           flybaseId = parameters[5];

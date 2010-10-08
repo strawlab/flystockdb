@@ -21,8 +21,8 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
       'Chromosome 2',
       'Chromosome 3',
       'Chromosome 4',
-      'Unknown',
-      'Chromosome Y'
+      'Chromosome Y',
+      'Unknown'
     ]
   },
 
@@ -58,8 +58,8 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
       //topContainer.add(new qx.ui.basic.Label('+'));
       chromosome.add(topContainer);
 
-      // Add separator and second chromosome for X, 2, 3, 4, U
-      if (i < 5) {
+      // Add separator and second chromosome for X, 2, 3, 4
+      if (i < 4) {
         var separator = new qx.ui.menu.Separator();
         separator.setDecorator('separator-vertical');
         chromosome.add(separator);
