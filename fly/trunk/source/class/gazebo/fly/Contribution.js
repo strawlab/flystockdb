@@ -648,6 +648,26 @@ qx.Class.define("gazebo.fly.Contribution",
             var chromosomeBag = chromosomes.shift();
             bottom = false;
 
+            // Is this a partite bag?
+            var partite = false;
+            var possibleBalancer = '-';
+            for (var i = 0; i < chromosomeBag.length; i++) {
+              if (chromosomeBag[i] == '/') {
+                partite = true;
+                if (i + 1 < chromosomeBag.length) {
+                  possibleBalancer = chromosomeBag[i + 1];
+                }
+                break;
+              }
+            }
+
+            // If not partite, then make homozygous:
+            this.debug("PARTITE: " + partite);
+            if (!partite) {
+              chromosomeBagDuplicate = chromosomeBag.concat();
+              chromosomeBag = chromosomeBag.concat([ '/' ].concat(chromosomeBagDuplicate));
+            }
+
             while (chromosomeBag.length > 0) {
               var token = chromosomeBag.shift();
               var comma = false;
@@ -663,10 +683,10 @@ qx.Class.define("gazebo.fly.Contribution",
               }
 
               if (this.reader.isAtom(token)) {
-                this.debug('TOKEN ADDED:   ' + token);
+                this.debug('TOKEN ADDED:   ' + token + "(" + possibleBalancer + ")");
                 this.searchDialog.searchForItem(token, [bottom, comma]);
               } else {
-                this.debug('TOKEN IGNORED: ' + token);
+                this.debug('TOKEN IGNORED: ' + token + "(" + possibleBalancer + ")");
               }
             }
           }

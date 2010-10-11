@@ -74,7 +74,7 @@ qx.Class.define("gazebo.fly.GenotypeReader",
     decompose : function(genotype) {
       var components = new Array();
 
-      var chromosomes = genotype.split(';');
+      var chromosomes = genotype.split(';'); // The naive view.
       var mendedChromosomes = new Array();
 
       for (var i = 0; i < chromosomes.length; i++) {
@@ -94,6 +94,7 @@ qx.Class.define("gazebo.fly.GenotypeReader",
         mendedChromosomes.push(chromosome);
       }
 
+      // The real thing.
       chromosomes = mendedChromosomes;
 
       for (i = 0; i < chromosomes.length; i++) {
@@ -102,14 +103,14 @@ qx.Class.define("gazebo.fly.GenotypeReader",
         chromosome = chromosomes[i];
 
         // Isolate '/' and ',', so we split on them too (due to the spaces)
+        // TODO Autosynaptic elements are denoted by doubled forward-slashes,
+        // i.e. '//', but they are not handled by this code yet.
         chromosome = chromosome.replace(/\//g, ' / ');
         chromosome = chromosome.replace(/,/g, ' , ');
 
-        this.debug("CHROMOSOME: " + chromosome);
         // Tokens are symbols and names.
         var tokens = chromosome.split(/\s/);
 
-        this.debug('Split ' + chromosome + ' into ' + tokens);
         for (var j = 0; j < tokens.length; j++) {
           var token = tokens[j].replace(/^\s+|\s+$/g, '');
 
@@ -128,7 +129,6 @@ qx.Class.define("gazebo.fly.GenotypeReader",
             }
           }
 
-          this.debug('Token: ' + token);
           chromosomeBag.push(token);
         }
 
