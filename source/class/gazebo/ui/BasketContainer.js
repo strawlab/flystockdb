@@ -175,8 +175,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
                   that.removeBasketItem(index, itemComposite);
                   that.addBasketItem(this.destinationIndex, item);
                   popup.hide();
-                  popup.dispose();
-                }, moveTo)
+                  // popup.dispose(); TODO Figure out why this causes a crash.
+                }, moveTo);
 
                 moveTo.setRich(true);
                 moveTo.graphicalModel = moveTo.getLabel();
