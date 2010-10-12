@@ -573,9 +573,9 @@ qx.Class.define("gazebo.fly.Contribution",
         function(result, ex, id)
         {
           if (that.rpcRunning && that.rpcRunning.getSequenceNumber() == id) {
-              var id = result;
+              var stock_id = result;
 
-              genotypeMetadataUI.updateInternalStockID("" + id);
+              genotypeMetadataUI.updateInternalStockID("" + stock_id);
           }
         },
         "create_data",
@@ -609,16 +609,51 @@ qx.Class.define("gazebo.fly.Contribution",
 
     inputListener : function(dataEvent)
     {
-      var treeItem = dataEvent.getData();
-      var userInput = dataEvent.getOldData();
+      var compound = dataEvent.getData();
+      var treeItem = compound[0];
+      var userInput = compound[1];
+      var reQuery = compound[2];
+      var initialParameters = dataEvent.getOldData();
+
+      var suggestedAides = compound.length > 2 ? compound[2] : null;
+      //var treeItem = dataEvent.getData();
+      //var userInput = dataEvent.getOldData();
+
       var chromosome = 5 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
       var flybaseId = null;
 
-      this.debug('Item: ' + treeItem + ' / ' + userInput);
+      this.debug('INPUT LISTENER: Item: ' + treeItem + ' / ' + userInput);
 
       if (treeItem) {
-        var parameters = treeItem.model_workaround;
+        var parameters = treeItem.model_workaround[0];
+
+        if (reQuery) {
+          if (parameters && !parameters[3]) {
+            for (var i = 1; i < treeItem.model_workaround.length && !parameters[3]; i++) {
+              parameters = treeItem.model_workaround[i];
+            }
+          }
+
+          if (initialParameters) {
+            parameters[0] = initialParameters[0];
+            parameters[1] = initialParameters[1];
+            parameters[2] = initialParameters[2];
+            parameters[5] = initialParameters[5];
+            parameters[6] = initialParameters[6];
+
+            treeItem.model_workaround = parameters;
+          } else {
+            parameters[0] = null;
+            parameters[1] = null;
+            parameters[2] = null;
+            parameters[5] = null;
+            parameters[6] = null;
+
+            treeItem.model_workaround = parameters;
+          }
+        }
+
         var bottom = treeItem.annotation ? treeItem.annotation[0] : false;
 
         chromosomeName = parameters[3].charAt(0);
@@ -663,8 +698,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
             // If not partite, then make homozygous:
             this.debug("PARTITE: " + partite);
+            var chromosomeBagDuplicate = chromosomeBag.concat();
             if (!partite) {
-              chromosomeBagDuplicate = chromosomeBag.concat();
               chromosomeBag = chromosomeBag.concat([ '/' ].concat(chromosomeBagDuplicate));
             }
 
@@ -683,10 +718,29 @@ qx.Class.define("gazebo.fly.Contribution",
               }
 
               if (this.reader.isAtom(token)) {
-                this.debug('TOKEN ADDED:   ' + token + "(" + possibleBalancer + ")");
-                this.searchDialog.searchForItem(token, [bottom, comma]);
+                // Collect further tokens that might help to resolve
+                // the chromosomal position of the token.
+                var splicePoint;
+                var aides = suggestedAides;
+
+                if (!aides) {
+                  aides = chromosomeBagDuplicate.concat([ possibleBalancer ]);
+                }
+
+                // Remove the token itself from the aides.
+                while ((splicePoint = aides.indexOf(token)) >= 0) {
+                  aides.splice(splicePoint, 1);
+                }
+
+                // Remove the '/' delimiter from the aides.
+                while ((splicePoint = aides.indexOf('/')) >= 0) {
+                  aides.splice(splicePoint, 1);
+                }
+
+                this.debug('TOKEN ADDED:   ' + token + " (" + possibleBalancer + ")");
+                this.searchDialog.searchForItem(token, [bottom, comma], aides, 3);
               } else {
-                this.debug('TOKEN IGNORED: ' + token + "(" + possibleBalancer + ")");
+                this.debug('TOKEN IGNORED: ' + token + " (" + possibleBalancer + ")");
               }
             }
           }
