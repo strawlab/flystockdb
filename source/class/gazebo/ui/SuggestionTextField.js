@@ -444,7 +444,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
     },
 
-    searchForItem : function(label, annotation)
+    searchForItem : function(label, annotation, aides, dependency_column)
     {
       var rpc = new qx.io.remote.Rpc();
       rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
@@ -456,7 +456,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
 
       // Remove whitespace?
-      label = this.stripWhitespace?label.replace(/^\s+|\s+$/g, ""):label;
+      label = this.stripWhitespace ? label.replace(/^\s+|\s+$/g, "") : label;
       
       var that = this;
       this.rpcRunning = rpc.callAsync(
@@ -466,16 +466,66 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           if (that.rpcRunning) { // && that.rpcRunning.getSequenceNumber() == id) {
 
             // No result returned.
-            if (!result || result.length == 0) {
-              that.fireDataEvent("searchRelay", null, label);
+            if (!result ||
+                result.length == 0 ||
+                (dependency_column != null && result[0][dependency_column] == '')
+               ) {
+              if (aides) {
+                var columns = [];
+                var tables = [];
+                var queries = [];
+                var arguments = [];
+                var previous_result = result ? result[0] : null;
+
+                that.debug("LABEL: " + label);
+                for (var i = 0; i < aides.length; i++) {
+                  columns.push([ '*' ]);
+                  tables.push([ 'x_searchables_' + (aides[i].length - 1 ) ]);
+                  queries.push('searchable like ?');
+                  arguments.push(aides[i]);
+                  that.debug("AIDE: " + aides[i]);
+                }
+
+                that.rpcRunning = rpc.callAsync(
+                  function(result, ex, id)
+                  {
+                    that.debug('Re-query (' + label + ') Result: ' + result);
+
+                    if (that.rpcRunning) { // TODO ...check id....
+                      if (result) {
+                        var treeItem = new qx.ui.tree.TreeFile();
+                        // Setting the model in Qooxdoo 1.0 does not work. Bug.
+                        treeItem.model_workaround = result;
+                        treeItem.annotation = annotation;
+                        that.fireDataEvent("searchRelay", [treeItem, label, true], previous_result);
+                      } else {
+                        that.fireDataEvent("searchRelay", [null, label, true], previous_result);
+                      }
+                    }
+                  },
+                  "query_union",
+                  {},
+                  "FB2010_05",
+                  columns,
+                  tables,
+                  queries,
+                  arguments
+                );
+
+                return;
+              }
+
+              // No aides given, so report failure.
+              that.fireDataEvent("searchRelay", [null, label, false]);
               return;
             }
 
             that.debug('searchForItem: ' + result);
             var treeItem = new qx.ui.tree.TreeFile();
-            treeItem.model_workaround = result[0];
+            // Setting the model in Qooxdoo 1.0 does not work. Bug.
+            treeItem.model_workaround = result;
             treeItem.annotation = annotation;
-            that.fireDataEvent("searchRelay", treeItem, result[0][0]);
+            that.fireDataEvent("searchRelay", [treeItem, result[0][0]]);
           }
         },
         "query",
@@ -484,6 +534,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         [ "*" ],
         [ "x_searchables_" + ( label.length - 1 ) ],
         "searchable like ?", // TODO: Figure out why = is not working.
+                             // 'like' may cause performance problems?'
         [ label ]
       );
     },
