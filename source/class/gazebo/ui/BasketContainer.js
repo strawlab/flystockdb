@@ -37,7 +37,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     this.setLayout(new qx.ui.layout.Flow(5, 5));
     this.setAllowStretchX(false, false);
-    this.setWidth(806);
+    this.setWidth(866);
 
     if (populate) {
       for (var i = 0; i < populate; i++) {
@@ -75,7 +75,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
       }
 
       itemContainer.setLayout(new qx.ui.layout.VBox(5));
-      itemContainer.setMinWidth(130);
+      itemContainer.setMinWidth(140);
       itemContainer.setMinHeight(this.basketMinHeight);
 
       this.add(itemContainer, { flex: 0 });
