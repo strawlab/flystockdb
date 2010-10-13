@@ -134,7 +134,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.container.add(groupSeparator);
 
     groupContainer = new qx.ui.container.Composite();
-    groupContainer.setLayout(new qx.ui.layout.HBox(10));
+    groupContainer.setLayout(new qx.ui.layout.VBox(10));
 
     groupContainer1 = new qx.ui.container.Composite();
     groupContainer1.setLayout(new qx.ui.layout.VBox(10));
@@ -145,50 +145,42 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     groupContainer3 = new qx.ui.container.Composite();
     groupContainer3.setLayout(new qx.ui.layout.VBox(10));
 
-    var availableGroups = new qx.ui.form.List();
-    availableGroups.setWidth(350);
-    availableGroups.setHeight(180);
+    var permissionGroups = new qx.ui.tree.Tree().set({
+      hideRoot: true
+    }); //new qx.ui.form.List();
+    permissionGroups.setWidth(350);
+    permissionGroups.setHeight(180);
 
-    availableGroups.setSelectionMode("multi");
+    permissionGroupsRoot = new qx.ui.tree.TreeFolder().set({
+      open: true
+    });
+    permissionGroups.setRoot(permissionGroupsRoot);
 
-    availableGroups.add(new qx.ui.basic.Atom("A. Aaronson Group, University of Aaberg"));
-    availableGroups.add(new qx.ui.basic.Atom("B.B. Bronson Group, University of Bern"));
-    availableGroups.add(new qx.ui.basic.Atom("C. Charles Group, CERN"));
+    permissionGroups.setSelectionMode("multi");
 
-    groupContainer1.add(new qx.ui.basic.Label().set({
-      value: 'Available Groups',
+    group1 = new qx.ui.tree.TreeFile();
+    group1checkbox = new qx.ui.form.CheckBox();
+    group1checkbox.setFocusable(false);
+    group1.addWidget(group1checkbox);
+    group1.addWidget(new qx.ui.core.Spacer(5));
+    group1.addWidget(new qx.ui.basic.Label("Publicly-Visible Stocks"));
+    group1.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+    group1.addWidget(new qx.ui.basic.Label("Rights"));
+
+    permissionGroupsRoot.add(group1);
+    //permissionGroups.add(new qx.ui.form.CheckBox("A. Aaronson Group, University of Aaberg"));
+    //permissionGroups.add(new qx.ui.form.CheckBox("B.B. Bronson Group, University of Bern"));
+    //permissionGroups.add(new qx.ui.form.CheckBox("C. Charles Group, CERN"));
+
+    groupContainer.add(new qx.ui.basic.Label().set({
+      value: 'Assigned Groups',
       appearance: 'annotation'
     }));
-    groupContainer1.add(availableGroups);
+    groupContainer.add(permissionGroups);
 
-    groupContainer2.add(new qx.ui.core.Spacer(10,80));
-    groupContainer2.add(new qx.ui.form.Button(null, 'qx/icon/Oxygen/22/actions/go-next.png'));
-    groupContainer2.add(new qx.ui.form.Button(null, 'qx/icon/Oxygen/22/actions/go-previous.png'));
-
-    var assignedGroups = new qx.ui.form.List();
-    assignedGroups.setWidth(350);
-    assignedGroups.setHeight(180);
-
-    assignedGroups.setSelectionMode("multi");
-
-    assignedGroups.add(new qx.ui.basic.Atom("Publicly-Visible Stocks"));
-
-    if (search) {
-      groupContainer3.add(new qx.ui.basic.Label().set({
-        value: 'Search in these Groups',
-        appearance: 'annotation'
-      }));
-    } else {
-      groupContainer3.add(new qx.ui.basic.Label().set({
-        value: 'Assigned Groups',
-        appearance: 'annotation'
-      }));
-    }
-    groupContainer3.add(assignedGroups);
-
-    groupContainer.add(groupContainer1);
-    groupContainer.add(groupContainer2);
-    groupContainer.add(groupContainer3);
+    //groupContainer.add(groupContainer1);
+    //groupContainer.add(groupContainer2);
+    //groupContainer.add(groupContainer3);
 
     this.container.add(groupContainer);
 
