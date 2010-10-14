@@ -151,15 +151,85 @@ qx.Class.define("gazebo.ui.Administration",
 
     container.add(userContainer);
 
-    this.groupList = new qx.ui.form.List();
+    var groupContainer = new qx.ui.container.Composite();
+    groupContainer.setLayout(new qx.ui.layout.HBox(10));
 
-    this.groupContribute = new qx.ui.form.SelectBox(); // only creator, only subscribers, everyone
-    this.groupVisible = new qx.ui.form.SelectBox(); // only creator, only subscribers, everyone
+    var groupContainer1 = new qx.ui.container.Composite();
+    groupContainer1.setLayout(new qx.ui.layout.VBox(10));
 
-    //this.add(this.groupList);
+    var groupContainer2 = new qx.ui.container.Composite();
+    groupContainer2.setLayout(new qx.ui.layout.VBox(10));
 
-    //this.add(this.groupContribute);
-    //this.add(this.groupVisible);
+    var groupContainer3 = new qx.ui.container.Composite();
+    groupContainer3.setLayout(new qx.ui.layout.VBox(10));
+
+    groupContainer1.add(new qx.ui.basic.Label().set({
+      value: 'Group List',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    this.groupList = new qx.ui.form.List().set({
+      width: 200
+    });
+    groupContainer1.add(this.groupList);
+
+    this.groupCreatedBy = new qx.ui.form.TextField().set({
+      width: 260
+    });
+    this.groupCreatedOn = new qx.ui.form.TextField().set({
+      width: 260
+    });
+    this.groupContact = new qx.ui.form.SelectBox();
+    this.groupName = new qx.ui.form.TextField().set({
+      width: 260
+    });
+    this.groupDescription = new qx.ui.form.TextField().set({
+      width: 260
+    });
+
+    groupContainer2.add(new qx.ui.basic.Label().set({
+      value: 'Details',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    groupContainer2.add(new qx.ui.basic.Label().set({
+      value: 'Created By',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    groupContainer2.add(this.groupCreatedBy);
+    groupContainer2.add(new qx.ui.basic.Label().set({
+      value: 'Created On',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    groupContainer2.add(this.groupCreatedOn);
+    groupContainer2.add(new qx.ui.basic.Label().set({
+      value: 'Contact',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    groupContainer2.add(this.groupContact);
+    groupContainer2.add(new qx.ui.basic.Label().set({
+      value: 'Group Name',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    groupContainer2.add(this.groupName);
+    groupContainer2.add(new qx.ui.basic.Label().set({
+      value: 'Description',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    groupContainer2.add(this.groupDescription);
+
+    //this.groupContribute = new qx.ui.form.SelectBox(); // only creator, only subscribers, everyone
+    //this.groupVisible = new qx.ui.form.SelectBox(); // only creator, only subscribers, everyone
+
+    groupContainer.add(groupContainer1);
+    groupContainer.add(groupContainer2);
+
+    container.add(groupContainer);
 
     this.add(container);
   },
