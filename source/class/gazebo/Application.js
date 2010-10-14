@@ -25,6 +25,8 @@
 
 #asset(qx/icon/Oxygen/16/categories/development.png)
 
+#asset(qx/icon/Oxygen/16/apps/utilities-keyring.png)
+
 ************************************************************************ */
 
 qx.Class.define("gazebo.Application",
@@ -155,11 +157,11 @@ qx.Class.define("gazebo.Application",
       var title = parameters['title'];
       var left = parameters['left'];
       var top = parameters['top'];
+      var minWidth = parameters['minWidth'] ? parameters['minWidth'] : 500;
       var customElements = parameters['customElements'];
 
       this.statusWindow = new qx.ui.window.Window(title ? title : "Status");
-      this.statusWindow.setMinWidth(150);
-      this.statusWindow.setMaxWidth(500);
+      this.statusWindow.setMinWidth(minWidth);
       this.statusWindow.setLayout(new qx.ui.layout.HBox(10).set({
         alignY: 'middle'
       }));
