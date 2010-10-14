@@ -180,7 +180,6 @@ qx.Class.define("gazebo.fly.Contribution",
         label: '<u>Add Fly-Stock</u>',
         rich: true,
         icon: 'qx/icon/Oxygen/16/actions/list-add.png',
-        //backgroundColor: '#FF0000',
         padding: [2, 6, 2, 6]
       });
       addLink.addListener('click', function(mouseEvent) {
@@ -188,10 +187,22 @@ qx.Class.define("gazebo.fly.Contribution",
         that.inquirer.suggestScreenTransition();
       }, this);
 
+      administrationLink = new qx.ui.basic.Atom().set({
+        label: '<u>Administration</u>',
+        rich: true,
+        icon: 'qx/icon/Oxygen/16/apps/utilities-keyring.png',
+        padding: [2, 6, 2, 6]
+      });
+      administrationLink.addListener('click', function(mouseEvent) {
+        that.generateAdministrationUI(that.inquirer);
+        that.inquirer.suggestScreenTransition();
+      }, this);
+
       linkContainer.setLayout(new qx.ui.layout.HBox(10));
       linkContainer.add(homeLink);
       linkContainer.add(searchLink);
       linkContainer.add(addLink);
+      linkContainer.add(administrationLink);
 
       if (!this.statusOpen) {
         this.statusOpen = true;
@@ -201,6 +212,7 @@ qx.Class.define("gazebo.fly.Contribution",
             title: ' ',
             left: 10,
             top: 10,
+            minWidth: 800,
             customElements: linkContainer
           },
           {
@@ -412,7 +424,30 @@ qx.Class.define("gazebo.fly.Contribution",
 
     },
 
+    generateAdministrationUI : function(inquirer) {
+
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Administration',
+          left : inquirer.LEFT_SO_THAT_CENTERED,
+          top: 100,
+          contents: new gazebo.ui.Administration()
+        },
+        {
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {
+
+        });
+
+    },
+
     generateStockListUI : function(inquirer) {
+
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
           title: 'Stocks',
@@ -430,6 +465,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
 
         });
+
     },
 
     generateMetaDataUI : function(inquirer) {

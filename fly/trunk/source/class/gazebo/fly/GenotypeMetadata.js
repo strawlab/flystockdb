@@ -33,23 +33,26 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.container = new qx.ui.container.Composite();
     this.container.setLayout(new qx.ui.layout.VBox(10));
     
-    idContainer = new qx.ui.container.Composite();
+    var idContainer = new qx.ui.container.Composite();
     idContainer.setLayout(new qx.ui.layout.HBox(10));
 
-    idContainer1 = new qx.ui.container.Composite();
+    var idContainer1 = new qx.ui.container.Composite();
     idContainer1.setLayout(new qx.ui.layout.VBox(10));
 
-    idContainer2 = new qx.ui.container.Composite();
+    var idContainer2 = new qx.ui.container.Composite();
     idContainer2.setLayout(new qx.ui.layout.VBox(10));
 
-    idContainer3 = new qx.ui.container.Composite();
+    var idContainer3 = new qx.ui.container.Composite();
     idContainer3.setLayout(new qx.ui.layout.VBox(10));
 
-    idContainer4 = new qx.ui.container.Composite();
+    var idContainer4 = new qx.ui.container.Composite();
     idContainer4.setLayout(new qx.ui.layout.VBox(10));
 
-    idContainer5 = new qx.ui.container.Composite();
+    var idContainer5 = new qx.ui.container.Composite();
     idContainer5.setLayout(new qx.ui.layout.VBox(10));
+
+    var idContainer6 = new qx.ui.container.Composite();
+    idContainer6.setLayout(new qx.ui.layout.VBox(10));
 
     idContainer1.add(new qx.ui.basic.Label().set({
       value: 'Internal Stock-ID',
@@ -58,7 +61,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }));
     this.internalStockID = new qx.ui.form.TextField().set({
       readOnly: true,
-      width: 160
+      width: 140
     });
     idContainer1.add(this.internalStockID);
 
@@ -68,7 +71,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       appearance: 'annotation'
     }));
     idContainer2.add(new qx.ui.form.TextField().set({
-      width: 160
+      width: 140
     }));
 
     idContainer3.add(new qx.ui.basic.Label().set({
@@ -77,7 +80,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       appearance: 'annotation'
     }));
     idContainer3.add(new qx.ui.form.TextField().set({
-      width: 200
+      width: 180
     }));
 
     var separator = new qx.ui.menu.Separator();
@@ -93,15 +96,27 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }));
     this.usernameTextField = new qx.ui.form.TextField().set({
       readOnly: true,
-      width: 200
+      width: 130
     })
     idContainer5.add(this.usernameTextField);
+
+    idContainer6.add(new qx.ui.basic.Label().set({
+      value: 'Contact / Stock Owner',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    this.contactSelectBox = new qx.ui.form.SelectBox().set({
+      width: 130
+    })
+    this.contactSelectBox.add(new qx.ui.form.ListItem('administrator'));
+    idContainer6.add(this.contactSelectBox);
 
     idContainer.add(idContainer1);
     idContainer.add(idContainer2);
     idContainer.add(idContainer3);
     idContainer.add(idContainer4);
     idContainer.add(idContainer5);
+    idContainer.add(idContainer6);
 
     this.container.add(idContainer);
 
