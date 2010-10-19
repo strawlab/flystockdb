@@ -739,12 +739,14 @@ qx.Class.define("gazebo.fly.Contribution",
               chromosomeBag = chromosomeBag.concat([ '/' ].concat(chromosomeBagDuplicate));
             }
 
+            var position = 0;
             while (chromosomeBag.length > 0) {
               var token = chromosomeBag.shift();
               var comma = false;
 
               if (token == '/') {
                 bottom = true;
+                position = 0;
                 continue;
               }
 
@@ -773,8 +775,9 @@ qx.Class.define("gazebo.fly.Contribution",
                   aides.splice(splicePoint, 1);
                 }
 
-                this.debug('TOKEN ADDED:   ' + token + " (" + possibleBalancer + ")");
-                this.searchDialog.searchForItem(token, [bottom, comma], aides, 3);
+                this.debug('TOKEN ADDED:   ' + token + " (" + possibleBalancer + ") [" + position + "]");
+                this.searchDialog.searchForItem(token, [bottom, comma, position], aides, 3);
+                position++;
               } else {
                 this.debug('TOKEN IGNORED: ' + token + " (" + possibleBalancer + ")");
               }
@@ -909,7 +912,9 @@ qx.Class.define("gazebo.fly.Contribution",
         container.add(label);
         container.add(commaSwitch);
 
-        this.genotypeBasket.addBasketItem(chromosome, container);
+        var weight = treeItem.annotation ? treeItem.annotation[2] : null;
+
+        this.genotypeBasket.addBasketItem(chromosome, container, weight);
         
         this.searchDialog.clear();
       }

@@ -94,7 +94,8 @@ qx.Class.define("gazebo.fly.GenotypeReader",
         mendedChromosomes.push(chromosome);
       }
 
-      // The real thing.
+      // The real thing, i.e. chromosomes with respect to special
+      // cases where ; may appear within brackets.
       chromosomes = mendedChromosomes;
 
       for (i = 0; i < chromosomes.length; i++) {
