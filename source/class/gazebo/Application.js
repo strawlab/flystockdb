@@ -13,6 +13,8 @@
 
 #asset(qx/icon/Oxygen/16/actions/edit-delete.png)
 #asset(qx/icon/Oxygen/16/actions/help-about.png)
+#asset(qx/icon/Oxygen/16/actions/go-up.png)
+#asset(qx/icon/Oxygen/16/actions/go-down.png)
 #asset(qx/icon/Oxygen/16/actions/go-next.png)
 #asset(qx/icon/Oxygen/16/actions/go-previous.png)
 

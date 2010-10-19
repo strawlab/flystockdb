@@ -110,12 +110,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
       this.addBasketItem(index, item);
     },
 
-    addBasketItem : function(index, item)
+    addBasketItem : function(index, item, weight)
     {
-      this.addFlavouredBasketItem(index, item, gazebo.ui.BasketContainer.LIBERAL_BASKET_ITEM);
+      this.addFlavouredBasketItem(index, item, gazebo.ui.BasketContainer.LIBERAL_BASKET_ITEM, weight);
     },
 
-    addFlavouredBasketItem : function(index, item, flavor)
+    addFlavouredBasketItem : function(index, item, flavor, weight)
     {
       var baskets = this.getChildren();
       var itemContainer = baskets[index];
@@ -159,6 +159,56 @@ qx.Class.define("gazebo.ui.BasketContainer",
           });
 
           if (flavor != gazebo.ui.BasketContainer.STICKY_BASKET_ITEM) {
+            var up = new qx.ui.basic.Atom("Up", 'qx/icon/Oxygen/16/actions/go-up.png');
+            var down = new qx.ui.basic.Atom("Down", 'qx/icon/Oxygen/16/actions/go-down.png');
+
+            up.addListener('click', function() {
+              var basketContents = that.getBasketItems(index);
+              var previousItem = null;
+
+              for (var i = 0; i < basketContents.length; i++) {
+                if (basketContents[i] == item) {
+                  if (!previousItem) {
+                    return; // Top position already.
+                  }
+                  var thisComposite = item.getLayoutParent();
+                  var previousComposite = previousItem.getLayoutParent();
+                  var mightyParent = thisComposite.getLayoutParent();
+
+                  mightyParent.remove(thisComposite);
+                  mightyParent.addBefore(thisComposite, previousComposite, 1);
+
+                  return;
+                }
+                previousItem = basketContents[i];
+              }
+            }, up);
+
+            popup.add(up);
+
+            down.addListener('click', function() {
+              var basketContents = that.getBasketItems(index);
+              var itemSpotted = false;
+
+              for (var i = 0; i < basketContents.length; i++) {
+                if (itemSpotted) {
+                  var previousComposite = item.getLayoutParent();
+                  var thisComposite = basketContents[i].getLayoutParent();
+                  var mightyParent = previousComposite.getLayoutParent();
+
+                  mightyParent.remove(previousComposite);
+                  mightyParent.addAfter(previousComposite, thisComposite, 1);
+
+                  return;
+                }
+                if (basketContents[i] == item) {
+                  itemSpotted = true;
+                }
+              }
+            }, down);
+
+            popup.add(down);
+
             for (var i = 0; i < baskets.length; i++) {
               if (i != index) {
                 var icon = that.getDirectionIcon(index, i);
@@ -222,7 +272,14 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
       itemComposite.add(item, { flex: 1 });
 
-      itemContainer.add(itemComposite, 1);
+      if (weight == null) {
+        itemContainer.add(itemComposite, 1);
+        this.debug("COMPOSITE ADDED SOMEWHERE");
+      } else {
+        itemContainer.addAt(itemComposite, weight, 1);
+        this.debug("COMPOSITE ADDED AT " + weight);
+      }
+      
     },
 
     removeBasketItem : function(index, item)
