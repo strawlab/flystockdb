@@ -47,7 +47,7 @@ qx.Class.define("gazebo.ui.Administration",
     this.userList = new qx.ui.form.List().set({
       width: 200
     });
-    userContainer1.add(this.userList);
+    userContainer1.add(this.userList, { flex: 1 });
 
     this.username = new qx.ui.form.TextField().set({
       width: 260
@@ -198,7 +198,7 @@ qx.Class.define("gazebo.ui.Administration",
     this.groupList = new qx.ui.form.List().set({
       width: 200
     });
-    groupContainer1.add(this.groupList);
+    groupContainer1.add(this.groupList, { flex: 1 });
 
     this.groupCreatedBy = new qx.ui.form.TextField().set({
       width: 260
@@ -292,9 +292,64 @@ qx.Class.define("gazebo.ui.Administration",
     container.add(groupContainer);
 
     this.add(container);
+
+    this.userList.addListener('changeSelection',
+      function(selectionEvent) {
+        var username;
+        
+        if (selectionEvent && selectionEvent.getData()) {
+          username = selectionEvent.getData()[0].getLabel();
+          alert(username);
+        }
+      },
+      this
+    );
+
+    this.groupList.addListener('changeSelection',
+      function(selectionEvent) {
+        var name;
+
+        if (selectionEvent && selectionEvent.getData()) {
+          name = selectionEvent.getData()[0].getLabel();
+          alert(name);
+        }
+      },
+      this
+    );
+
+    // Populate user-list:
+    this.populateList(this.userList, 'get_userlist');
+
+    // Populate group-list:
+    this.populateList(this.groupList, 'get_grouplist');
   },
 
   members :
   {
+    populateList : function(destination, request)
+    {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (!result || result.length == 0) {
+            // TODO Retry and eventually error handling..
+            return;
+          }
+
+          for (var i = 0; i < result.length; i++) {
+            destination.add(new qx.ui.form.ListItem(result[i][0]));
+          }
+        },
+        request,
+        { alphabetical: true },
+        "true",
+        []
+      );
+    }
   }
 });

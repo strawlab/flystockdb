@@ -411,7 +411,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               }
 
               var childFolder, childFile;
-              for (i = 0; i < result.length; i++) {
+              for (var i = 0; i < result.length; i++) {
                 if (result[i][1].match(/\.\.\./)) {
                   childFolder = new qx.ui.tree.TreeFolder(result[i][1]);
                   childFolder.addState("small"); // Small icons.
