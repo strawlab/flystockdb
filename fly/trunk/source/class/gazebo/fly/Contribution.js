@@ -652,8 +652,6 @@ qx.Class.define("gazebo.fly.Contribution",
       var initialParameters = dataEvent.getOldData();
 
       var suggestedAides = compound.length > 2 ? compound[2] : null;
-      //var treeItem = dataEvent.getData();
-      //var userInput = dataEvent.getOldData();
 
       var chromosome = 5 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
@@ -912,7 +910,9 @@ qx.Class.define("gazebo.fly.Contribution",
         container.add(label);
         container.add(commaSwitch);
 
-        var weight = treeItem.annotation ? treeItem.annotation[2] : null;
+        // In case the input cannot be put on a chromosome, it goes onto
+        // the 'Unknown' chromosome without any particular ordering.
+        var weight = treeItem && treeItem.annotation ? treeItem.annotation[2] : null;
 
         this.genotypeBasket.addBasketItem(chromosome, container, weight);
         
