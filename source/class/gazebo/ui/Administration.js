@@ -299,7 +299,20 @@ qx.Class.define("gazebo.ui.Administration",
         
         if (selectionEvent && selectionEvent.getData()) {
           username = selectionEvent.getData()[0].getLabel();
-          alert(username);
+
+          this.populateInputFields(
+            [
+              this.username,
+              this.detailCreatedBy,
+              this.detailCreatedOn,
+              this.detailFirstName,
+              this.detailLastName,
+              this.detailEMail,
+              this.detailDeactivated
+            ],
+            'get_userdetails',
+            username
+          );
         }
       },
       this
@@ -311,22 +324,48 @@ qx.Class.define("gazebo.ui.Administration",
 
         if (selectionEvent && selectionEvent.getData()) {
           name = selectionEvent.getData()[0].getLabel();
-          alert(name);
+
+          this.populateInputFields(
+            [
+              this.groupName,
+              this.groupCreatedBy,
+              this.groupCreatedOn,
+              this.groupContact,
+              this.groupDescription
+            ],
+            'get_groupdetails',
+            name
+          );
+        }
+      },
+      this
+    );
+
+    this.groupList.addListener('changeSelection',
+      function(selectionEvent) {
+        var name;
+
+        if (selectionEvent && selectionEvent.getData()) {
+          name = selectionEvent.getData()[0].getLabel();
         }
       },
       this
     );
 
     // Populate user-list:
-    this.populateList(this.userList, 'get_userlist');
+    this.populateList(this.userList, 'get_userlist', 'username');
 
     // Populate group-list:
-    this.populateList(this.groupList, 'get_grouplist');
+    this.populateList(this.groupList, 'get_grouplist', 'name');
+
+    // Populate group-contact list:
+    this.groupContact.add(new qx.ui.form.ListItem(''));
+    this.populateList(this.groupContact, 'get_userlist', 'username');
   },
 
   members :
   {
-    populateList : function(destination, request)
+    populateList : function(destination, request, column)
     {
       var rpc = new qx.io.remote.Rpc();
       rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
@@ -346,9 +385,51 @@ qx.Class.define("gazebo.ui.Administration",
           }
         },
         request,
-        { alphabetical: true },
+        { orderby: column },
         "true",
         []
+      );
+    },
+
+    populateInputFields : function(fields, request, argument)
+    {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (!result || result.length != 1) {
+            // TODO Retry and eventually error handling..
+            return;
+          }
+
+          if (result[0].length != fields.length) {
+            // TODO Woops...
+          }
+
+          for (var i = 0; i < fields.length; i++) {
+            if (fields[i].setValue) {
+              fields[i].setValue(result[0][i]);
+            } else if (fields[i].setSelection) {
+              var selectables = fields[i].getSelectables(true);
+
+              for (var j = 0; j < selectables.length; j++) {
+                if (selectables[j].getLabel() == result[0][i]) {
+                  fields[i].setSelection([ selectables[j] ]);
+                  break;
+                }
+              }
+            } else {
+              // Well.. what now, brown cow?
+            }
+          }
+        },
+        request,
+        {},
+        argument
       );
     }
   }
