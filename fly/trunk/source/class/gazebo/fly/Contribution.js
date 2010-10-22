@@ -428,9 +428,9 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
-          title: 'Administration',
+          title: 'User Administration',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 100,
+          top: 95,
           contents: new gazebo.ui.Administration()
         },
         {

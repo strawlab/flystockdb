@@ -108,7 +108,6 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.contactSelectBox = new qx.ui.form.SelectBox().set({
       width: 130
     })
-    this.contactSelectBox.add(new qx.ui.form.ListItem('administrator'));
     idContainer6.add(this.contactSelectBox);
 
     idContainer.add(idContainer1);
@@ -135,7 +134,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       }));
     }
 
-    this.container.add(new qx.ui.core.Spacer(10,20));
+    this.container.add(new qx.ui.core.Spacer(10,10));
 
     this.container.add(new qx.ui.basic.Label().set({
       value: 'Group Membership',
@@ -166,23 +165,14 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     permissionGroups.setWidth(350);
     permissionGroups.setHeight(180);
 
-    permissionGroupsRoot = new qx.ui.tree.TreeFolder().set({
+    this.permissionGroupsRoot = new qx.ui.tree.TreeFolder().set({
       open: true
     });
-    permissionGroups.setRoot(permissionGroupsRoot);
+    permissionGroups.setRoot(this.permissionGroupsRoot);
 
     permissionGroups.setSelectionMode("multi");
 
-    group1 = new qx.ui.tree.TreeFile();
-    group1checkbox = new qx.ui.form.CheckBox();
-    group1checkbox.setFocusable(false);
-    group1.addWidget(group1checkbox);
-    group1.addWidget(new qx.ui.core.Spacer(5));
-    group1.addWidget(new qx.ui.basic.Label("Publicly-Visible Stocks"));
-    group1.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
-    group1.addWidget(new qx.ui.basic.Label("Rights"));
-
-    permissionGroupsRoot.add(group1);
+    //permissionGroupsRoot.add(group1);
     //permissionGroups.add(new qx.ui.form.CheckBox("A. Aaronson Group, University of Aaberg"));
     //permissionGroups.add(new qx.ui.form.CheckBox("B.B. Bronson Group, University of Bern"));
     //permissionGroups.add(new qx.ui.form.CheckBox("C. Charles Group, CERN"));
@@ -192,6 +182,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       appearance: 'annotation'
     }));
     groupContainer.add(permissionGroups);
+
+    this.updateGroups();
 
     //groupContainer.add(groupContainer1);
     //groupContainer.add(groupContainer2);
@@ -238,7 +230,97 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
       if (status && status['logged_in']) {
         this.usernameTextField.setValue(status['username']);
+        this.updateContacts();
       }
+    },
+
+    // Gets called twice, which is kind of right because the userlist
+    // is requested twice from the server. However, I have no clue why
+    // it is called twice, because updateContacts above seems to be only
+    // called once.
+    updateContacts : function()
+    {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (!result || result.length == 0) {
+            // TODO Retry and eventually error handling..
+            return;
+          }
+
+          that.contactSelectBox.removeAll();
+
+          var thisUser = null;
+
+          for (var i = 0; i < result.length; i++) {
+            var user = new qx.ui.form.ListItem(result[i][0]);
+
+            if (result[i][0] == that.usernameTextField.getValue()) {
+              thisUser = user;
+            }
+
+            that.contactSelectBox.add(user);
+          }
+
+          if (thisUser) {
+            that.contactSelectBox.setSelection([ thisUser ]);
+          }
+        },
+        'get_userlist',
+        {},
+        "true",
+        []
+      );
+    },
+
+    updateGroups : function()
+    {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+      
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (!result || result.length == 0) {
+            // TODO Retry and eventually error handling..
+            return;
+          }
+
+          for (var i = 0; i < result.length; i++) {
+            var group = new qx.ui.tree.TreeFile();
+
+            groupCheckbox = new qx.ui.form.CheckBox();
+            groupCheckbox.setFocusable(false);
+
+            if (result[i][0] == 'Public') {
+              groupCheckbox.setValue(true);
+            }
+
+            group.addWidget(groupCheckbox);
+            group.addWidget(new qx.ui.core.Spacer(5));
+            group.addWidget(new qx.ui.basic.Label(result[i][0]));
+            group.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+            group.addWidget(new qx.ui.basic.Label(result[i][1]));
+
+            that.permissionGroupsRoot.add(group);
+          }
+        },
+        'get_grouplist',
+        { detailed: true },
+        "true",
+        []
+      );
     }
   }
 });
