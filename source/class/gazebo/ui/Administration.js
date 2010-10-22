@@ -28,7 +28,7 @@ qx.Class.define("gazebo.ui.Administration",
     container.setLayout(new qx.ui.layout.VBox(10));
 
     var userContainer = new qx.ui.container.Composite();
-    userContainer.setLayout(new qx.ui.layout.HBox(10));
+    userContainer.setLayout(new qx.ui.layout.HBox(20));
 
     var userContainer1 = new qx.ui.container.Composite();
     userContainer1.setLayout(new qx.ui.layout.VBox(10));
@@ -138,6 +138,10 @@ qx.Class.define("gazebo.ui.Administration",
     this.userModify.add(new qx.ui.form.ListItem("Created Users"));
     this.userModify.add(new qx.ui.form.ListItem("All Users"));
 
+    this.userDeleteGroup.magicMapping = true;
+    this.userPermissions.magicMapping = true;
+    this.userModify.magicMapping = true;
+
     userContainer3.add(new qx.ui.basic.Label().set({
       value: '<b>Rights & Permissions</b>',
       rich: true,
@@ -173,13 +177,22 @@ qx.Class.define("gazebo.ui.Administration",
     userContainer3.add(userContainer3_3);
 
     userContainer.add(userContainer1);
+
+    var userSeparator1 = new qx.ui.menu.Separator();
+    userSeparator1.setDecorator('separator-horizontal');
+    userSeparator1.setWidth(3);
+    userContainer.add(userSeparator1);
+
     userContainer.add(userContainer2);
+
+    userContainer.add(new qx.ui.core.Spacer(3, 10));
+
     userContainer.add(userContainer3);
 
     container.add(userContainer);
 
     var groupContainer = new qx.ui.container.Composite();
-    groupContainer.setLayout(new qx.ui.layout.HBox(10));
+    groupContainer.setLayout(new qx.ui.layout.HBox(20));
 
     var groupContainer1 = new qx.ui.container.Composite();
     groupContainer1.setLayout(new qx.ui.layout.VBox(10));
@@ -258,15 +271,16 @@ qx.Class.define("gazebo.ui.Administration",
     }); // only creator, only subscribers, everyone
 
     this.groupContribute.add(new qx.ui.form.ListItem("Only Group Creator"));
-    this.groupContribute.add(new qx.ui.form.ListItem("Only Administrators"));
     this.groupContribute.add(new qx.ui.form.ListItem("Only Subscribers"));
     this.groupContribute.add(new qx.ui.form.ListItem("Everyone"));
 
     this.groupVisible.add(new qx.ui.form.ListItem("Only Group Creator"));
-    this.groupVisible.add(new qx.ui.form.ListItem("Only Administrators"));
     this.groupVisible.add(new qx.ui.form.ListItem("Only Subscribers"));
     this.groupVisible.add(new qx.ui.form.ListItem("Everyone"));
 
+    this.groupContribute.magicMapping = true;
+    this.groupVisible.magicMapping = true;
+    
     groupContainer3.add(new qx.ui.basic.Label().set({
       value: '<b>Rights & Permissions</b>',
       rich: true,
@@ -286,8 +300,28 @@ qx.Class.define("gazebo.ui.Administration",
     groupContainer3.add(this.groupContribute);
 
     groupContainer.add(groupContainer1);
+
+    var groupSeparator1 = new qx.ui.menu.Separator();
+    groupSeparator1.setDecorator('separator-horizontal');
+    groupSeparator1.setWidth(3);
+    groupContainer.add(groupSeparator1);
+
     groupContainer.add(groupContainer2);
+
+    groupContainer.add(new qx.ui.core.Spacer(3, 10));
+
     groupContainer.add(groupContainer3);
+
+    container.add(new qx.ui.core.Spacer(10,8));
+    container.add(new qx.ui.basic.Label().set({
+      value: 'Group Administration',
+      rich: true,
+      appearance: 'window/title',
+      textColor: 'text-gray'
+    }));
+    var groupSeparator = new qx.ui.menu.Separator();
+    groupSeparator.setDecorator('separator-vertical');
+    container.add(groupSeparator);
 
     container.add(groupContainer);
 
@@ -308,7 +342,14 @@ qx.Class.define("gazebo.ui.Administration",
               this.detailFirstName,
               this.detailLastName,
               this.detailEMail,
-              this.detailDeactivated
+              this.detailDeactivated,
+              this.userCreateUser,
+              this.userCreateGroup,
+              this.userDeactivateUser,
+              this.userUnsubscribe,
+              this.userDeleteGroup,
+              this.userPermissions,
+              this.userModify
             ],
             'get_userdetails',
             username
@@ -331,7 +372,9 @@ qx.Class.define("gazebo.ui.Administration",
               this.groupCreatedBy,
               this.groupCreatedOn,
               this.groupContact,
-              this.groupDescription
+              this.groupDescription,
+              this.groupContribute,
+              this.groupVisible
             ],
             'get_groupdetails',
             name
@@ -361,6 +404,43 @@ qx.Class.define("gazebo.ui.Administration",
     // Populate group-contact list:
     this.groupContact.add(new qx.ui.form.ListItem(''));
     this.populateList(this.groupContact, 'get_userlist', 'username');
+
+    var userSeparator2 = new qx.ui.menu.Separator();
+    userSeparator2.setDecorator('separator-horizontal');
+    userSeparator2.setWidth(3);
+    userContainer.add(userSeparator2);
+
+    this.userSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
+    this.userAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
+    this.userDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
+
+    var userAddDeleteContainer = new qx.ui.container.Composite();
+    userAddDeleteContainer.setLayout(new qx.ui.layout.VBox(10));
+
+    userAddDeleteContainer.add(this.userAddButton, { flex: 1 });
+    userAddDeleteContainer.add(this.userDeleteButton, { flex: 1 });
+
+    userContainer.add(userAddDeleteContainer);
+    userContainer.add(this.userSubmitButton);
+
+    var groupSeparator2 = new qx.ui.menu.Separator();
+    groupSeparator2.setDecorator('separator-horizontal');
+    groupSeparator2.setWidth(3);
+    groupContainer.add(groupSeparator2);
+
+    this.groupSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
+    this.groupAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
+    this.groupDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
+
+    var groupAddDeleteContainer = new qx.ui.container.Composite();
+    groupAddDeleteContainer.setLayout(new qx.ui.layout.VBox(10));
+
+    groupAddDeleteContainer.add(this.groupAddButton, { flex: 1 });
+    groupAddDeleteContainer.add(this.groupDeleteButton, { flex: 1 });
+
+    groupContainer.add(groupAddDeleteContainer);
+    groupContainer.add(this.groupSubmitButton);
+
   },
 
   members :
@@ -411,10 +491,20 @@ qx.Class.define("gazebo.ui.Administration",
           }
 
           for (var i = 0; i < fields.length; i++) {
-            if (fields[i].setValue) {
+            var selectables;
+            
+            if (fields[i].magicMapping) {
+              selectables = fields[i].getSelectables(true);
+
+              if (result[0][i] < selectables.length) {
+                fields[i].setSelection([ selectables[ result[0][i] ] ]);
+              } else {
+                // TODO Woops...
+              }
+            } else if (fields[i].setValue) {
               fields[i].setValue(result[0][i]);
             } else if (fields[i].setSelection) {
-              var selectables = fields[i].getSelectables(true);
+              selectables = fields[i].getSelectables(true);
 
               for (var j = 0; j < selectables.length; j++) {
                 if (selectables[j].getLabel() == result[0][i]) {

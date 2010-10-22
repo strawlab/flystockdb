@@ -25,6 +25,9 @@
 #asset(qx/icon/Oxygen/16/actions/edit-find.png)
 #asset(qx/icon/Oxygen/16/actions/list-add.png)
 
+#asset(qx/icon/Oxygen/64/actions/list-add.png)
+#asset(qx/icon/Oxygen/64/actions/list-remove.png)
+
 #asset(qx/icon/Oxygen/16/categories/development.png)
 
 #asset(qx/icon/Oxygen/16/apps/utilities-keyring.png)
