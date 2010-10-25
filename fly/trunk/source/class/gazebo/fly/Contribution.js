@@ -431,7 +431,11 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'User Administration',
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 95,
-          contents: new gazebo.ui.Administration()
+          contents: new gazebo.ui.Administration(
+            { inquirer: inquirer },
+            {},
+            {}
+          )
         },
         {
           onTransitionCloseScreen: {

@@ -161,7 +161,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     var permissionGroups = new qx.ui.tree.Tree().set({
       hideRoot: true
-    }); //new qx.ui.form.List();
+    });
     permissionGroups.setWidth(350);
     permissionGroups.setHeight(180);
 
