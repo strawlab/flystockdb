@@ -127,14 +127,25 @@ qx.Class.define("gazebo.ui.Administration",
     this.userPermissions = new qx.ui.form.SelectBox().set({
       width: 200
     });
-    this.userModify = new qx.ui.form.SelectBox().set({
-      width: 200
-    });
+    //this.userModify = new qx.ui.form.SelectBox().set({
+    //  width: 200
+    //});
     //this.userSubscriptions = new qx.ui.form.SelectBox().set({
     //  width: 200
     //});
+    this.userOverview = new qx.ui.tree.Tree().set({
+      hideRoot: true,
+      height: 110
+    });
+    this.userOverviewRoot = new qx.ui.tree.TreeFolder().set({
+      open: true
+    });
+    this.userOverview.setRoot(this.userOverviewRoot);
+
+
 
     this.userDeleteGroup.add(new qx.ui.form.ListItem("Not Allowed"));
+    this.userDeleteGroup.add(new qx.ui.form.ListItem("Created Groups"));
     this.userDeleteGroup.add(new qx.ui.form.ListItem("Administered Groups"));
     this.userDeleteGroup.add(new qx.ui.form.ListItem("All Groups"));
 
@@ -142,13 +153,13 @@ qx.Class.define("gazebo.ui.Administration",
     this.userPermissions.add(new qx.ui.form.ListItem("Created Users"));
     this.userPermissions.add(new qx.ui.form.ListItem("All Users"));
 
-    this.userModify.add(new qx.ui.form.ListItem("Not Allowed"));
-    this.userModify.add(new qx.ui.form.ListItem("Created Users"));
-    this.userModify.add(new qx.ui.form.ListItem("All Users"));
+    //this.userModify.add(new qx.ui.form.ListItem("Not Allowed"));
+    //this.userModify.add(new qx.ui.form.ListItem("Created Users"));
+    //this.userModify.add(new qx.ui.form.ListItem("All Users"));
 
     this.userDeleteGroup.magicMapping = true;
     this.userPermissions.magicMapping = true;
-    this.userModify.magicMapping = true;
+    //this.userModify.magicMapping = true;
 
     userContainer3.add(new qx.ui.basic.Label().set({
       value: '<b>Rights & Permissions</b>',
@@ -171,18 +182,18 @@ qx.Class.define("gazebo.ui.Administration",
     var userContainer3_2 = new qx.ui.container.Composite();
     userContainer3_2.setLayout(new qx.ui.layout.VBox(5));
     userContainer3_2.add(new qx.ui.basic.Label().set({
-      value: 'Change User Permissions'
+      value: 'Change User Permissions / Details'
     }));
     userContainer3_2.add(this.userPermissions);
     userContainer3.add(userContainer3_2);
 
-    var userContainer3_3 = new qx.ui.container.Composite();
-    userContainer3_3.setLayout(new qx.ui.layout.VBox(5));
-    userContainer3_3.add(new qx.ui.basic.Label().set({
-      value: 'Modify User Details'
-    }));
-    userContainer3_3.add(this.userModify);
-    userContainer3.add(userContainer3_3);
+    //var userContainer3_3 = new qx.ui.container.Composite();
+    //userContainer3_3.setLayout(new qx.ui.layout.VBox(5));
+    //userContainer3_3.add(new qx.ui.basic.Label().set({
+    //  value: 'Modify User Details'
+    //}));
+    //userContainer3_3.add(this.userModify);
+    //userContainer3.add(userContainer3_3);
 
     //var userContainer3_4 = new qx.ui.container.Composite();
     //userContainer3_4.setLayout(new qx.ui.layout.VBox(5));
@@ -191,6 +202,14 @@ qx.Class.define("gazebo.ui.Administration",
     //}));
     //userContainer3_4.add(this.userSubscriptions);
     //userContainer3.add(userContainer3_4);
+
+    var userContainer3_3 = new qx.ui.container.Composite();
+    userContainer3_3.setLayout(new qx.ui.layout.VBox(5));
+    userContainer3_3.add(new qx.ui.basic.Label().set({
+      value: 'Overview of Your Groups'
+    }));
+    userContainer3_3.add(this.userOverview);
+    userContainer3.add(userContainer3_3);
 
     userContainer.add(userContainer1);
 
@@ -289,8 +308,8 @@ qx.Class.define("gazebo.ui.Administration",
       width: 200
     });
 
-    this.groupContribute.add(new qx.ui.form.ListItem("Only Group Administrators"));
-    this.groupContribute.add(new qx.ui.form.ListItem("Only Administrators & Subscribers"));
+    this.groupContribute.add(new qx.ui.form.ListItem("Only Its Group Administrators"));
+    this.groupContribute.add(new qx.ui.form.ListItem("Only Its Administrators & Subscribers"));
     this.groupContribute.add(new qx.ui.form.ListItem("Everyone"));
 
     this.groupVisible.add(new qx.ui.form.ListItem("Only Group Administrators"));
@@ -301,7 +320,8 @@ qx.Class.define("gazebo.ui.Administration",
     this.groupVisible.magicMapping = true;
 
     this.groupAdminAndSubscriptions = new qx.ui.tree.Tree().set({
-      hideRoot: true
+      hideRoot: true,
+      height: 140
     });
     this.groupAASRoot = new qx.ui.tree.TreeFolder().set({
       open: true
@@ -380,10 +400,7 @@ qx.Class.define("gazebo.ui.Administration",
               this.userCreateUser,
               this.userCreateGroup,
               this.userDeactivateUser,
-              this.userUnsubscribe,
-              this.userDeleteGroup,
-              this.userPermissions,
-              this.userModify
+              this.userPermissions
             ],
             'get_userdetails',
             username
@@ -392,6 +409,11 @@ qx.Class.define("gazebo.ui.Administration",
       },
       this
     );
+
+    //this.userList.addListener('changeSelection',
+    //  this.updateUserOverview,
+    //  this
+    //);
 
     this.groupList.addListener('changeSelection',
       function(selectionEvent) {
@@ -403,6 +425,7 @@ qx.Class.define("gazebo.ui.Administration",
           this.populateInputFields(
             [
               this.groupName,
+              null,
               this.groupCreatedBy,
               this.groupCreatedOn,
               this.groupContact,
@@ -531,8 +554,10 @@ qx.Class.define("gazebo.ui.Administration",
 
           for (var i = 0; i < fields.length; i++) {
             var selectables;
-            
-            if (fields[i].magicMapping) {
+
+            if (!fields[i]) {
+              // Do nothing.
+            } else if (fields[i].magicMapping) {
               selectables = fields[i].getSelectables(true);
 
               if (result[0][i] && result[0][i] < selectables.length) {
@@ -576,6 +601,8 @@ qx.Class.define("gazebo.ui.Administration",
 
               that.detailCreatedBy.setValue(result[0][1]);
               that.detailCreatedOn.setValue(result[0][2]);
+
+              that.updateUserOverview(result[0][0]);
             }
           }
         ],
@@ -594,6 +621,7 @@ qx.Class.define("gazebo.ui.Administration",
             {}
           );
           that.detailCreatedOn.setValue('');
+          that.userOverviewRoot.removeAll();
         }
       );
     },
@@ -607,6 +635,69 @@ qx.Class.define("gazebo.ui.Administration",
       }
     },
 
+    updateUserOverview : function(username) {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          that.userOverviewRoot.removeAll();
+
+          if (!result || result.length == 0) {
+            // TODO Retry and eventually error handling..
+            return;
+          }
+
+          var header = new qx.ui.tree.TreeFile();
+
+          header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+          header.addWidget(new qx.ui.basic.Label('Creator'));
+          header.addWidget(new qx.ui.core.Spacer(15));
+          header.addWidget(new qx.ui.basic.Label('Adm.'));
+
+          that.userOverviewRoot.add(header);
+
+          for (var i = 0; i < result.length; i++) {
+            var group = new qx.ui.tree.TreeFile();
+
+            isCreator = new qx.ui.form.CheckBox();
+            isCreator.setFocusable(false);
+            isCreator.setEnabled(false);
+
+            if (result[i][1] == 'administrator') {
+              isCreator.setValue(true);
+            }
+
+            adminCheckbox = new qx.ui.form.CheckBox();
+            adminCheckbox.setFocusable(false);
+            adminCheckbox.setEnabled(false);
+
+            if (result[i][2]) {
+              adminCheckbox.setValue(true);
+            }
+
+            group.addWidget(new qx.ui.basic.Label(result[i][0]));
+            group.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+            group.addWidget(isCreator);
+            group.addWidget(new qx.ui.core.Spacer(35));
+            group.addWidget(adminCheckbox);
+            group.addWidget(new qx.ui.core.Spacer(8));
+
+            that.userOverviewRoot.add(group);
+          }
+        },
+        'get_usersubscriptions',
+        {},
+        "g.group_id == s.group_id AND s.username = ?", // TODO Why do I need ==?
+        [ 'administrator' ]
+      );
+    },
+
     updateGroupUsername : function(dataEvent)
     {
       var status = dataEvent.getData();
@@ -614,6 +705,69 @@ qx.Class.define("gazebo.ui.Administration",
       if (status && status['logged_in']) {
         this.groupCreatedBy.setValue(status['username']);
       }
+    },
+
+    updateSubscriptions : function(group_id)
+    {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (!result || result.length == 0) {
+            // TODO Retry and eventually error handling..
+            return;
+          }
+
+          that.groupAASRoot.removeAll();
+          
+          var header = new qx.ui.tree.TreeFile();
+          
+          header.addWidget(new qx.ui.basic.Label(''));
+          header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+          header.addWidget(new qx.ui.basic.Label('Adm.'));
+          header.addWidget(new qx.ui.core.Spacer(15));
+          header.addWidget(new qx.ui.basic.Label('Subs.'));
+
+          that.groupAASRoot.add(header);
+
+          for (var i = 0; i < result.length; i++) {
+            var group = new qx.ui.tree.TreeFile();
+
+            group.addWidget(new qx.ui.basic.Label(result[i][0]));
+
+            var adminCheckbox = new qx.ui.form.CheckBox();
+            adminCheckbox.setFocusable(false);
+            var subscriptionCheckbox = new qx.ui.form.CheckBox();
+            subscriptionCheckbox.setFocusable(false);
+
+            if (result[i][1] != null) {
+              subscriptionCheckbox.setValue(true);
+
+              if (result[i][1]) {
+                adminCheckbox.setValue(true);
+              }
+            }
+
+            group.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+            group.addWidget(adminCheckbox);
+            group.addWidget(new qx.ui.core.Spacer(29));
+            group.addWidget(subscriptionCheckbox);
+            group.addWidget(new qx.ui.core.Spacer(8));
+
+            that.groupAASRoot.add(group);
+          }
+        },
+        'get_groupsubscriptions',
+        { comprehensive: true },
+        "u.username == s.username AND s.group_id = ?",
+        [ group_id ]
+      );
     },
 
     setGroupButtons : function()
@@ -628,10 +782,10 @@ qx.Class.define("gazebo.ui.Administration",
               that.groupAddButton.setEnabled(false);
               that.groupDeleteButton.setEnabled(true);
 
-              that.groupCreatedBy.setValue(result[0][1]);
-              that.groupCreatedOn.setValue(result[0][2]);
+              that.groupCreatedBy.setValue(result[0][2]);
+              that.groupCreatedOn.setValue(result[0][3]);
 
-              
+              that.updateSubscriptions(result[0][1]);
             }
           }
         ],
@@ -650,6 +804,10 @@ qx.Class.define("gazebo.ui.Administration",
             {}
           );
           that.groupCreatedOn.setValue('');
+
+          that.groupAASRoot.removeAll();
+          var note = new qx.ui.tree.TreeFile('Add group first (green button)', null);
+          that.groupAASRoot.add(note);
         }
       );
     }
