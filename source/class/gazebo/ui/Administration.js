@@ -142,8 +142,6 @@ qx.Class.define("gazebo.ui.Administration",
     });
     this.userOverview.setRoot(this.userOverviewRoot);
 
-
-
     this.userDeleteGroup.add(new qx.ui.form.ListItem("Not Allowed"));
     this.userDeleteGroup.add(new qx.ui.form.ListItem("Created Groups"));
     this.userDeleteGroup.add(new qx.ui.form.ListItem("Administered Groups"));
@@ -400,6 +398,7 @@ qx.Class.define("gazebo.ui.Administration",
               this.userCreateUser,
               this.userCreateGroup,
               this.userDeactivateUser,
+              this.userDeleteGroup,
               this.userPermissions
             ],
             'get_userdetails',
@@ -500,10 +499,56 @@ qx.Class.define("gazebo.ui.Administration",
 
     this.username.addListener('changeValue', this.setUserButtons, this);
     this.groupName.addListener('changeValue', this.setGroupButtons, this);
+
+    this.userSubmitButton.addListener('execute',
+      function() {
+        // TODO Check validity of user input
+
+        var rpc = new qx.io.remote.Rpc();
+        rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+        rpc.setUrl(gazebo.Application.getServerURL());
+        rpc.setServiceName("gazebo.cgi");
+
+        rpc.callAsync(
+          function(result, ex, id)
+          {
+
+          },
+          'update_user',
+          {},
+          this.username.getValue(),
+          [
+            this.detailFirstName.getValue(),
+            this.detailLastName.getValue(),
+            this.detailEMail.getValue(),
+            this.detailDeactivated.getValue(),
+            this.userCreateUser.getValue(),
+            this.userCreateGroup.getValue(),
+            this.userDeactivateUser.getValue(),
+            this.selectionPosition(this.userDeleteGroup),
+            this.selectionPosition(this.userPermissions)
+          ]
+        );
+      },
+      this
+    );
   },
 
   members :
   {
+    selectionPosition : function(selectBox)
+    {
+      var selectables = selectBox.getSelectables();
+
+      for (var i = 0; i < selectables.length; i++) {
+        if (selectBox.isSelected(selectables[i])) {
+          return i;
+        }
+      }
+
+      return -1;
+    },
+
     populateList : function(destination, request, column)
     {
       var rpc = new qx.io.remote.Rpc();
