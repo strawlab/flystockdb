@@ -238,7 +238,7 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 200,
-          canProceedWithEmptyBasket: false,
+          canProceedWithEmptyBasket: true, // For entering wild-type stocks.
           populate: 10,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
@@ -649,6 +649,34 @@ qx.Class.define("gazebo.fly.Contribution",
 
     inputListener : function(dataEvent)
     {
+      ////
+      //Some testing..
+      var writer = new gazebo.fly.GenotypeWriter();
+      var chromosomes = new Array(6);
+
+      for (var x = 0; x < chromosomes.length; x++) {
+        chromosomes[x] = [];
+      }
+
+      for (x = 0; x < 10; x++) {
+        var items = this.genotypeBasket.getBasketItems(x);
+        var bag = new Array();
+
+        for (var y = 0; y < items.length; y++) {
+          var labels = items[y].getChildren();
+
+          bag.push(labels[0]);
+        }
+
+        if (x < 6) {
+          chromosomes[x].push(bag);
+        } else {
+          chromosomes[x % 6].push(bag);
+        }
+      }
+      //alert(chromosomes);
+      alert(writer.flybaseNotation(chromosomes));
+      ////
       var compound = dataEvent.getData();
       var treeItem = compound[0];
       var userInput = compound[1];
