@@ -65,13 +65,19 @@ qx.Class.define("gazebo.ui.Administration",
       readOnly: true
     });
     this.detailFirstName = new qx.ui.form.TextField().set({
-      width: 260
+      width: 130
     });
     this.detailLastName = new qx.ui.form.TextField().set({
-      width: 260
+      width: 130
     });
     this.detailEMail = new qx.ui.form.TextField().set({
       width: 260
+    });
+    this.detailOldPassword = new qx.ui.form.PasswordField().set({
+      width: 100
+    });
+    this.detailNewPassword = new qx.ui.form.PasswordField().set({
+      width: 100
     });
 
     userContainer2.add(new qx.ui.basic.Label().set({
@@ -97,18 +103,35 @@ qx.Class.define("gazebo.ui.Administration",
       appearance: 'annotation'
     }));
     userContainer2.add(this.detailCreatedOn);
-    userContainer2.add(new qx.ui.basic.Label().set({
+
+    var userContainer2_1 = new qx.ui.container.Composite();
+    userContainer2_1.setLayout(new qx.ui.layout.HBox(10));
+
+    var userContainer2_1_1 = new qx.ui.container.Composite();
+    userContainer2_1_1.setLayout(new qx.ui.layout.VBox(10));
+
+    var userContainer2_1_2 = new qx.ui.container.Composite();
+    userContainer2_1_2.setLayout(new qx.ui.layout.VBox(10));
+
+    userContainer2_1_1.add(new qx.ui.basic.Label().set({
       value: 'First Name',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2.add(this.detailFirstName);
-    userContainer2.add(new qx.ui.basic.Label().set({
+    userContainer2_1_1.add(this.detailFirstName);
+
+    userContainer2_1_2.add(new qx.ui.basic.Label().set({
       value: 'Last Name',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2.add(this.detailLastName);
+    userContainer2_1_2.add(this.detailLastName);
+
+    userContainer2_1.add(userContainer2_1_1);
+    userContainer2_1.add(userContainer2_1_2);
+
+    userContainer2.add(userContainer2_1);
+
     userContainer2.add(new qx.ui.basic.Label().set({
       value: 'E-Mail Address',
       rich: true,
@@ -116,9 +139,55 @@ qx.Class.define("gazebo.ui.Administration",
     }));
     userContainer2.add(this.detailEMail);
 
+    var userContainer2_2 = new qx.ui.container.Composite();
+    userContainer2_2.setLayout(new qx.ui.layout.HBox(10));
+
+    var userContainer2_2_1 = new qx.ui.container.Composite();
+    userContainer2_2_1.setLayout(new qx.ui.layout.VBox(10));
+
+    var userContainer2_2_2 = new qx.ui.container.Composite();
+    userContainer2_2_2.setLayout(new qx.ui.layout.VBox(10));
+
+    var userContainer2_2_3 = new qx.ui.container.Composite();
+    userContainer2_2_3.setLayout(new qx.ui.layout.VBox(10));
+
+    userContainer2_2_1.add(new qx.ui.basic.Label().set({
+      value: 'Current Password',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    userContainer2_2_1.add(this.detailOldPassword);
+    userContainer2_2_1.add(userContainer2_2_1);
+    
+    userContainer2_2_2.add(new qx.ui.basic.Label().set({
+      value: 'New Password',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    userContainer2_2_2.add(this.detailNewPassword);
+
+    userContainer2_2_3.add(new qx.ui.basic.Label().set({
+      value: 'Reset P.',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    userContainer2_2_3.add(new qx.ui.form.Button(null, 'qx/icon/Oxygen/16/actions/mail-mark-unread.png'));
+
+    userContainer2_2.add(userContainer2_2_1);
+    userContainer2_2.add(userContainer2_2_2);
+
+    var pwdSeparator = new qx.ui.menu.Separator();
+    pwdSeparator.setDecorator('separator-horizontal');
+    pwdSeparator.setWidth(3);
+    userContainer2_2.add(pwdSeparator);
+
+    userContainer2_2.add(userContainer2_2_3);
+
+    userContainer2.add(userContainer2_2);
+
     this.detailDeactivated = new qx.ui.form.CheckBox("Login Deactivated / Blocked");
     this.userCreateUser = new qx.ui.form.CheckBox("Can Create Users");
-    this.userDeactivateUser = new qx.ui.form.CheckBox("Can Deactivate Users");
+    this.userDeactivateUser = new qx.ui.form.CheckBox("Can Activate / Deactivate Users");
     this.userCreateGroup = new qx.ui.form.CheckBox("Can Create Groups");
     //this.userUnsubscribe = new qx.ui.form.CheckBox("Unsubscribe from Groups");
     this.userDeleteGroup = new qx.ui.form.SelectBox().set({
@@ -382,9 +451,19 @@ qx.Class.define("gazebo.ui.Administration",
     this.userList.addListener('changeSelection',
       function(selectionEvent) {
         var username;
-        
-        if (selectionEvent && selectionEvent.getData()) {
-          username = selectionEvent.getData()[0].getLabel();
+
+        if (selectionEvent &&
+          selectionEvent.getData() &&
+          selectionEvent.getData().length >= 1) {
+          var firstSelection = selectionEvent.getData()[0];
+
+          // Check if selected element is not null. Otherwise crashes
+          // when calling removeAll on the list.
+          if (!firstSelection) {
+            return;
+          }
+          
+          username = firstSelection.getLabel();
 
           this.populateInputFields(
             [
@@ -409,17 +488,27 @@ qx.Class.define("gazebo.ui.Administration",
       this
     );
 
-    //this.userList.addListener('changeSelection',
-    //  this.updateUserOverview,
-    //  this
-    //);
+    this.userList.addListener('changeSelection',
+      this.updateUserOverview,
+      this
+    );
 
     this.groupList.addListener('changeSelection',
       function(selectionEvent) {
         var name;
 
-        if (selectionEvent && selectionEvent.getData()) {
-          name = selectionEvent.getData()[0].getLabel();
+        if (selectionEvent &&
+          selectionEvent.getData() &&
+          selectionEvent.getData().length >= 1) {
+          var firstSelection = selectionEvent.getData()[0];
+
+          // Check if selected element is not null. Otherwise crashes
+          // when calling removeAll on the list.
+          if (!firstSelection) {
+            return;
+          }
+
+          name = firstSelection.getLabel();
 
           this.populateInputFields(
             [
@@ -435,17 +524,6 @@ qx.Class.define("gazebo.ui.Administration",
             'get_groupdetails',
             name
           );
-        }
-      },
-      this
-    );
-
-    this.groupList.addListener('changeSelection',
-      function(selectionEvent) {
-        var name;
-
-        if (selectionEvent && selectionEvent.getData()) {
-          name = selectionEvent.getData()[0].getLabel();
         }
       },
       this
@@ -520,7 +598,7 @@ qx.Class.define("gazebo.ui.Administration",
           [
             this.detailFirstName.getValue(),
             this.detailLastName.getValue(),
-            this.detailEMail.getValue(),
+            this.detailEMail.getValue().replace("@", "@@"), // Workaround
             this.detailDeactivated.getValue(),
             this.userCreateUser.getValue(),
             this.userCreateGroup.getValue(),
@@ -532,6 +610,123 @@ qx.Class.define("gazebo.ui.Administration",
       },
       this
     );
+
+    this.userAddButton.addListener('execute',
+      function() {
+        // TODO Check validity of user input
+
+        var rpc = new qx.io.remote.Rpc();
+        rpc.setTimeout(20000); // 20sec time-out, arbitrarily chosen.
+        rpc.setUrl(gazebo.Application.getServerURL());
+        rpc.setServiceName("gazebo.cgi");
+
+        var that = this;
+
+        rpc.callAsync(
+          function(result, ex, id)
+          {
+            that.populateList(that.userList, 'get_userlist', 'username');
+          },
+          'create_user',
+          {
+            generate_password: true
+            //email_to: this.detailEMail.getValue()
+          },
+          [
+            this.username.getValue(),
+            this.detailFirstName.getValue(),
+            this.detailLastName.getValue(),
+            this.detailEMail.getValue().replace("@", "@@"), // Workaround
+            this.detailDeactivated.getValue(),
+            this.userCreateUser.getValue(),
+            this.userCreateGroup.getValue(),
+            this.userDeactivateUser.getValue(),
+            this.selectionPosition(this.userDeleteGroup),
+            this.selectionPosition(this.userPermissions)
+          ]
+        );          
+      },
+      this
+    );
+
+    this.groupSubmitButton.addListener('execute',
+      function() {
+        // TODO Check validity of user input
+
+        var rpc = new qx.io.remote.Rpc();
+        rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+        rpc.setUrl(gazebo.Application.getServerURL());
+        rpc.setServiceName("gazebo.cgi");
+
+        rpc.callAsync(
+          function(result, ex, id)
+          {
+
+          },
+          'update_group',
+          {},
+          this.groupName.getValue(),
+          [
+            this.groupContact.getSelection()[0].getLabel(), // TODO Always there?
+            this.groupDescription.getValue(),
+            this.selectionPosition(this.groupContribute),
+            this.selectionPosition(this.groupVisible)
+          ]
+        );
+
+        var assignments = []
+        var list = this.groupAASRoot.getChildren();
+
+        // Skip header.. so, start with 1!
+        for (var i = 1; i < list.length; i++) {
+          assignments.push(list[i].model_workaround_call());
+        }
+
+        rpc.callAsync(
+          function(result, ex, id)
+          {
+
+          },
+          'update_subscriptions',
+          {},
+          this.groupName.getValue(),
+          assignments
+        );
+      },
+      this
+    );
+
+    this.groupAddButton.addListener('execute',
+      function() {
+        // TODO Check validity of user input
+
+        var rpc = new qx.io.remote.Rpc();
+        rpc.setTimeout(20000); // 20sec time-out, arbitrarily chosen.
+        rpc.setUrl(gazebo.Application.getServerURL());
+        rpc.setServiceName("gazebo.cgi");
+
+        var that = this;
+
+        rpc.callAsync(
+          function(result, ex, id)
+          {
+            that.populateList(that.groupList, 'get_grouplist', 'name');
+          },
+          'create_group',
+          {
+          },
+          [
+            this.groupName.getValue(),
+            this.groupContact.getSelection()[0].getLabel(), // TODO Always there?
+            this.groupDescription.getValue(),
+            this.selectionPosition(this.groupContribute),
+            this.selectionPosition(this.groupVisible)
+          ]
+        );
+      },
+      this
+    );
+
   },
 
   members :
@@ -549,6 +744,7 @@ qx.Class.define("gazebo.ui.Administration",
       return -1;
     },
 
+    // TODO Should call removeAll() on destination, but that bails out with an error.
     populateList : function(destination, request, column)
     {
       var rpc = new qx.io.remote.Rpc();
@@ -563,6 +759,10 @@ qx.Class.define("gazebo.ui.Administration",
             // TODO Retry and eventually error handling..
             return;
           }
+
+          if (!destination) { return; }
+          
+          destination.removeAll();
 
           for (var i = 0; i < result.length; i++) {
             destination.add(new qx.ui.form.ListItem(result[i][0]));
@@ -714,7 +914,7 @@ qx.Class.define("gazebo.ui.Administration",
             isCreator.setFocusable(false);
             isCreator.setEnabled(false);
 
-            if (result[i][1] == 'administrator') {
+            if (result[i][1] == that.username.getValue()) {
               isCreator.setValue(true);
             }
 
@@ -739,7 +939,7 @@ qx.Class.define("gazebo.ui.Administration",
         'get_usersubscriptions',
         {},
         "g.group_id == s.group_id AND s.username = ?", // TODO Why do I need ==?
-        [ 'administrator' ]
+        [ that.username.getValue() ]
       );
     },
 
@@ -782,30 +982,7 @@ qx.Class.define("gazebo.ui.Administration",
           that.groupAASRoot.add(header);
 
           for (var i = 0; i < result.length; i++) {
-            var group = new qx.ui.tree.TreeFile();
-
-            group.addWidget(new qx.ui.basic.Label(result[i][0]));
-
-            var adminCheckbox = new qx.ui.form.CheckBox();
-            adminCheckbox.setFocusable(false);
-            var subscriptionCheckbox = new qx.ui.form.CheckBox();
-            subscriptionCheckbox.setFocusable(false);
-
-            if (result[i][1] != null) {
-              subscriptionCheckbox.setValue(true);
-
-              if (result[i][1]) {
-                adminCheckbox.setValue(true);
-              }
-            }
-
-            group.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
-            group.addWidget(adminCheckbox);
-            group.addWidget(new qx.ui.core.Spacer(29));
-            group.addWidget(subscriptionCheckbox);
-            group.addWidget(new qx.ui.core.Spacer(8));
-
-            that.groupAASRoot.add(group);
+            that.groupAASRoot.add(that.generateSubscriptionItem(result[i][0], result[i][1], result[i][1] != null));
           }
         },
         'get_groupsubscriptions',
@@ -813,6 +990,39 @@ qx.Class.define("gazebo.ui.Administration",
         "u.username == s.username AND s.group_id = ?",
         [ group_id ]
       );
+    },
+
+    generateSubscriptionItem : function(username, isAdmin, isSubscribed)
+    {
+      var item = new qx.ui.tree.TreeFile();
+
+      var usernameLabel = new qx.ui.basic.Label(username);
+      item.addWidget(usernameLabel);
+
+      var adminCheckbox = new qx.ui.form.CheckBox();
+      adminCheckbox.setFocusable(false);
+      var subscriptionCheckbox = new qx.ui.form.CheckBox();
+      subscriptionCheckbox.setFocusable(false);
+
+      if (isSubscribed) {
+        subscriptionCheckbox.setValue(true);
+
+        if (isAdmin) {
+          adminCheckbox.setValue(true);
+        }
+      }
+
+      item.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+      item.addWidget(adminCheckbox);
+      item.addWidget(new qx.ui.core.Spacer(29));
+      item.addWidget(subscriptionCheckbox);
+      item.addWidget(new qx.ui.core.Spacer(8));
+
+      item.model_workaround_call = function() {
+        return [ usernameLabel.getValue(), adminCheckbox.getValue(), subscriptionCheckbox.getValue() ];
+      };
+
+      return item;
     },
 
     setGroupButtons : function()

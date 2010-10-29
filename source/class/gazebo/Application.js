@@ -30,6 +30,8 @@
 
 #asset(qx/icon/Oxygen/16/categories/development.png)
 
+#asset(qx/icon/Oxygen/16/actions/mail-mark-unread.png)
+
 #asset(qx/icon/Oxygen/16/apps/utilities-keyring.png)
 
 ************************************************************************ */
