@@ -34,13 +34,13 @@ qx.Class.define("gazebo.ui.Administration",
     userContainer.setLayout(new qx.ui.layout.HBox(20));
 
     var userContainer1 = new qx.ui.container.Composite();
-    userContainer1.setLayout(new qx.ui.layout.VBox(10));
+    userContainer1.setLayout(new qx.ui.layout.VBox(7));
 
     var userContainer2 = new qx.ui.container.Composite();
-    userContainer2.setLayout(new qx.ui.layout.VBox(10));
+    userContainer2.setLayout(new qx.ui.layout.VBox(7));
 
     var userContainer3 = new qx.ui.container.Composite();
-    userContainer3.setLayout(new qx.ui.layout.VBox(10));
+    userContainer3.setLayout(new qx.ui.layout.VBox(7));
 
     userContainer1.add(new qx.ui.basic.Label().set({
       value: '<b>User List</b>',
@@ -57,11 +57,11 @@ qx.Class.define("gazebo.ui.Administration",
       liveUpdate: true
     });
     this.detailCreatedBy = new qx.ui.form.TextField().set({
-      width: 260,
+      width: 130,
       readOnly: true
     });
     this.detailCreatedOn = new qx.ui.form.TextField().set({
-      width: 260,
+      width: 130,
       readOnly: true
     });
     this.detailFirstName = new qx.ui.form.TextField().set({
@@ -91,18 +91,6 @@ qx.Class.define("gazebo.ui.Administration",
       appearance: 'annotation'
     }));
     userContainer2.add(this.username);
-    userContainer2.add(new qx.ui.basic.Label().set({
-      value: 'Created By',
-      rich: true,
-      appearance: 'annotation'
-    }));
-    userContainer2.add(this.detailCreatedBy);
-    userContainer2.add(new qx.ui.basic.Label().set({
-      value: 'Created On',
-      rich: true,
-      appearance: 'annotation'
-    }));
-    userContainer2.add(this.detailCreatedOn);
 
     var userContainer2_1 = new qx.ui.container.Composite();
     userContainer2_1.setLayout(new qx.ui.layout.HBox(10));
@@ -114,23 +102,50 @@ qx.Class.define("gazebo.ui.Administration",
     userContainer2_1_2.setLayout(new qx.ui.layout.VBox(10));
 
     userContainer2_1_1.add(new qx.ui.basic.Label().set({
-      value: 'First Name',
+      value: 'Created By',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2_1_1.add(this.detailFirstName);
-
+    userContainer2_1_1.add(this.detailCreatedBy);
     userContainer2_1_2.add(new qx.ui.basic.Label().set({
-      value: 'Last Name',
+      value: 'Created On',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2_1_2.add(this.detailLastName);
+    userContainer2_1_2.add(this.detailCreatedOn);
 
     userContainer2_1.add(userContainer2_1_1);
     userContainer2_1.add(userContainer2_1_2);
 
     userContainer2.add(userContainer2_1);
+
+    var userContainer2_2 = new qx.ui.container.Composite();
+    userContainer2_2.setLayout(new qx.ui.layout.HBox(10));
+
+    var userContainer2_2_1 = new qx.ui.container.Composite();
+    userContainer2_2_1.setLayout(new qx.ui.layout.VBox(7));
+
+    var userContainer2_2_2 = new qx.ui.container.Composite();
+    userContainer2_2_2.setLayout(new qx.ui.layout.VBox(7));
+
+    userContainer2_2_1.add(new qx.ui.basic.Label().set({
+      value: 'First Name',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    userContainer2_2_1.add(this.detailFirstName);
+
+    userContainer2_2_2.add(new qx.ui.basic.Label().set({
+      value: 'Last Name',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    userContainer2_2_2.add(this.detailLastName);
+
+    userContainer2_2.add(userContainer2_2_1);
+    userContainer2_2.add(userContainer2_2_2);
+
+    userContainer2.add(userContainer2_2);
 
     userContainer2.add(new qx.ui.basic.Label().set({
       value: 'E-Mail Address',
@@ -139,51 +154,51 @@ qx.Class.define("gazebo.ui.Administration",
     }));
     userContainer2.add(this.detailEMail);
 
-    var userContainer2_2 = new qx.ui.container.Composite();
-    userContainer2_2.setLayout(new qx.ui.layout.HBox(10));
+    var userContainer2_3 = new qx.ui.container.Composite();
+    userContainer2_3.setLayout(new qx.ui.layout.HBox(10));
 
-    var userContainer2_2_1 = new qx.ui.container.Composite();
-    userContainer2_2_1.setLayout(new qx.ui.layout.VBox(10));
+    var userContainer2_3_1 = new qx.ui.container.Composite();
+    userContainer2_3_1.setLayout(new qx.ui.layout.VBox(7));
 
-    var userContainer2_2_2 = new qx.ui.container.Composite();
-    userContainer2_2_2.setLayout(new qx.ui.layout.VBox(10));
+    var userContainer2_3_2 = new qx.ui.container.Composite();
+    userContainer2_3_2.setLayout(new qx.ui.layout.VBox(7));
 
-    var userContainer2_2_3 = new qx.ui.container.Composite();
-    userContainer2_2_3.setLayout(new qx.ui.layout.VBox(10));
+    var userContainer2_3_3 = new qx.ui.container.Composite();
+    userContainer2_3_3.setLayout(new qx.ui.layout.VBox(7));
 
-    userContainer2_2_1.add(new qx.ui.basic.Label().set({
+    userContainer2_3_1.add(new qx.ui.basic.Label().set({
       value: 'Current Password',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2_2_1.add(this.detailOldPassword);
-    userContainer2_2_1.add(userContainer2_2_1);
+    userContainer2_3_1.add(this.detailOldPassword);
+    userContainer2_3_1.add(userContainer2_3_1);
     
-    userContainer2_2_2.add(new qx.ui.basic.Label().set({
+    userContainer2_3_2.add(new qx.ui.basic.Label().set({
       value: 'New Password',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2_2_2.add(this.detailNewPassword);
+    userContainer2_3_2.add(this.detailNewPassword);
 
-    userContainer2_2_3.add(new qx.ui.basic.Label().set({
+    userContainer2_3_3.add(new qx.ui.basic.Label().set({
       value: 'Reset P.',
       rich: true,
       appearance: 'annotation'
     }));
-    userContainer2_2_3.add(new qx.ui.form.Button(null, 'qx/icon/Oxygen/16/actions/mail-mark-unread.png'));
+    userContainer2_3_3.add(new qx.ui.form.Button(null, 'qx/icon/Oxygen/16/actions/mail-mark-unread.png'));
 
-    userContainer2_2.add(userContainer2_2_1);
-    userContainer2_2.add(userContainer2_2_2);
+    userContainer2_3.add(userContainer2_3_1);
+    userContainer2_3.add(userContainer2_3_2);
 
     var pwdSeparator = new qx.ui.menu.Separator();
     pwdSeparator.setDecorator('separator-horizontal');
     pwdSeparator.setWidth(3);
-    userContainer2_2.add(pwdSeparator);
+    userContainer2_3.add(pwdSeparator);
 
-    userContainer2_2.add(userContainer2_2_3);
+    userContainer2_3.add(userContainer2_3_3);
 
-    userContainer2.add(userContainer2_2);
+    userContainer2.add(userContainer2_3);
 
     this.detailDeactivated = new qx.ui.form.CheckBox("Login Deactivated / Blocked");
     this.userCreateUser = new qx.ui.form.CheckBox("Can Create Users");
@@ -204,7 +219,7 @@ qx.Class.define("gazebo.ui.Administration",
     //});
     this.userOverview = new qx.ui.tree.Tree().set({
       hideRoot: true,
-      height: 110
+      height: 80
     });
     this.userOverviewRoot = new qx.ui.tree.TreeFolder().set({
       open: true
@@ -297,13 +312,13 @@ qx.Class.define("gazebo.ui.Administration",
     groupContainer.setLayout(new qx.ui.layout.HBox(20));
 
     var groupContainer1 = new qx.ui.container.Composite();
-    groupContainer1.setLayout(new qx.ui.layout.VBox(10));
+    groupContainer1.setLayout(new qx.ui.layout.VBox(7));
 
     var groupContainer2 = new qx.ui.container.Composite();
-    groupContainer2.setLayout(new qx.ui.layout.VBox(10));
+    groupContainer2.setLayout(new qx.ui.layout.VBox(7));
 
     var groupContainer3 = new qx.ui.container.Composite();
-    groupContainer3.setLayout(new qx.ui.layout.VBox(10));
+    groupContainer3.setLayout(new qx.ui.layout.VBox(7));
 
     groupContainer1.add(new qx.ui.basic.Label().set({
       value: '<b>Group List</b>',
@@ -316,11 +331,11 @@ qx.Class.define("gazebo.ui.Administration",
     groupContainer1.add(this.groupList, { flex: 1 });
 
     this.groupCreatedBy = new qx.ui.form.TextField().set({
-      width: 260,
+      width: 130,
       readOnly: true
     });
     this.groupCreatedOn = new qx.ui.form.TextField().set({
-      width: 260,
+      width: 130,
       readOnly: true
     });
     this.groupContact = new qx.ui.form.SelectBox();
@@ -343,18 +358,34 @@ qx.Class.define("gazebo.ui.Administration",
       appearance: 'annotation'
     }));
     groupContainer2.add(this.groupName);
-    groupContainer2.add(new qx.ui.basic.Label().set({
+
+    var groupContainer2_1 = new qx.ui.container.Composite();
+    groupContainer2_1.setLayout(new qx.ui.layout.HBox(10));
+
+    var groupContainer2_1_1 = new qx.ui.container.Composite();
+    groupContainer2_1_1.setLayout(new qx.ui.layout.VBox(7));
+
+    var groupContainer2_1_2 = new qx.ui.container.Composite();
+    groupContainer2_1_2.setLayout(new qx.ui.layout.VBox(7));
+
+    groupContainer2_1_1.add(new qx.ui.basic.Label().set({
       value: 'Created By',
       rich: true,
       appearance: 'annotation'
     }));
-    groupContainer2.add(this.groupCreatedBy);
-    groupContainer2.add(new qx.ui.basic.Label().set({
+    groupContainer2_1_1.add(this.groupCreatedBy);
+    groupContainer2_1_2.add(new qx.ui.basic.Label().set({
       value: 'Created On',
       rich: true,
       appearance: 'annotation'
     }));
-    groupContainer2.add(this.groupCreatedOn);
+    groupContainer2_1_2.add(this.groupCreatedOn);
+
+    groupContainer2_1.add(groupContainer2_1_1);
+    groupContainer2_1.add(groupContainer2_1_2);
+
+    groupContainer2.add(groupContainer2_1);
+
     groupContainer2.add(new qx.ui.basic.Label().set({
       value: 'Contact',
       rich: true,
@@ -388,7 +419,7 @@ qx.Class.define("gazebo.ui.Administration",
 
     this.groupAdminAndSubscriptions = new qx.ui.tree.Tree().set({
       hideRoot: true,
-      height: 140
+      height: 100
     });
     this.groupAASRoot = new qx.ui.tree.TreeFolder().set({
       open: true
@@ -433,7 +464,7 @@ qx.Class.define("gazebo.ui.Administration",
 
     groupContainer.add(groupContainer3);
 
-    container.add(new qx.ui.core.Spacer(10,8));
+    //container.add(new qx.ui.core.Spacer(10,8));
     container.add(new qx.ui.basic.Label().set({
       value: 'Group Administration',
       rich: true,

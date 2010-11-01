@@ -453,6 +453,10 @@ qx.Class.define("gazebo.Application",
 			this.customWindow.setShowMaximize(false);
 			this.customWindow.setShowMinimize(false);
 
+      if (parameters['maxHeight']) {
+        this.customWindow.setMaxHeight(parameters['maxHeight']);
+      }
+
       this.customWindow.addListener("resize", this.getPositioningFunction(left, top), this.customWindow);
 
       this.customWindow.add(customContainer);

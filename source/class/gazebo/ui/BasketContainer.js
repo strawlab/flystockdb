@@ -28,16 +28,22 @@ qx.Class.define("gazebo.ui.BasketContainer",
     var decorations = parameters['decorations'];
 
     this.labels = parameters['labels'];
-    this.basketMinHeight = parameters['basketMinHeight'] ? parameters['basketMinHeight'] : 280;
+    this.basketMinHeight = parameters['basketMinHeight'] ? parameters['basketMinHeight'] : 250;
 
     // Install overrides (needed when populating baskets):
     if (overrides['makeEmptyBasketLabel']) {
       this.makeEmptyBasketLabel = overrides['makeEmptyBasketLabel'];
     }
 
-    this.setLayout(new qx.ui.layout.Flow(5, 5));
-    this.setAllowStretchX(false, false);
-    this.setWidth(866);
+    this.setLayout(new qx.ui.layout.VBox(10));
+
+    this.basketComposite = new qx.ui.container.Composite();
+
+    this.basketComposite.setLayout(new qx.ui.layout.Flow(5, 5));
+    this.basketComposite.setAllowStretchX(false, false);
+    this.basketComposite.setWidth(866);
+
+    this.add(this.basketComposite);
 
     if (populate) {
       for (var i = 0; i < populate; i++) {
@@ -58,10 +64,31 @@ qx.Class.define("gazebo.ui.BasketContainer",
         }
       }
     }
+
+    if (parameters['footer']) {
+      this.footer = new qx.ui.basic.Label().set({
+        value: parameters['footer'],
+        selectable: true,
+        rich: true,
+        appearance: 'annotation'
+      });
+
+      this.add(this.footer);
+    }
+
+    if (listeners['onBasketChange']) {
+      listener = listeners['onBasketChange'];
+      this.addListener('onBasketChangeRelay', listener['call'], listener['context']);
+    }
   },
 
   members:
   {
+    setFooter : function(text)
+    {
+      this.footer.setValue(text);
+    },
+
     addBasket : function(title, decoration)
     {
       var itemContainer = new qx.ui.groupbox.GroupBox();
@@ -78,12 +105,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
       itemContainer.setMinWidth(140);
       itemContainer.setMinHeight(this.basketMinHeight);
 
-      this.add(itemContainer, { flex: 0 });
+      this.basketComposite.add(itemContainer, { flex: 0 });
     },
 
     getBasketItems : function(index)
     {
-      var baskets = this.getChildren();
+      var baskets = this.basketComposite.getChildren();
       var itemContainer = baskets[index];
       var items = new Array();
       
@@ -103,7 +130,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     setBasketItem : function(index, item)
     {
-      var baskets = this.getChildren();
+      var baskets = this.basketComposite.getChildren();
       var itemContainer = baskets[index];
 
       itemContainer.removeAll();
@@ -117,7 +144,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     addFlavouredBasketItem : function(index, item, flavor, weight)
     {
-      var baskets = this.getChildren();
+      var baskets = this.basketComposite.getChildren();
       var itemContainer = baskets[index];
 
       var contents = itemContainer.getChildren();
@@ -159,8 +186,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
           });
 
           if (flavor != gazebo.ui.BasketContainer.STICKY_BASKET_ITEM) {
-            var up = new qx.ui.basic.Atom("Up", 'qx/icon/Oxygen/16/actions/go-up.png');
-            var down = new qx.ui.basic.Atom("Down", 'qx/icon/Oxygen/16/actions/go-down.png');
+            var up = new qx.ui.basic.Atom("Towards front", 'qx/icon/Oxygen/16/actions/go-up.png');
+            var down = new qx.ui.basic.Atom("Towards end", 'qx/icon/Oxygen/16/actions/go-down.png');
 
             up.addListener('click', function() {
               var basketContents = that.getBasketItems(index);
@@ -279,12 +306,13 @@ qx.Class.define("gazebo.ui.BasketContainer",
         itemContainer.addAt(itemComposite, weight, 1);
         this.debug("COMPOSITE ADDED AT " + weight);
       }
-      
+
+      this.fireDataEvent('onBasketChangeRelay', this);
     },
 
     removeBasketItem : function(index, item)
     {
-      var baskets = this.getChildren();
+      var baskets = this.basketComposite.getChildren();
       var itemContainer = baskets[index];
 
       itemContainer.remove(item);
@@ -298,6 +326,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
           this.addFlavouredBasketItem(index, emptyBasketLabel, gazebo.ui.BasketContainer.EMPTY_BASKET_ITEM);
         }
       }
+
+      this.fireDataEvent('onBasketChangeRelay', this);
     },
 
     getDirectionIcon : function(position, destination) {
