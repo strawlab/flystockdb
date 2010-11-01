@@ -26,6 +26,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     var inquirer = parameters['inquirer'];
     var search = parameters['search'];
 
+    this.genotype = parameters['genotype'];
+
     this.setLayout(new qx.ui.layout.HBox(10));
 
     this.setMinWidth(800);
@@ -54,6 +56,12 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     var idContainer6 = new qx.ui.container.Composite();
     idContainer6.setLayout(new qx.ui.layout.VBox(10));
 
+    var idContainer7 = new qx.ui.container.Composite();
+    idContainer7.setLayout(new qx.ui.layout.VBox(10));
+
+    var idContainer8 = new qx.ui.container.Composite();
+    idContainer8.setLayout(new qx.ui.layout.VBox(10));
+
     idContainer1.add(new qx.ui.basic.Label().set({
       value: 'Internal Stock-ID',
       rich: true,
@@ -61,7 +69,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }));
     this.internalStockID = new qx.ui.form.TextField().set({
       readOnly: true,
-      width: 140
+      width: 110
     });
     idContainer1.add(this.internalStockID);
 
@@ -70,26 +78,44 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       rich: true,
       appearance: 'annotation'
     }));
-    idContainer2.add(new qx.ui.form.TextField().set({
-      width: 140
-    }));
+    this.xrefTextField = new qx.ui.form.TextField().set({
+      width: 110
+    });
+    idContainer2.add(this.xrefTextField);
 
     idContainer3.add(new qx.ui.basic.Label().set({
       value: 'Source / Donor',
       rich: true,
       appearance: 'annotation'
     }));
-    idContainer3.add(new qx.ui.form.TextField().set({
+    this.donorTextField = new qx.ui.form.TextField().set({
       width: 180
-    }));
+    });
+    idContainer3.add(this.donorTextField);
 
-    var separator = new qx.ui.menu.Separator();
-    separator.setDecorator('separator-horizontal');
-    separator.setWidth(3);
-    separator.setHeight(45);
-    idContainer4.add(separator);
+    var separator1 = new qx.ui.menu.Separator();
+    separator1.setDecorator('separator-horizontal');
+    separator1.setWidth(3);
+    separator1.setHeight(45);
+    idContainer4.add(separator1);
 
     idContainer5.add(new qx.ui.basic.Label().set({
+      value: 'Wildtype Name',
+      rich: true,
+      appearance: 'annotation'
+    }));
+    this.wildtypeTextField = new qx.ui.form.TextField().set({
+      width: 130
+    });
+    idContainer5.add(this.wildtypeTextField);
+
+    var separator2 = new qx.ui.menu.Separator();
+    separator2.setDecorator('separator-horizontal');
+    separator2.setWidth(3);
+    separator2.setHeight(45);
+    idContainer6.add(separator2);
+
+    idContainer7.add(new qx.ui.basic.Label().set({
       value: 'Stock Entered By',
       rich: true,
       appearance: 'annotation'
@@ -97,10 +123,10 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.usernameTextField = new qx.ui.form.TextField().set({
       readOnly: true,
       width: 130
-    })
-    idContainer5.add(this.usernameTextField);
+    });
+    idContainer7.add(this.usernameTextField);
 
-    idContainer6.add(new qx.ui.basic.Label().set({
+    idContainer8.add(new qx.ui.basic.Label().set({
       value: 'Contact / Stock Owner',
       rich: true,
       appearance: 'annotation'
@@ -108,7 +134,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.contactSelectBox = new qx.ui.form.SelectBox().set({
       width: 130
     })
-    idContainer6.add(this.contactSelectBox);
+    idContainer8.add(this.contactSelectBox);
 
     idContainer.add(idContainer1);
     idContainer.add(idContainer2);
@@ -116,6 +142,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     idContainer.add(idContainer4);
     idContainer.add(idContainer5);
     idContainer.add(idContainer6);
+    idContainer.add(idContainer7);
+    idContainer.add(idContainer8);
 
     this.container.add(idContainer);
 
@@ -126,15 +154,17 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }));
 
     if (search) {
-      this.container.add(new qx.ui.form.TextField());
+      this.descriptionTextX = new qx.ui.form.TextField();
+      this.container.add(this.descriptionTextX);
     } else {
-      this.container.add(new qx.ui.form.TextArea().set({
+      this.descriptionTextX = new qx.ui.form.TextArea().set({
         maxLength: 65535,
-        height: 200
-      }));
+        height: 150
+      });
+      this.container.add(this.descriptionTextX);
     }
 
-    this.container.add(new qx.ui.core.Spacer(10,10));
+    this.container.add(new qx.ui.core.Spacer(10,3));
 
     this.container.add(new qx.ui.basic.Label().set({
       value: 'Group Membership',
@@ -163,7 +193,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       hideRoot: true
     });
     permissionGroups.setWidth(350);
-    permissionGroups.setHeight(180);
+    permissionGroups.setHeight(110);
 
     this.permissionGroupsRoot = new qx.ui.tree.TreeFolder().set({
       open: true
@@ -172,11 +202,6 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     permissionGroups.setSelectionMode("multi");
 
-    //permissionGroupsRoot.add(group1);
-    //permissionGroups.add(new qx.ui.form.CheckBox("A. Aaronson Group, University of Aaberg"));
-    //permissionGroups.add(new qx.ui.form.CheckBox("B.B. Bronson Group, University of Bern"));
-    //permissionGroups.add(new qx.ui.form.CheckBox("C. Charles Group, CERN"));
-
     groupContainer.add(new qx.ui.basic.Label().set({
       value: 'Assigned Groups',
       appearance: 'annotation'
@@ -184,10 +209,6 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     groupContainer.add(permissionGroups);
 
     this.updateGroups();
-
-    //groupContainer.add(groupContainer1);
-    //groupContainer.add(groupContainer2);
-    //groupContainer.add(groupContainer3);
 
     this.container.add(groupContainer);
 
@@ -200,6 +221,13 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     var submitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
     this.add(submitButton);
+
+    submitButton.addListener('execute',
+      function() {
+        this.saveStock();
+      },
+      this
+    );
 
     inquirer.generateAuthenticationDispatcher(
       {},
@@ -219,6 +247,57 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
   members:
   {
+    // TODO Appears also in Administration.js.. should provide a general implementation.
+    selectionPosition : function(selectBox)
+    {
+      var selectables = selectBox.getSelectables();
+
+      for (var i = 0; i < selectables.length; i++) {
+        if (selectBox.isSelected(selectables[i])) {
+          return i;
+        }
+      }
+
+      return -1;
+    },
+
+    saveStock : function()
+    {
+      var rpc = new qx.io.remote.Rpc();
+			rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+			rpc.setUrl(gazebo.Application.getServerURL());
+			rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      var xref = this.xrefTextField.getValue();
+      var description = this.descriptionTextX.getValue();
+      var donor = this.donorTextField.getValue();
+      var contact = this.contactSelectBox.getSelectables()[this.selectionPosition(this.contactSelectBox)].getLabel();
+      var wildtype = this.wildtypeTextField.getValue();
+
+      this.rpcRunning = rpc.callAsync(
+        function(result, ex, id)
+        {
+          // TODO
+        },
+        "update_data",
+        {},
+        "FB2010_05",
+        "x_stocks",
+        parseInt(this.internalStockID.getValue()),
+        [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
+        [
+          xref,
+          this.genotype,
+          description,
+          donor,
+          contact,
+          wildtype
+        ]
+      );
+    },
+
     updateInternalStockID : function(stockID)
     {
       this.internalStockID.setValue(stockID);

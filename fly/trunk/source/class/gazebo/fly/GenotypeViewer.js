@@ -30,11 +30,16 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
   {
     this.base(arguments);
 
+    var height = parameters['height'] ? parameters['height'] : 86;
+
     //this.setLayout(new qx.ui.layout.HBox(5));
     this.set({
       width: 900,
-      height: 86
+      height: height
     });
+
+    outterContainer = new qx.ui.container.Composite();
+    outterContainer.setLayout(new qx.ui.layout.VBox(10));
 
     this.container = new qx.ui.container.Composite();
 
@@ -55,7 +60,6 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
       topContainer.setLayout(new qx.ui.layout.HBox(2).set({ alignX: "center" }));
       bottomContainer.setLayout(new qx.ui.layout.HBox(2).set({ alignX: "center" }));
 
-      //topContainer.add(new qx.ui.basic.Label('+'));
       chromosome.add(topContainer);
 
       // Add separator and second chromosome for X, 2, 3, 4
@@ -64,14 +68,24 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
         separator.setDecorator('separator-vertical');
         chromosome.add(separator);
 
-        //bottomContainer.add(new qx.ui.basic.Label('+'));
         chromosome.add(bottomContainer);
       }
 
       this.container.add(chromosome);
     }
 
-    this.add(this.container);
+    outterContainer.add(this.container);
+
+    if (parameters['footer']) {
+      outterContainer.add(new qx.ui.basic.Label().set({
+        value: parameters['footer'],
+        rich: true,
+        selectable: true,
+        appearance: 'annotation'
+      }));
+    }
+
+    this.add(outterContainer);
   },
 
   members:

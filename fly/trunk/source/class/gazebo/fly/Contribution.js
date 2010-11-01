@@ -31,6 +31,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
   statics :
   {
+    FOOTER_PREAMBLE : 'FlyBase Nomenclature: ',
     // States are not used yet.
     UI_BLANK : 0,
     UI_LOGIN : 1,
@@ -129,9 +130,9 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
           title: 'Quick Search',
-          left: 10,
+          left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 100,
-          textFieldMinimalWidth: 150,
+          textFieldMinimalWidth: 250,
           stripWhitespace: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/dialog-ok.png'
@@ -237,7 +238,8 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 200,
+          footer: gazebo.fly.Contribution.FOOTER_PREAMBLE + '+',
+          top: 180,
           canProceedWithEmptyBasket: true, // For entering wild-type stocks.
           populate: 10,
           titles: [ 'Chromosome X',
@@ -277,6 +279,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           onOpen: { call: this.basketOpenListener, context: this },
           onProceed: { call: this.proceedListener, context: this },
+          onBasketChange: { call: this.basketChangeListener, context: this },
           onTransitionCloseScreen: {
             call: inquirer.disposeBasket,
             context: inquirer,
@@ -300,7 +303,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Add Gene, Allele, Balancer, ...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 100,
+          top: 90,
           stripWhitespace: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
@@ -329,7 +332,7 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 190,
-          basketMinHeight: 150,
+          basketMinHeight: 110,
           canProceedWithEmptyBasket: true,
           populate: 6,
           titles: [ 'Chromosome X',
@@ -380,7 +383,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Add Gene, Allele, Balancer, ...',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 100,
+          top: 90,
           stripWhitespace: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
@@ -403,7 +406,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 430,
+          top: 380,
           contents: new gazebo.fly.GenotypeMetadata(
             { inquirer: inquirer, search: true },
             {},
@@ -454,9 +457,10 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
-          title: 'Stocks',
-          left : 300,
-          top: 100,
+          title: 'Popular Stocks',
+          left : inquirer.LEFT_SO_THAT_CENTERED,
+          top: 190,
+          maxHeight: 270,
           contents: new gazebo.fly.StockListViewer()
         },
         {
@@ -468,7 +472,28 @@ qx.Class.define("gazebo.fly.Contribution",
         },
         {
 
-        });
+        }
+      );
+
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Most Recently Entered Stocks',
+          left : inquirer.LEFT_SO_THAT_CENTERED,
+          top: 470,
+          maxHeight: 270,
+          contents: new gazebo.fly.StockListViewer()
+        },
+        {
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {
+
+        }
+      );
 
     },
 
@@ -478,8 +503,15 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 100,
-          contents: new gazebo.fly.GenotypeViewer()
+          top: 90,
+          contents: new gazebo.fly.GenotypeViewer(
+            {
+              height: 106,
+              footer: gazebo.fly.Contribution.FOOTER_PREAMBLE + this.getFlyBaseNotation()
+            },
+            {},
+            {}
+          )
         },
         {
           onOpen: { call: this.genotypeViewerOpenListener, context: this },
@@ -496,10 +528,11 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 270,
+          top: 260,
           contents: new gazebo.fly.GenotypeMetadata(
             {
-              inquirer: inquirer
+              inquirer: inquirer,
+              genotype: this.getFlyBaseNotation()
             },
             {
               onOpen: { call: this.metadataEditorOpenListener, context: this }
@@ -599,7 +632,6 @@ qx.Class.define("gazebo.fly.Contribution",
     },
 
     metadataEditorOpenListener : function(dataEvent) {
-
       var genotypeMetadataUI = dataEvent.getData();
 
       var rpc = new qx.io.remote.Rpc();
@@ -622,10 +654,9 @@ qx.Class.define("gazebo.fly.Contribution",
         {},
         "FB2010_05",
         "x_stocks",
-        [ "xref", "genotype", "description", "donor" ],
-        [ "", "", "", "" ]
+        [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
+        [ "", "", "", "", "", "" ]
       );
-
     },
 
     searchDialogOpenListener : function(dataEvent) {
@@ -636,21 +667,7 @@ qx.Class.define("gazebo.fly.Contribution",
       this.genotypeBasket = dataEvent.getData();
     },
 
-    proceedListener : function() {
-      this.generateMetaDataUI(this.inquirer);
-      this.inquirer.suggestScreenTransition();
-    },
-
-    searchListener : function(dataEvent)
-    {
-      this.requestTransition = true;
-      this.inputListener(dataEvent);
-    },
-
-    inputListener : function(dataEvent)
-    {
-      ////
-      //Some testing..
+    getFlyBaseNotation : function() {
       var writer = new gazebo.fly.GenotypeWriter();
       var chromosomes = new Array(6);
 
@@ -674,9 +691,29 @@ qx.Class.define("gazebo.fly.Contribution",
           chromosomes[x % 6].push(bag);
         }
       }
-      //alert(chromosomes);
-      alert(writer.flybaseNotation(chromosomes));
-      ////
+
+      return writer.flybaseNotation(chromosomes);
+    },
+
+    basketChangeListener : function(dataEvent) {
+      this.genotypeBasket.setFooter(gazebo.fly.Contribution.FOOTER_PREAMBLE +
+        this.getFlyBaseNotation()
+      );
+    },
+
+    proceedListener : function() {
+      this.generateMetaDataUI(this.inquirer);
+      this.inquirer.suggestScreenTransition();
+    },
+
+    searchListener : function(dataEvent)
+    {
+      this.requestTransition = true;
+      this.inputListener(dataEvent);
+    },
+
+    inputListener : function(dataEvent)
+    {
       var compound = dataEvent.getData();
       var treeItem = compound[0];
       var userInput = compound[1];
@@ -843,6 +880,7 @@ qx.Class.define("gazebo.fly.Contribution",
               false);
           }, this);
 
+          label.plainModel = displayText;
           label.graphicalModel = label.getValue();
 
           label.addListener('mouseover', function(mouseEvent) {
@@ -857,6 +895,8 @@ qx.Class.define("gazebo.fly.Contribution",
             value: displayText,
             rich: true
           });
+
+          label.plainModel = displayText;
         }
 
         label.setToolTipText(userInput);
@@ -871,19 +911,27 @@ qx.Class.define("gazebo.fly.Contribution",
 
         commaSwitch.isCommaSwitch = true;
         commaSwitch.isSwitchedOn = false;
+        label.commaSwitchedOn = false;
 
         if (treeItem && treeItem.annotation ? treeItem.annotation[1] : false) {
           commaSwitch.setValue('<b style="color: #000;">,</b>');
           commaSwitch.isSwitchedOn = true;
+          label.commaSwitchedOn = true;
         }
+
+        var that = this;
 
         commaSwitch.addListener('click', function(mouseEvent) {
           if (this.getValue() == '<b style="color: #888;">,</b>') {
             this.setValue('<b style="color: #000;">,</b>');
             commaSwitch.isSwitchedOn = true;
+            label.commaSwitchedOn = true;
+            that.basketChangeListener(null);
           } else {
             this.setValue('<b style="color: #888;">,</b>');
             commaSwitch.isSwitchedOn = false;
+            label.commaSwitchedOn = false;
+            that.basketChangeListener(null);
           }
         }, commaSwitch);
 

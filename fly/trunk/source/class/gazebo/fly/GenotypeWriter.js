@@ -26,7 +26,19 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
       var flat = ""
 
       for (var i = 0; i < chromosome.length; i++) {
-        flat += chromosome[i].getValue();
+        if (chromosome[i].plainModel) {
+          flat += chromosome[i].plainModel;
+
+          if (chromosome[i].commaSwitchedOn) {
+            flat += ', ';
+          } else {
+            flat += ' ';
+          }
+        }
+      }
+
+      if (flat.length == 0) {
+        flat = '+';
       }
 
       return flat;
@@ -34,7 +46,8 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
 
     flybaseNotation : function(chromosomes)
     {
-      flybaseString = ""
+      var flybaseString = "";
+      var chromosomeContents = "";
 
       for (var i = 0; i < chromosomes.length; i++) {
         if (!chromosomes[i]) {
@@ -43,19 +56,26 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
 
         if (chromosomes[i].length == 1) {
           // Y or U
-          this.flattenChromosome(chromosomes[i][0]);
+          chromosomeContents = this.flattenChromosome(chromosomes[i][0]);
         } else if (chromosomes[i].length == 2) {
           // X, 2, 3 or 4
           var parent1 = chromosomes[i][0];
           var parent2 = chromosomes[i][1];
+          var parent2Values = new Array();
+
+          for (var j = 0; j < parent2.length; j++) {
+            if (parent2[j].plainModel) {
+              parent2Values.push(parent2[j].plainModel);
+            }
+          }
 
           var everythingHomozygous = true;
 
           if (parent1.length != parent2.length) {
             everythingHomozygous = false;
           } else {
-            for (var j = 0; j < parent1.length; j++) {
-              if (parent1[j].getValue() != parent2[j].getValue()) {
+            for (j = 0; j < parent1.length; j++) {
+              if (!parent1[j].plainModel || parent2Values.indexOf(parent1[j].plainModel) == -1) {
                 everythingHomozygous = false;
                 break;
               }
@@ -63,16 +83,31 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
           }
 
           if (everythingHomozygous) {
-            flybaseString += this.flattenChromosome(parent1);
+            chromosomeContents = this.flattenChromosome(parent1);
           } else {
-            flybaseString += this.flattenChromosome(parent1) + ' / ' + this.flattenChromosome(parent2);
+            chromosomeContents = this.flattenChromosome(parent1) + ' / ' + this.flattenChromosome(parent2);
           }
         } else {
           // Woops...
         }
 
-        flybaseString += ' ; ';
+        // Remove wild-type chromosomes:
+        if (chromosomeContents == '+' || chromosomeContents == '+ / +') {
+          chromosomeContents = '';
+        }
+
+        flybaseString += chromosomeContents;
+
+        if (i < chromosomes.length - 1 && chromosomeContents.length > 0) {
+          flybaseString += ' ; ';
+        }
       }
+
+      if (flybaseString.length == 0) {
+        flybaseString = '+';
+      }
+
+      flybaseString = flybaseString.replace(/\s;\s$/, '');
 
       return flybaseString;
     }
