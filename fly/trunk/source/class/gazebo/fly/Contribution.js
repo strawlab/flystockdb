@@ -535,7 +535,8 @@ qx.Class.define("gazebo.fly.Contribution",
               genotype: this.getFlyBaseNotation()
             },
             {
-              onOpen: { call: this.metadataEditorOpenListener, context: this }
+              onOpen: { call: this.metadataEditorOpenListener, context: this },
+              onSave: { call: this.metadataEditorSaveListener, context: this }
             },
             {}
           )
@@ -657,6 +658,11 @@ qx.Class.define("gazebo.fly.Contribution",
         [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
         [ "", "", "", "", "", "" ]
       );
+    },
+
+    metadataEditorSaveListener : function(dataEvent) {
+      this.generateDashboardUI(this.inquirer);
+      this.inquirer.suggestScreenTransition();
     },
 
     searchDialogOpenListener : function(dataEvent) {

@@ -243,6 +243,11 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       this.addListener('openGenotypeMetadataRelay', listener['call'], listener['context']);
     }
     this.fireDataEvent('openGenotypeMetadataRelay', this);
+
+    if (listeners['onSave']) {
+      listener = listeners['onSave'];
+      this.addListener('saveRelay', listener['call'], listener['context']);
+    }
   },
 
   members:
@@ -279,7 +284,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
         {
-          // TODO
+          // TODO Check result.
+          that.fireDataEvent('saveRelay', that);
         },
         "update_data",
         {},
