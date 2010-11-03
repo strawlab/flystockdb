@@ -139,8 +139,8 @@ qx.Class.define("gazebo.fly.Contribution",
         },
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
-          onSearch: { call: this.searchListener, context: this },
-          onInput: { call: this.inputListener, context: this },
+          onSearch: { call: this.quickSearchListener, context: this },
+          // onInput: { call: this.inputListener, context: this },
           onTransitionCloseScreen: {
             call: inquirer.disposeSearchDialog,
             context: inquirer,
@@ -461,7 +461,7 @@ qx.Class.define("gazebo.fly.Contribution",
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 190,
           maxHeight: 270,
-          contents: new gazebo.fly.StockListViewer()
+          contents: new gazebo.fly.StockListViewer({})
         },
         {
           onTransitionCloseScreen: {
@@ -481,7 +481,31 @@ qx.Class.define("gazebo.fly.Contribution",
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 470,
           maxHeight: 270,
-          contents: new gazebo.fly.StockListViewer()
+          contents: new gazebo.fly.StockListViewer({})
+        },
+        {
+          onTransitionCloseScreen: {
+            call: inquirer.disposeCustomInterface,
+            context: inquirer,
+            parameters: {}
+          }
+        },
+        {
+
+        }
+      );
+
+    },
+
+    generateSearchResultUI : function(inquirer, searchQuery) {
+
+      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+        {
+          title: 'Search Results',
+          left : inquirer.LEFT_SO_THAT_CENTERED,
+          top: 90,
+          maxHeight: 630,
+          contents: new gazebo.fly.StockListViewer(searchQuery)
         },
         {
           onTransitionCloseScreen: {
@@ -716,6 +740,17 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       this.requestTransition = true;
       this.inputListener(dataEvent);
+    },
+
+    quickSearchListener : function(dataEvent)
+    {
+      var compound = dataEvent.getData();
+      var treeItem = compound[0];
+      var userInput = compound[1];
+      var reQuery = compound[2];
+
+      this.generateSearchResultUI(this.inquirer, { searchTerm: userInput });
+      this.inquirer.suggestScreenTransition();
     },
 
     inputListener : function(dataEvent)

@@ -14,7 +14,7 @@ qx.Class.define("gazebo.fly.StockListModel",
 {
   extend : qx.ui.table.model.Remote,
 
-  construct : function()
+  construct : function(parameters)
   {
     this.base(arguments);
 
@@ -39,10 +39,36 @@ qx.Class.define("gazebo.fly.StockListModel",
         "10", // TODO "10" and "11" are hacks. See below.
         "11"
       ]);
+
+    this.searchTerm = parameters['searchTerm'];
   },
 
   members:
   {
+    generateQuery : function()
+    {
+      if (this.searchTerm) {
+        return 's.id ~ ? OR s.xref ~ ? OR s.genotype ~ ? OR s.description ~ ? OR s.wildtype ~ ?';
+      }
+
+      return 'true';
+    },
+
+    generateQueryArguments : function()
+    {
+      if (this.searchTerm) {
+        return [
+          '(^|\\W)' + this.searchTerm + '(\\W|$)',
+          '(^|\\W)' + this.searchTerm + '(\\W|$)',
+          '(^|\\W)' + this.searchTerm + '(\\W|$)',
+          '(^|\\W)' + this.searchTerm + '(\\W|$)',
+          '(^|\\W)' + this.searchTerm + '(\\W|$)'
+        ];
+      }
+
+      return [];
+    },
+
     _loadRowCount : function()
     {
       var rpc = new qx.io.remote.Rpc();
@@ -63,8 +89,8 @@ qx.Class.define("gazebo.fly.StockListModel",
         "FB2010_05",
         [ '*' ],
         [ "x_stocks s" ],
-        "true",
-        [ ]
+        this.generateQuery(),
+        this.generateQueryArguments()
       );
     },
 
@@ -94,14 +120,44 @@ qx.Class.define("gazebo.fly.StockListModel",
             that._onRowDataLoaded(resultList);
           }
         },
-        "query",
+        "query_data",
         {},
         "FB2010_05",
         [ '*' ],
         [ "x_stocks s" ],
-        "true",
-        [ ]
+        this.generateQuery(),
+        this.generateQueryArguments()
       );
+    }
+  }
+});
+
+qx.Class.define("gazebo.fly.StockListModelRenderer",
+{
+  extend : qx.ui.table.cellrenderer.Default,
+
+  construct : function(searchTerm)
+  {
+    this.base(arguments);
+
+    this.searchTerm = searchTerm;
+  },
+
+  members :
+  {
+    _getCellStyle : function(cellInfo)
+    {
+      var cellContents = cellInfo['value'];
+
+      var re = new RegExp("(^|\\W)" + this.searchTerm + "(\\W|$)", "g");
+
+      if (cellContents && ('' + cellContents).match(re)) {
+        var color = (cellInfo.row % 2 == 1 ? "#abc7ed" : "#bee4ff");
+
+        return this.base(arguments, cellInfo) + "background-color:" + color + ";";
+      }
+
+      return this.base(arguments, cellInfo);
     }
   }
 });

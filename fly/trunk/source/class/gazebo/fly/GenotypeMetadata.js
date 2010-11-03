@@ -295,7 +295,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
         [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
         [
           xref,
-          this.genotype,
+          this.genotype.replace("+", "@P"),
           description,
           donor,
           contact,
