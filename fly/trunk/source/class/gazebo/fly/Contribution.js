@@ -9,7 +9,7 @@
 
 /* ************************************************************************
 
-#asset(fly/flox300.png)
+#asset(fly/flystockdb160.png)
 
 #asset(fly/balancer.png)
 #asset(fly/gene.png)
@@ -108,10 +108,24 @@ qx.Class.define("gazebo.fly.Contribution",
 
     generateLoginUI : function(inquirer) {
 
+      var logoContainer = new qx.ui.container.Composite();
+
+      logoContainer.setLayout(new qx.ui.layout.VBox(10).set({
+        alignX: "center"
+      }));
+      logoContainer.add(new qx.ui.basic.Image('fly/flystockdb160.png'));
+      logoContainer.add(new qx.ui.basic.Label().set({
+        value: '<a style="color: #0099cc;">fly</a><a style="color: #009966;">stock</a><a style="color: #333333;">db</a>',
+        rich: true,
+        appearance: 'software/title'
+      }));
+      logoContainer.add(new qx.ui.core.Spacer(10,10));
+
       inquirer.openScreen(inquirer.generateConnectionDialog, inquirer,
         {
           title: 'Login',
-          passwordRequired: true
+          passwordRequired: true,
+          logo: logoContainer
         },
         {
           onConnect: { call: this.loginListener, context: this },
@@ -135,7 +149,8 @@ qx.Class.define("gazebo.fly.Contribution",
           textFieldMinimalWidth: 250,
           stripWhitespace: true,
           searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/dialog-ok.png'
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/dialog-ok.png',
+          disableSuggestions: true
         },
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
@@ -148,7 +163,7 @@ qx.Class.define("gazebo.fly.Contribution",
           }
         },
         {
-          prepareFileSuggestion: this.prepareSuggestion
+          // prepareFileSuggestion: this.prepareSuggestion
         });
 
       var linkContainer = new qx.ui.container.Composite();
@@ -211,9 +226,9 @@ qx.Class.define("gazebo.fly.Contribution",
         inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
           {
             title: ' ',
-            left: 10,
+            left: inquirer.LEFT_SO_THAT_CENTERED,
             top: 10,
-            minWidth: 800,
+            minWidth: 700,
             customElements: linkContainer
           },
           {
@@ -234,6 +249,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
     generateGenotypeInputUI : function(inquirer) {
 
+      this.numberOfBaskets = 10;
+
       inquirer.openScreen(inquirer.generateBasket, inquirer,
         {
           title: 'Genotype',
@@ -241,7 +258,9 @@ qx.Class.define("gazebo.fly.Contribution",
           footer: gazebo.fly.Contribution.FOOTER_PREAMBLE + '+',
           top: 180,
           canProceedWithEmptyBasket: true, // For entering wild-type stocks.
-          populate: 10,
+          populate: this.numberOfBaskets,
+          draggableItems: true,
+          dragAndDropFlavour: 'genomic feature',
           titles: [ 'Chromosome X',
                     'Chromosome 2',
                     'Chromosome 3',
@@ -277,7 +296,7 @@ qx.Class.define("gazebo.fly.Contribution",
                    ]
         },
         {
-          onOpen: { call: this.basketOpenListener, context: this },
+          onOpen: { call: this.inputBasketOpenListener, context: this },
           onProceed: { call: this.proceedListener, context: this },
           onBasketChange: { call: this.basketChangeListener, context: this },
           onTransitionCloseScreen: {
@@ -327,6 +346,8 @@ qx.Class.define("gazebo.fly.Contribution",
     // TODO Have to remove commas from baskets.
     generateSearchUI : function(inquirer) {
 
+      this.numberOfBaskets = 6;
+
       inquirer.openScreen(inquirer.generateBasket, inquirer,
         {
           title: 'Genotype',
@@ -334,7 +355,7 @@ qx.Class.define("gazebo.fly.Contribution",
           top: 190,
           basketMinHeight: 110,
           canProceedWithEmptyBasket: true,
-          populate: 6,
+          populate: this.numberOfBaskets,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
                     'Chromosome 3',
@@ -355,11 +376,11 @@ qx.Class.define("gazebo.fly.Contribution",
                     'group',
                     'group-dark',
                     'group'
-                   ]
+                   ],
+          hideProceedButton: true
         },
         {
-          onOpen: { call: this.basketOpenListener, context: this },
-          onProceed: { call: this.proceedListener, context: this },
+          onOpen: { call: this.searchBasketOpenListener, context: this },
           onTransitionCloseScreen: {
             call: inquirer.disposeBasket,
             context: inquirer,
@@ -408,8 +429,13 @@ qx.Class.define("gazebo.fly.Contribution",
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 380,
           contents: new gazebo.fly.GenotypeMetadata(
-            { inquirer: inquirer, search: true },
-            {},
+            {
+              inquirer: inquirer,
+              search: true
+            },
+            {
+              onProceed: { call: this.advancedSearchListener, context: this }
+            },
             {}
           )
         },
@@ -560,7 +586,7 @@ qx.Class.define("gazebo.fly.Contribution",
             },
             {
               onOpen: { call: this.metadataEditorOpenListener, context: this },
-              onSave: { call: this.metadataEditorSaveListener, context: this }
+              onProceed: { call: this.metadataEditorSaveListener, context: this }
             },
             {}
           )
@@ -660,7 +686,7 @@ qx.Class.define("gazebo.fly.Contribution",
       var genotypeMetadataUI = dataEvent.getData();
 
       var rpc = new qx.io.remote.Rpc();
-			rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+			rpc.setTimeout(gazebo.Application.timeout);
 			rpc.setUrl(gazebo.Application.getServerURL());
 			rpc.setServiceName("gazebo.cgi");
 
@@ -684,28 +710,37 @@ qx.Class.define("gazebo.fly.Contribution",
       );
     },
 
-    metadataEditorSaveListener : function(dataEvent) {
+    metadataEditorSaveListener : function() {
       this.generateDashboardUI(this.inquirer);
       this.inquirer.suggestScreenTransition();
     },
 
-    searchDialogOpenListener : function(dataEvent) {
+    searchDialogOpenListener : function(dataEvent)
+    {
       this.searchDialog = dataEvent.getData();
     },
 
-    basketOpenListener : function(dataEvent) {
+    inputBasketOpenListener : function(dataEvent)
+    {
       this.genotypeBasket = dataEvent.getData();
+      this.showCommas = true;
     },
 
-    getFlyBaseNotation : function() {
-      var writer = new gazebo.fly.GenotypeWriter();
+    searchBasketOpenListener : function(dataEvent)
+    {
+      this.genotypeBasket = dataEvent.getData();
+      this.showCommas = false;
+    },
+
+    getChromosomes : function(maxBaskets)
+    {
       var chromosomes = new Array(6);
 
       for (var x = 0; x < chromosomes.length; x++) {
         chromosomes[x] = [];
       }
 
-      for (x = 0; x < 10; x++) {
+      for (x = 0; x < maxBaskets; x++) {
         var items = this.genotypeBasket.getBasketItems(x);
         var bag = new Array();
 
@@ -722,16 +757,27 @@ qx.Class.define("gazebo.fly.Contribution",
         }
       }
 
-      return writer.flybaseNotation(chromosomes);
+      return chromosomes;
     },
 
-    basketChangeListener : function(dataEvent) {
+    getFlyBaseNotation : function()
+    {
+      var writer = new gazebo.fly.GenotypeWriter();
+
+      // Assuming 10 baskets, i.e. stock input.
+      // Aww.. to hardcode or not to hardcode.. that is the question..
+      return writer.flybaseNotation(this.getChromosomes(10));
+    },
+
+    basketChangeListener : function(dataEvent)
+    {
       this.genotypeBasket.setFooter(gazebo.fly.Contribution.FOOTER_PREAMBLE +
         this.getFlyBaseNotation()
       );
     },
 
-    proceedListener : function() {
+    proceedListener : function()
+    {
       this.generateMetaDataUI(this.inquirer);
       this.inquirer.suggestScreenTransition();
     },
@@ -750,6 +796,27 @@ qx.Class.define("gazebo.fly.Contribution",
       var reQuery = compound[2];
 
       this.generateSearchResultUI(this.inquirer, { searchTerm: userInput });
+      this.inquirer.suggestScreenTransition();
+    },
+
+    advancedSearchListener : function()
+    {
+      // Assuming 6 baskets, i.e. advanced search.
+      var chromosomes = this.getChromosomes(6);
+      var constraints = {}
+
+      for (var i = 0; i < chromosomes.length; i++) {
+        var chromosome = chromosomes[i];
+
+        // TODO Hack, looks at the last entry only at the moment.
+        for (var j = 0; j < chromosome.length; j++) {
+          if (chromosome[j][0].plainModel) {
+            constraints['searchChromosome' + i] = chromosome[j][0].plainModel;
+          }
+        }
+      }
+
+      this.generateSearchResultUI(this.inquirer, constraints);
       this.inquirer.suggestScreenTransition();
     },
 
@@ -800,6 +867,15 @@ qx.Class.define("gazebo.fly.Contribution",
 
         var bottom = treeItem.annotation ? treeItem.annotation[0] : false;
 
+        if (parameters[5] && parameters[5].match("^FB.+")) {
+          flybaseId = parameters[5];
+
+          // Put balancers on the bottom chromosome -- if entered alone.
+          if (!bottom && !treeItem.annotation && flybaseId.match("^FBba.+")) {
+            bottom = true;
+          }
+        }
+
         chromosomeName = parameters[3].charAt(0);
 
         if (chromosomeName == 'X') { chromosome = bottom ? 6 : 0; }
@@ -809,8 +885,26 @@ qx.Class.define("gazebo.fly.Contribution",
         else if (chromosomeName == '4') { chromosome = bottom ? 9 : 3; }
         else { chromosomeName = 'Unknown'; chromosome = 5; }
 
-        if (parameters[5] && parameters[5].match("^FB.+")) {
-          flybaseId = parameters[5];
+        // Check if the feature that we are inserting is already
+        // in the top-chromosome. If so, put it onto the bottom.
+        // Example: you enter 'w' twice and get a homozygous X chr.
+        if (!bottom && this.numberOfBaskets == 10 && chromosome < 4) {
+          var currentChromosomes = this.getChromosomes(10);
+
+          for (i = 0; i < 4; i++) {
+            var topChromosome = currentChromosomes[i][0];
+            
+            for (var j = 0; j < topChromosome.length; j++) {
+              if (topChromosome[j].plainModel == userInput) {
+                chromosome += 6;
+                break;
+              }
+            }
+
+            if (chromosome > 3) {
+              break;
+            }
+          }
         }
       }
 
@@ -830,7 +924,7 @@ qx.Class.define("gazebo.fly.Contribution",
             // Is this a partite bag?
             var partite = false;
             var possibleBalancer = '-';
-            for (var i = 0; i < chromosomeBag.length; i++) {
+            for (i = 0; i < chromosomeBag.length; i++) {
               if (chromosomeBag[i] == '/') {
                 partite = true;
                 if (i + 1 < chromosomeBag.length) {
@@ -940,13 +1034,22 @@ qx.Class.define("gazebo.fly.Contribution",
           label.plainModel = displayText;
         }
 
+        label.setDraggable(true);
+        label.addListener("dragstart",
+          function(e) {
+            e.addType('genomic feature');
+            e.addAction('move');
+            e.addData('genomic feature', container);
+          }
+        );
+
         label.setToolTipText(userInput);
 
         var commaSwitch = new qx.ui.basic.Label().set({
           value: '<b style="color: #888;">,</b>',
           rich: true,
           textAlign: 'center',
-          width: 22,
+          width: 12,
           height: 18
         });
 
@@ -976,45 +1079,6 @@ qx.Class.define("gazebo.fly.Contribution",
           }
         }, commaSwitch);
 
-        // Highlighting
-        /*
-        commaSwitch.currentlyRunningTransition = false;
-        commaSwitch.addListener('mouseover', function(mouseEvent) {
-          // Should move into 'appear', where only one instance should
-          // be used for all commaSwitch instances.
-          if (this.currentlyRunningTransition) {
-            return;
-          }
-
-          this.currentlyRunningTransition = true;
-
-          var domElement = this.getContainerElement().getDomElement();
-          var colorFlow = new qx.fx.effect.combination.ColorFlow(domElement);
-
-          var parent = this.getContainerElement().getDomElement();
-          var status = qx.util.ColorUtil.cssStringToRgb(qx.bom.element.Style.get(parent, "backgroundColor")).toString();
-
-          this.debug("X: " + qx.bom.element.Style.get(domElement, "backgroundColor"));
-          this.debug("Y: " + qx.bom.element.Style.getCss(domElement));
-
-          colorFlow.set({
-            restoreBackground  : true,
-            startColor         : "#ffffff",
-            endColor           : "#dddddd",
-            duration           : 0.3,
-            backwardTransition : "none"
-          });
-
-          colorFlow.addListener('finish', function() {
-            this.currentlyRunningTransition = false;
-            qx.bom.element.Style.reset(domElement, "backgroundColor");
-            qx.bom.element.Style.set(domElement, "backgroundColor", "rgb(0, 128, 255)");
-            this.debug("ADASDASD");
-          }, this);
-
-          colorFlow.start();
-        }, commaSwitch);
-        */
         commaSwitch.addListener('mouseover', function(mouseEvent) {
           this.setDecorator('button-hovered');
         }, commaSwitch);
@@ -1029,7 +1093,11 @@ qx.Class.define("gazebo.fly.Contribution",
         }, commaSwitch);
 
         container.add(label);
-        container.add(commaSwitch);
+
+        // TODO commaSwitch objects should not be created when not used..
+        if (this.showCommas) {
+          container.add(commaSwitch);
+        }
 
         // In case the input cannot be put on a chromosome, it goes onto
         // the 'Unknown' chromosome without any particular ordering.
@@ -1060,6 +1128,8 @@ qx.Class.define("gazebo.fly.Contribution",
       } else if (parameters[2] == 'single balancer') {
         file.setIcon('fly/balancer.png');
       } else if (parameters[2] == 'transgenic_transposon') {
+        file.setIcon('fly/transgenic.png');
+      } else if (parameters[2] == 'transposable_element_insertion_site') {
         file.setIcon('fly/transgenic.png');
       } else if (parameters[2] == 'natural_transposable_element') {
         file.setIcon('fly/transposon.png');

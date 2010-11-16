@@ -41,6 +41,13 @@ qx.Class.define("gazebo.fly.StockListModel",
       ]);
 
     this.searchTerm = parameters['searchTerm'];
+
+    this.searchChromosomeX = parameters['searchChromosome0'];
+    this.searchChromosome2 = parameters['searchChromosome1'];
+    this.searchChromosome3 = parameters['searchChromosome2'];
+    this.searchChromosome4 = parameters['searchChromosome3'];
+    this.searchChromosomeY = parameters['searchChromosome4'];
+    this.searchChromosomeU = parameters['searchChromosome5'];
   },
 
   members:
@@ -49,6 +56,16 @@ qx.Class.define("gazebo.fly.StockListModel",
     {
       if (this.searchTerm) {
         return 's.id ~ ? OR s.xref ~ ? OR s.genotype ~ ? OR s.description ~ ? OR s.wildtype ~ ?';
+      }
+
+      // TODO HACK
+      if (this.searchChromosomeX ||
+        this.searchChromosome2 ||
+        this.searchChromosome3 ||
+        this.searchChromosome4 ||
+        this.searchChromosomeY ||
+        this.searchChromosomeU) {
+        return 's.genotype ~ ?';
       }
 
       return 'true';
@@ -66,13 +83,32 @@ qx.Class.define("gazebo.fly.StockListModel",
         ];
       }
 
+      // TODO HACK
+      if (this.searchChromosomeX ||
+        this.searchChromosome2 ||
+        this.searchChromosome3 ||
+        this.searchChromosome4 ||
+        this.searchChromosomeY ||
+        this.searchChromosomeU) {
+        var searchTerm = '';
+
+        searchTerm += this.searchChromosomeX ? this.searchChromosomeX : '';
+        searchTerm += this.searchChromosome2 ? this.searchChromosome2 : '';
+        searchTerm += this.searchChromosome3 ? this.searchChromosome3 : '';
+        searchTerm += this.searchChromosome4 ? this.searchChromosome4 : '';
+        searchTerm += this.searchChromosomeY ? this.searchChromosomeY : '';
+        searchTerm += this.searchChromosomeU ? this.searchChromosomeU : '';
+
+        return '(^|\\W)' + searchTerm + '(\\W|$)';
+      }
+
       return [];
     },
 
     _loadRowCount : function()
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(5000); // 5sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.delayedTimeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -97,7 +133,7 @@ qx.Class.define("gazebo.fly.StockListModel",
     _loadRowData : function(firstRow, lastRow)
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(5000); // 5sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.delayedTimeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
         
@@ -114,7 +150,7 @@ qx.Class.define("gazebo.fly.StockListModel",
               }
               // TODO Temporary hack for now..
               rowHash[result[i].length + ''] = 'Public'
-              rowHash['' + (result[i].length + 1)] = 'administrator'
+              rowHash['' + (result[i].length + 1)] = result[i][6]
               resultList.push(rowHash);
             }
             that._onRowDataLoaded(resultList);

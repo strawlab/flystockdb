@@ -44,6 +44,32 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
       return flat;
     },
 
+    // TODO Something that can be used to uniquely reconstruct the genotype.
+    stringNotation : function(chromosomes)
+    {
+      var string = "";
+      var chromosomeContents = "";
+
+      for (var i = 0; i < chromosomes.length; i++) {
+        string += '[ ';
+
+        if (chromosomes[i].length == 1) {
+          // Y or U
+          string += this.flattenChromosome(chromosomes[i][0]);
+        } else if (chromosomes[i].length == 2) {
+          // X, 2, 3 or 4
+          var parent1 = chromosomes[i][0];
+          var parent2 = chromosomes[i][1];
+
+          string += this.flattenChromosome(parent1) + ' / ' + this.flattenChromosome(parent2);
+        }
+        
+        string += ' ]'
+      }
+
+      return string;      
+    },
+
     flybaseNotation : function(chromosomes)
     {
       var flybaseString = "";

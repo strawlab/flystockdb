@@ -24,8 +24,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.base(arguments);
 
     var inquirer = parameters['inquirer'];
-    var search = parameters['search'];
 
+    this.search = parameters['search'];
     this.genotype = parameters['genotype'];
 
     this.setLayout(new qx.ui.layout.HBox(10));
@@ -120,11 +120,19 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       rich: true,
       appearance: 'annotation'
     }));
-    this.usernameTextField = new qx.ui.form.TextField().set({
-      readOnly: true,
-      width: 130
-    });
-    idContainer7.add(this.usernameTextField);
+
+    if (this.search) {
+      this.usernameSelectBox = new qx.ui.form.SelectBox().set({
+        width: 130
+      })
+      idContainer7.add(this.usernameSelectBox);
+    } else {
+      this.usernameTextField = new qx.ui.form.TextField().set({
+        readOnly: true,
+        width: 130
+      });
+      idContainer7.add(this.usernameTextField);
+    }
 
     idContainer8.add(new qx.ui.basic.Label().set({
       value: 'Contact / Stock Owner',
@@ -153,7 +161,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       appearance: 'annotation'
     }));
 
-    if (search) {
+    if (this.search) {
       this.descriptionTextX = new qx.ui.form.TextField();
       this.container.add(this.descriptionTextX);
     } else {
@@ -222,21 +230,18 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     var submitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
     this.add(submitButton);
 
-    submitButton.addListener('execute',
-      function() {
-        this.saveStock();
-      },
-      this
-    );
-
-    inquirer.generateAuthenticationDispatcher(
-      {},
-      {
-        'onAuthenticationSuccess': { call: this.updateUsername, context: this },
-        'onAuthenticationFailure': { call: this.updateUsername, context: this }
-      },
-      {}
-    );
+    if (this.search) {
+      this.updateContacts();
+    } else {
+      inquirer.generateAuthenticationDispatcher(
+        {},
+        {
+          'onAuthenticationSuccess': { call: this.updateUsername, context: this },
+          'onAuthenticationFailure': { call: this.updateUsername, context: this }
+        },
+        {}
+      );
+    }
 
     if (listeners['onOpen']) {
       listener = listeners['onOpen'];
@@ -244,9 +249,30 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }
     this.fireDataEvent('openGenotypeMetadataRelay', this);
 
-    if (listeners['onSave']) {
-      listener = listeners['onSave'];
-      this.addListener('saveRelay', listener['call'], listener['context']);
+    if (this.search && listeners['onProceed']) {
+      listener = listeners['onProceed'];
+      this.addListener('onProceedRelay', listener['call'], listener['context']);
+
+      submitButton.addListener('execute',
+        function() {
+          this.fireDataEvent('onProceedRelay', this);
+        },
+        this
+      );
+    }
+
+    if (!this.search) {
+      if (listeners['onProceed']) {
+        listener = listeners['onProceed'];
+        this.addListener('onProceedRelay', listener['call'], listener['context']);
+      }
+
+      submitButton.addListener('execute',
+        function() {
+          this.saveStock();
+        },
+        this
+      );
     }
   },
 
@@ -269,7 +295,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     saveStock : function()
     {
       var rpc = new qx.io.remote.Rpc();
-			rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+			rpc.setTimeout(gazebo.Application.timeout);
 			rpc.setUrl(gazebo.Application.getServerURL());
 			rpc.setServiceName("gazebo.cgi");
 
@@ -285,7 +311,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
         function(result, ex, id)
         {
           // TODO Check result.
-          that.fireDataEvent('saveRelay', that);
+          that.fireDataEvent('onProceedRelay', that);
         },
         "update_data",
         {},
@@ -295,7 +321,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
         [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
         [
           xref,
-          this.genotype.replace("+", "@P"),
+          gazebo.Application.marshallString(this.genotype),
           description,
           donor,
           contact,
@@ -326,7 +352,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     updateContacts : function()
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -342,16 +368,35 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
           that.contactSelectBox.removeAll();
 
+          // Add default selection when searching, which searches everyone.
+          if (that.search) {
+            var defaultUser = new qx.ui.form.ListItem().set({
+              label: '<i>everyone</i>',
+              rich: true
+            });
+            that.contactSelectBox.add(defaultUser);
+            defaultUser = new qx.ui.form.ListItem().set({
+              label: '<i>everyone</i>',
+              rich: true
+            });
+            that.usernameSelectBox.add(defaultUser);
+          }
+
           var thisUser = null;
 
           for (var i = 0; i < result.length; i++) {
             var user = new qx.ui.form.ListItem(result[i][0]);
 
-            if (result[i][0] == that.usernameTextField.getValue()) {
+            if (!that.search && result[i][0] == that.usernameTextField.getValue()) {
               thisUser = user;
             }
 
             that.contactSelectBox.add(user);
+
+            if (that.search) {
+              user = new qx.ui.form.ListItem(result[i][0]); // Cannot re-use ListItem.
+              that.usernameSelectBox.add(user);
+            }
           }
 
           if (thisUser) {
@@ -368,7 +413,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     updateGroups : function()
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
