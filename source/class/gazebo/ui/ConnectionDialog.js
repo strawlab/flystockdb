@@ -78,7 +78,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		connectButton.addListener("execute", function() {
 			if (form.validate()) {
 				var rpc = new qx.io.remote.Rpc();
-				rpc.setTimeout(1000); // 1sec time-out, arbitrarily chosen.
+				rpc.setTimeout(gazebo.Application.timeout);
 				rpc.setUrl(gazebo.Application.getServerURL());
 				rpc.setServiceName("gazebo.cgi");
 

@@ -19,6 +19,16 @@ qx.Theme.define("gazebo.theme.Font",
         (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
         [ "Consolas" ] :
         [ "Consolas", "DejaVu Sans Mono", "Courier New", "monospace" ]
+    },
+
+    "software/title" :
+    {
+      size: 20,
+      lineHeight : 1.4,
+      family : qx.bom.client.Platform.MAC ? [ "Geneva" ] :
+        (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
+        [ "Verdana" ] :
+        [ "Geneva", "Verdana", "Arial", "sans-serif" ]
     }
   }
 });

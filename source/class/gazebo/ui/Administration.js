@@ -288,7 +288,7 @@ qx.Class.define("gazebo.ui.Administration",
     var userContainer3_3 = new qx.ui.container.Composite();
     userContainer3_3.setLayout(new qx.ui.layout.VBox(5));
     userContainer3_3.add(new qx.ui.basic.Label().set({
-      value: 'Overview of Your Groups'
+      value: 'Group-Subscription Overview'
     }));
     userContainer3_3.add(this.userOverview);
     userContainer3.add(userContainer3_3);
@@ -614,7 +614,7 @@ qx.Class.define("gazebo.ui.Administration",
         // TODO Check validity of user input
 
         var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+        rpc.setTimeout(gazebo.Application.timeout);
         rpc.setUrl(gazebo.Application.getServerURL());
         rpc.setServiceName("gazebo.cgi");
 
@@ -647,7 +647,7 @@ qx.Class.define("gazebo.ui.Administration",
         // TODO Check validity of user input
 
         var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(20000); // 20sec time-out, arbitrarily chosen.
+        rpc.setTimeout(gazebo.Application.delayedTimeout);
         rpc.setUrl(gazebo.Application.getServerURL());
         rpc.setServiceName("gazebo.cgi");
 
@@ -685,7 +685,7 @@ qx.Class.define("gazebo.ui.Administration",
         // TODO Check validity of user input
 
         var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+        rpc.setTimeout(gazebo.Application.timeout);
         rpc.setUrl(gazebo.Application.getServerURL());
         rpc.setServiceName("gazebo.cgi");
 
@@ -732,7 +732,7 @@ qx.Class.define("gazebo.ui.Administration",
         // TODO Check validity of user input
 
         var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(20000); // 20sec time-out, arbitrarily chosen.
+        rpc.setTimeout(gazebo.Application.delayedTimeout);
         rpc.setUrl(gazebo.Application.getServerURL());
         rpc.setServiceName("gazebo.cgi");
 
@@ -779,7 +779,7 @@ qx.Class.define("gazebo.ui.Administration",
     populateList : function(destination, request, column)
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -809,7 +809,7 @@ qx.Class.define("gazebo.ui.Administration",
     populateInputFields : function(fields, request, argument, failover)
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -913,7 +913,7 @@ qx.Class.define("gazebo.ui.Administration",
 
     updateUserOverview : function(username) {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -933,7 +933,7 @@ qx.Class.define("gazebo.ui.Administration",
 
           header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
           header.addWidget(new qx.ui.basic.Label('Creator'));
-          header.addWidget(new qx.ui.core.Spacer(15));
+          header.addWidget(new qx.ui.core.Spacer(7));
           header.addWidget(new qx.ui.basic.Label('Adm.'));
 
           that.userOverviewRoot.add(header);
@@ -960,9 +960,9 @@ qx.Class.define("gazebo.ui.Administration",
             group.addWidget(new qx.ui.basic.Label(result[i][0]));
             group.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
             group.addWidget(isCreator);
-            group.addWidget(new qx.ui.core.Spacer(35));
+            group.addWidget(new qx.ui.core.Spacer(26));
             group.addWidget(adminCheckbox);
-            group.addWidget(new qx.ui.core.Spacer(8));
+            group.addWidget(new qx.ui.core.Spacer(4));
 
             that.userOverviewRoot.add(group);
           }
@@ -986,7 +986,7 @@ qx.Class.define("gazebo.ui.Administration",
     updateSubscriptions : function(group_id)
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 

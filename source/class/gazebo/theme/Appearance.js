@@ -45,6 +45,19 @@ qx.Theme.define("gazebo.theme.Appearance",
           textColor : states.selected ? "text-selected" : "text-gray"
         };
       }
+    },
+
+    "software/title" :
+    {
+      style : function(states)
+      {
+        return {
+          alignY      : "middle",
+          font        : "software/title",
+          marginLeft  : 0,
+          marginRight : 12
+        };
+      }
     }
 
   }

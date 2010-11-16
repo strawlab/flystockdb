@@ -29,6 +29,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     var searchButtonIcon = parameters['searchButtonIcon'];
     var minWidth = parameters['textFieldMinimalWidth'] ? parameters['textFieldMinimalWidth'] : 300;
 
+    this.disableSuggestions = parameters['disableSuggestions'];
+
     this.rpcRunning = null;
     this.openAll = false;
 
@@ -237,8 +239,12 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
      */
     generateSuggestions : function(dataEvent)
     {
+      if (this.disableSuggestions) {
+        return;
+      }
+
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -361,7 +367,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         [ "*" ],
         [ "x_searchables_" + ( textValue.length - 1 ) ],
         "searchable ilike ?",
-        [ textValue + "%" ]
+        [ gazebo.Application.marshallString(textValue) + "%" ]
       );
     },
 
@@ -384,7 +390,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         }
       
         var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(5000); // 5sec time-out, arbitrarily chosen.
+        rpc.setTimeout(gazebo.Application.delayedTimeout);
         rpc.setUrl(gazebo.Application.getServerURL());
         rpc.setServiceName("gazebo.cgi");
 
@@ -394,9 +400,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           return;
         }
 
-        // Workaround: For some reason, '+' does not make it to the server.
-        textValue = textValue.replace("@", "@@");
-        textValue = textValue.replace("+", "@P");
         this.debug("Searching for: " + textValue);
 
         var that = this;
@@ -439,7 +442,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           [ "*" ],
           [ "x_fast_transitions" ],
           "abstraction == ? ORDER BY concretisation ASC",
-          [ textValue ]
+          [ gazebo.Application.marshallString(textValue) ]
         );
       }
     },
@@ -447,7 +450,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     searchForItem : function(label, annotation, aides, dependency_column)
     {
       var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+      rpc.setTimeout(gazebo.Application.timeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
@@ -535,7 +538,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         [ "x_searchables_" + ( label.length - 1 ) ],
         "searchable like ?", // TODO: Figure out why = is not working.
                              // 'like' may cause performance problems?'
-        [ label ]
+        [ gazebo.Application.marshallString(label) ]
       );
     },
 

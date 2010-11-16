@@ -34,6 +34,9 @@
 
 #asset(qx/icon/Oxygen/16/apps/utilities-keyring.png)
 
+#asset(qx/icon/Tango/32/places/user-trash.png)
+#asset(qx/icon/Tango/32/places/user-trash-full.png)
+
 ************************************************************************ */
 
 qx.Class.define("gazebo.Application",
@@ -50,6 +53,10 @@ qx.Class.define("gazebo.Application",
 		// HTTP port on the application's server, which might be null
 		port : qx.core.Setting.get("gazebo.server.port"),
 
+    // Time-out for common UI tasks
+    timeout : 8000,
+    delayedTimeout : 40000,
+
 		// Generates the application's server URL
 		getServerURL : function()
 		{
@@ -58,7 +65,19 @@ qx.Class.define("gazebo.Application",
 			} else {
 				return "http://" + this.hostname + "/gazebo.cgi";
 			}
-		}
+		},
+
+    // Prepare a string for transmission via JSON. Some characters will
+    // otherwise not make it to the server or will be rewritten into other
+    // characters.
+    marshallString : function(string)
+    {
+      string = string.replace("@", "@@")
+      string = string.replace(";", "@S")
+      string = string.replace("+", "@P")
+
+      return string;
+    }
 	},
 
   members :
@@ -294,13 +313,14 @@ qx.Class.define("gazebo.Application",
 		generateConnectionDialog : function(parameters, listeners, overrides)
 		{
       var title = parameters['title'];
+      var logo = parameters['logo'];
 
 			var connectionDialog = new gazebo.ui.ConnectionDialog(parameters, listeners, overrides);
 			connectionDialog.addListener("connect", this.establishConnection, this);
 
 			this.connectionWindow = new qx.ui.window.Window(title ? title :"Database Connection");
-			this.connectionWindow.setLayout(new qx.ui.layout.HBox(10));
-			this.connectionWindow.add(connectionDialog);
+			this.connectionWindow.setLayout(new qx.ui.layout.VBox(10));
+
 			this.connectionWindow.setResizable(false, false, false, false);
 			this.connectionWindow.setMovable(false);
 			this.connectionWindow.setShowClose(false);
@@ -308,6 +328,12 @@ qx.Class.define("gazebo.Application",
 			this.connectionWindow.setShowMinimize(false);
 
 			this.connectionWindow.addListener("resize", this.connectionWindow.center, this.connectionWindow);
+
+      if (logo) {
+        this.connectionWindow.add(logo);
+      }
+
+			this.connectionWindow.add(connectionDialog);
 
       this.connectionWindow.open();      
       this.getRoot().add(this.connectionWindow);
@@ -322,7 +348,7 @@ qx.Class.define("gazebo.Application",
     // Only for testing purposes, yet.
     generateLogo : function(parameters, listeners, overrides)
     {
-      this.getRoot().add(new qx.ui.form.Button(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
+      this.getRoot().add(new qx.ui.basic.Atom(null, "qx/icon/Oxygen/64/actions/dialog-ok.png"));
     },
 
     disposeLogo : function(parameters)
@@ -392,10 +418,13 @@ qx.Class.define("gazebo.Application",
       this.basketWindow.addListener("resize", this.getPositioningFunction(left, top), this.basketWindow);
 
       this.basketWindow.add(this.basketContainer);
-      this.basketWindow.add(new qx.ui.toolbar.Separator());
 
-      var proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
-      this.basketWindow.add(proceedButton);
+      if (!parameters['hideProceedButton']) {
+        this.basketWindow.add(new qx.ui.toolbar.Separator());
+
+        var proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
+        this.basketWindow.add(proceedButton);
+      }
 
       this.basketWindow.open();
       this.getRoot().add(this.basketWindow);

@@ -30,6 +30,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
     this.labels = parameters['labels'];
     this.basketMinHeight = parameters['basketMinHeight'] ? parameters['basketMinHeight'] : 250;
 
+    this.draggableItems = parameters['draggableItems'];
+    this.dragAndDropFlavour = parameters['dragAndDropFlavour'] ? parameters['dragAndDropFlavour'] : 'item';
+
+    this.basketItemSpacing = 5;
+    this.basketItemDNDSpacing = 0;
+
     // Install overrides (needed when populating baskets):
     if (overrides['makeEmptyBasketLabel']) {
       this.makeEmptyBasketLabel = overrides['makeEmptyBasketLabel'];
@@ -65,6 +71,80 @@ qx.Class.define("gazebo.ui.BasketContainer",
       }
     }
 
+    var that = this;
+    
+    // Needs fixing/repositioning if populate is not set.
+    if (this.draggableItems) {
+      var trashcan = new qx.ui.basic.Atom(null, 'qx/icon/Tango/32/places/user-trash.png');
+
+      trashcan.setDroppable(true);
+      
+      trashcan.addListener("dragover",
+        function(e) {
+          if (!e.supportsType(that.dragAndDropFlavour)) {
+            e.preventDefault();
+          }
+          trashcan.setIcon('qx/icon/Tango/32/places/user-trash-full.png');
+        });
+      trashcan.addListener("dragleave",
+        function(e) {
+          if (!e.supportsType(that.dragAndDropFlavour)) {
+            e.preventDefault();
+          }
+          trashcan.setIcon('qx/icon/Tango/32/places/user-trash.png');
+        });
+      trashcan.addListener("drop",
+        function(e) {
+          if (!e.supportsType(that.dragAndDropFlavour)) {
+            e.preventDefault();
+          }
+          trashcan.setIcon('qx/icon/Tango/32/places/user-trash.png');
+
+          var item = e.getData(that.dragAndDropFlavour);
+          var itemAddress = that.locateItem(null, item);
+
+          that.removeBasketItem(itemAddress[1], item.getLayoutParent());
+        });
+
+      var trashComposite = new qx.ui.container.Composite();
+
+      trashComposite.setLayout(new qx.ui.layout.VBox(10).set({
+        alignY: 'bottom'
+      }));
+      trashComposite.setMinHeight(this.basketMinHeight);
+      trashComposite.add(trashcan);
+      
+      this.basketComposite.add(trashComposite);
+    }
+
+    var footerContainer = new qx.ui.container.Composite();
+    footerContainer.setLayout(new qx.ui.layout.HBox(10).set({
+      alignY: 'middle'
+    }));
+
+    var clearAll = new qx.ui.basic.Atom(null, 'qx/icon/Oxygen/16/actions/edit-delete.png');
+
+    clearAll.addListener('mouseover',
+      function(mouseEvent) {
+        this.setDecorator('button-hovered');
+      },
+      clearAll
+    );
+    clearAll.addListener('mouseout',
+      function(mouseEvent) {
+        this.setDecorator(null);
+      },
+      clearAll
+    );
+    clearAll.addListener('click',
+      function(mouseEvent) {
+        that.removeAllBasketItems();
+      },
+      clearAll
+    );
+
+    footerContainer.add(clearAll);
+
     if (parameters['footer']) {
       this.footer = new qx.ui.basic.Label().set({
         value: parameters['footer'],
@@ -73,8 +153,16 @@ qx.Class.define("gazebo.ui.BasketContainer",
         appearance: 'annotation'
       });
 
-      this.add(this.footer);
+      var separator = new qx.ui.menu.Separator();
+      separator.setDecorator('separator-horizontal');
+      separator.setWidth(3);
+      separator.setHeight(16);
+      footerContainer.add(separator);
+
+      footerContainer.add(this.footer);
     }
+
+    this.add(footerContainer);
 
     if (listeners['onBasketChange']) {
       listener = listeners['onBasketChange'];
@@ -101,11 +189,154 @@ qx.Class.define("gazebo.ui.BasketContainer",
         itemContainer.setLegend(title);
       }
 
-      itemContainer.setLayout(new qx.ui.layout.VBox(5));
+      itemContainer.setLayout(new qx.ui.layout.VBox(this.basketItemSpacing));
       itemContainer.setMinWidth(140);
       itemContainer.setMinHeight(this.basketMinHeight);
 
+      if (this.draggableItems) {
+        itemContainer.setDroppable(true);
+
+        itemContainer.myPreviewItems = new Array();
+
+        var that = this;
+        itemContainer.addListener("drop",
+          function(e) {
+            var item = e.getData(that.dragAndDropFlavour);
+
+            itemContainer.setDecorator(null);
+
+            var previewItem;
+            while(previewItem = itemContainer.myPreviewItems.pop()) {
+              itemContainer.remove(previewItem);
+            }
+
+            var itemAddress = that.locateItem(itemContainer, item);
+
+            var thisBasket = itemAddress[0];
+            var location = itemAddress[1];
+
+            if (thisBasket >= 0 && location >= 0) {
+              that.removeBasketItem(location, item.getLayoutParent());
+
+              if (itemContainer.myDropHint) {
+                that.addBasketItemBefore(thisBasket, item, itemContainer.myDropHint);
+              } else {
+                that.addBasketItem(thisBasket, item, null);
+              }
+            }
+          }
+        );
+
+        itemContainer.addListener("dragover",
+          function(e) {
+            if (!e.supportsType(that.dragAndDropFlavour)) {
+              e.preventDefault();
+            } else {
+              itemContainer.setDecorator('button-hovered');
+              itemContainer.getLayout().setSpacing(that.basketItemDNDSpacing);
+
+              contents = itemContainer.getChildren();
+
+              for (i = 0; i < contents.length + 1; i++) {
+                var separatorItem = new qx.ui.menu.Separator();
+                separatorItem.setDecorator('separator-vertical');
+                separatorItem.setHeight(2);
+                separatorItem.setAllowStretchX(true, true);
+
+                var previewItem = new qx.ui.container.Composite();
+                previewItem.setLayout(new qx.ui.layout.VBox(0));
+                previewItem.setAllowStretchX(true, true);
+                previewItem.add(separatorItem);
+
+                previewItem.myDropHint = i < contents.length ? contents[i] : null;
+
+                var thisItemContainer = itemContainer;
+                previewItem.addListener("mouseover",
+                  function(e) {
+                    thisItemContainer.myDropHint = this.myDropHint;
+                    this.setDecorator('button-hovered');
+                  },
+                  previewItem
+                );
+                previewItem.addListener("mouseout",
+                  function(e) {
+                    thisItemContainer.myDropHint = null;
+                    this.setDecorator(null);
+                  },
+                  previewItem
+                );
+
+                itemContainer.myPreviewItems.push(previewItem);
+              }
+
+              // Make a copy in case Qooxdoo eventually gives us the real thing.
+              originalContents = new Array();
+              for (i = 0; i < contents.length; i++) {
+                originalContents.push(contents[i]);
+              }
+              for (i = 0; i < originalContents.length; i++) {
+                itemContainer.addBefore(itemContainer.myPreviewItems[i], originalContents[i]);
+              }
+
+              itemContainer.add(itemContainer.myPreviewItems[itemContainer.myPreviewItems.length - 1]);
+            }
+          }
+        );
+
+        itemContainer.addListener("dragleave",
+          function(e) {
+            itemContainer.setDecorator(null);
+            itemContainer.getLayout().setSpacing(that.basketItemSpacing);
+            var previewItem;
+            while(previewItem = itemContainer.myPreviewItems.pop()) {
+              itemContainer.remove(previewItem);
+            }
+          }
+        );
+      }
+
       this.basketComposite.add(itemContainer, { flex: 0 });
+    },
+
+    locateItem : function(itemContainer, item)
+    {
+      var thisBasket = -1;
+      var location = -1;
+
+      var baskets = this.basketComposite.getChildren();
+
+      for (var i = 0; i < baskets.length; i++) {
+        var contents = this.getBasketItems(i);
+
+        if (baskets[i] == itemContainer) {
+          thisBasket = i;
+        }
+
+        for (var j = 0; j < contents.length; j++) {
+          if (contents[j] == item) {
+            location = i;
+            break;
+          }
+        }
+      }
+
+      return [ thisBasket, location ];
+    },
+
+    removeAllBasketItems : function()
+    {
+      var baskets = this.basketComposite.getChildren();
+
+      for (var i = 0; i < baskets.length; i++) {
+        var contents = this.getBasketItems(i);
+
+        for (var j = 0; j < contents.length; j++) {
+          // TODO I am not entirely sure why null is part of the array.
+          if (contents[j]) {
+            this.removeBasketItem(i, contents[j].getLayoutParent());
+          }
+        }
+      }
     },
 
     getBasketItems : function(index)
@@ -142,7 +373,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
       this.addFlavouredBasketItem(index, item, gazebo.ui.BasketContainer.LIBERAL_BASKET_ITEM, weight);
     },
 
-    addFlavouredBasketItem : function(index, item, flavor, weight)
+    addBasketItemBefore : function(index, item, beforeItem)
+    {
+      this.addFlavouredBasketItem(index, item, gazebo.ui.BasketContainer.LIBERAL_BASKET_ITEM, null, beforeItem);
+    },
+
+    addFlavouredBasketItem : function(index, item, flavor, weight, beforeItem)
     {
       var baskets = this.basketComposite.getChildren();
       var itemContainer = baskets[index];
@@ -164,7 +400,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
       itemComposite.setLayout(new qx.ui.layout.HBox(5));
 
       var that = this;
-      if (flavor != gazebo.ui.BasketContainer.EMPTY_BASKET_ITEM) {
+      if (flavor != gazebo.ui.BasketContainer.EMPTY_BASKET_ITEM && !this.draggableItems) {
         var controlButton = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/categories/development.png");
 
         controlButton.setWidth(20);
@@ -186,57 +422,85 @@ qx.Class.define("gazebo.ui.BasketContainer",
           });
 
           if (flavor != gazebo.ui.BasketContainer.STICKY_BASKET_ITEM) {
-            var up = new qx.ui.basic.Atom("Towards front", 'qx/icon/Oxygen/16/actions/go-up.png');
-            var down = new qx.ui.basic.Atom("Towards end", 'qx/icon/Oxygen/16/actions/go-down.png');
+            var currentBasketContents = that.getBasketItems(index);
 
-            up.addListener('click', function() {
-              var basketContents = that.getBasketItems(index);
-              var previousItem = null;
+            var first = false;
+            var last = false;
 
-              for (var i = 0; i < basketContents.length; i++) {
-                if (basketContents[i] == item) {
-                  if (!previousItem) {
-                    return; // Top position already.
+            for (var i = 0; i < currentBasketContents.length; i++) {
+              if (currentBasketContents[i] == item && i == 0) {
+                first = true;
+              }
+              if (currentBasketContents[i] == item && i == currentBasketContents.length - 1) {
+                last = true;
+              }
+            }
+            //if (currentBasketContents.length);
+
+            if (!first) {
+              var up = new qx.ui.basic.Atom("Towards front", 'qx/icon/Oxygen/16/actions/go-up.png');
+
+              up.addListener('click', function() {
+                var basketContents = that.getBasketItems(index);
+                var previousItem = null;
+
+                popup.hide();
+
+                for (var i = 0; i < basketContents.length; i++) {
+                  if (basketContents[i] == item) {
+                    if (!previousItem) {
+                      return; // Top position already.
+                    }
+                    var thisComposite = item.getLayoutParent();
+                    var previousComposite = previousItem.getLayoutParent();
+                    var mightyParent = thisComposite.getLayoutParent();
+
+                    mightyParent.remove(thisComposite);
+                    mightyParent.addBefore(thisComposite, previousComposite, 1);
+
+                    return;
                   }
-                  var thisComposite = item.getLayoutParent();
-                  var previousComposite = previousItem.getLayoutParent();
-                  var mightyParent = thisComposite.getLayoutParent();
-
-                  mightyParent.remove(thisComposite);
-                  mightyParent.addBefore(thisComposite, previousComposite, 1);
-
-                  return;
+                  previousItem = basketContents[i];
                 }
-                previousItem = basketContents[i];
-              }
-            }, up);
+              }, up);
 
-            popup.add(up);
+              this.registerHighlighters(up);
 
-            down.addListener('click', function() {
-              var basketContents = that.getBasketItems(index);
-              var itemSpotted = false;
+              popup.add(up);
+            }
 
-              for (var i = 0; i < basketContents.length; i++) {
-                if (itemSpotted) {
-                  var previousComposite = item.getLayoutParent();
-                  var thisComposite = basketContents[i].getLayoutParent();
-                  var mightyParent = previousComposite.getLayoutParent();
+            if (!last) {
+              var down = new qx.ui.basic.Atom("Towards end", 'qx/icon/Oxygen/16/actions/go-down.png');
 
-                  mightyParent.remove(previousComposite);
-                  mightyParent.addAfter(previousComposite, thisComposite, 1);
+              down.addListener('click', function() {
+                var basketContents = that.getBasketItems(index);
+                var itemSpotted = false;
 
-                  return;
+                popup.hide();
+
+                for (var i = 0; i < basketContents.length; i++) {
+                  if (itemSpotted) {
+                    var previousComposite = item.getLayoutParent();
+                    var thisComposite = basketContents[i].getLayoutParent();
+                    var mightyParent = previousComposite.getLayoutParent();
+
+                    mightyParent.remove(previousComposite);
+                    mightyParent.addAfter(previousComposite, thisComposite, 1);
+
+                    return;
+                  }
+                  if (basketContents[i] == item) {
+                    itemSpotted = true;
+                  }
                 }
-                if (basketContents[i] == item) {
-                  itemSpotted = true;
-                }
-              }
-            }, down);
+              }, down);
 
-            popup.add(down);
+              this.registerHighlighters(down);
 
-            for (var i = 0; i < baskets.length; i++) {
+              popup.add(down);
+            }
+
+            for (i = 0; i < baskets.length; i++) {
               if (i != index) {
                 var icon = that.getDirectionIcon(index, i);
                 var moveTo;
@@ -255,16 +519,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
                   // popup.dispose(); TODO Figure out why this causes a crash.
                 }, moveTo);
 
-                moveTo.setRich(true);
-                moveTo.graphicalModel = moveTo.getLabel();
-
-                moveTo.addListener('mouseover', function(mouseEvent) {
-                  this.setLabel("<span style='color: #5070bf;'>" + this.graphicalModel + "</span>");
-                }, moveTo);
-
-                moveTo.addListener('mouseout', function(mouseEvent) {
-                  this.setLabel(this.graphicalModel);
-                }, moveTo);
+                this.registerHighlighters(moveTo);
 
                 popup.add(moveTo);
               }
@@ -299,15 +554,34 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
       itemComposite.add(item, { flex: 1 });
 
-      if (weight == null) {
-        itemContainer.add(itemComposite, 1);
-        this.debug("COMPOSITE ADDED SOMEWHERE");
+      if (!weight) {
+        if (beforeItem) {
+          itemContainer.addBefore(itemComposite, beforeItem, 1);
+          this.debug("COMPOSITE ADDED BEFORE " + beforeItem);
+        } else {
+          itemContainer.add(itemComposite, 1);
+          this.debug("COMPOSITE ADDED SOMEWHERE");
+        }
       } else {
         itemContainer.addAt(itemComposite, weight, 1);
         this.debug("COMPOSITE ADDED AT " + weight);
       }
 
       this.fireDataEvent('onBasketChangeRelay', this);
+    },
+
+    registerHighlighters : function(label)
+    {
+      label.setRich(true);
+      label.graphicalModel = label.getLabel();
+
+      label.addListener('mouseover', function(mouseEvent) {
+        this.setLabel("<span style='color: #5070bf;'>" + this.graphicalModel + "</span>");
+      }, label);
+
+      label.addListener('mouseout', function(mouseEvent) {
+        this.setLabel(this.graphicalModel);
+      }, label);
     },
 
     removeBasketItem : function(index, item)
