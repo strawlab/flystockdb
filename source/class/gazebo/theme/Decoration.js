@@ -81,6 +81,15 @@ qx.Theme.define("gazebo.theme.Decoration",
       }
     },
 
+    "group-blue" :
+    {
+      decorator : qx.ui.decoration.Grid,
+
+      style : {
+        baseImage : "gazebo/decoration/groupbox/groupbox-blue.png"
+      }
+    },
+
     "scrollbar-slider-horizontal" :
     {
       decorator : qx.ui.decoration.Beveled,

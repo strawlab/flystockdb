@@ -26,6 +26,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
     var populate = parameters['populate'];
     var titles = parameters['titles'];
     var decorations = parameters['decorations'];
+    var width = parameters['width'] ? parameters['width'] : 866;
+    var compact = parameters['compact'];
 
     this.labels = parameters['labels'];
     this.basketMinHeight = parameters['basketMinHeight'] ? parameters['basketMinHeight'] : 250;
@@ -47,7 +49,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     this.basketComposite.setLayout(new qx.ui.layout.Flow(5, 5));
     this.basketComposite.setAllowStretchX(false, false);
-    this.basketComposite.setWidth(866);
+    this.basketComposite.setWidth(width);
 
     this.add(this.basketComposite);
 
@@ -143,7 +145,14 @@ qx.Class.define("gazebo.ui.BasketContainer",
       clearAll
     );
 
-    footerContainer.add(clearAll);
+    if (compact) {
+      var clearContainer = new qx.ui.container.Composite();
+      clearContainer.setLayout(new qx.ui.layout.HBox(10));
+      clearContainer.add(clearAll);
+      this.basketComposite.add(clearContainer);
+    } else {
+      footerContainer.add(clearAll);
+    }
 
     if (parameters['footer']) {
       this.footer = new qx.ui.basic.Label().set({
@@ -153,11 +162,13 @@ qx.Class.define("gazebo.ui.BasketContainer",
         appearance: 'annotation'
       });
 
-      var separator = new qx.ui.menu.Separator();
-      separator.setDecorator('separator-horizontal');
-      separator.setWidth(3);
-      separator.setHeight(16);
-      footerContainer.add(separator);
+      if (!compact) {
+        var separator = new qx.ui.menu.Separator();
+        separator.setDecorator('separator-horizontal');
+        separator.setWidth(3);
+        separator.setHeight(16);
+        footerContainer.add(separator);
+      }
 
       footerContainer.add(this.footer);
     }
