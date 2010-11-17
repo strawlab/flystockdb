@@ -155,35 +155,59 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     this.container.add(idContainer);
 
-    this.container.add(new qx.ui.basic.Label().set({
+    var textContainer = new qx.ui.container.Composite();
+    textContainer.setLayout(new qx.ui.layout.HBox(10));
+
+    var textContainer1 = new qx.ui.container.Composite();
+    textContainer1.setLayout(new qx.ui.layout.VBox(10));
+
+    var textContainer2 = new qx.ui.container.Composite();
+    textContainer2.setLayout(new qx.ui.layout.VBox(10));
+
+    textContainer1.add(new qx.ui.basic.Label().set({
+      value: 'Vial Label / Bottle Label',
+      rich: true,
+      appearance: 'annotation'
+    }));
+
+    if (this.search) {
+      this.vialTextX = new qx.ui.form.TextField().set({
+        width: 230
+      });
+      textContainer1.add(this.vialTextX);
+    } else {
+      this.vialTextX = new qx.ui.form.TextArea().set({
+        maxLength: 65535,
+        height: 150,
+        width: 230
+      });
+      textContainer1.add(this.vialTextX);
+    }
+
+    textContainer2.add(new qx.ui.basic.Label().set({
       value: 'Descriptions, Annotations and Notes',
       rich: true,
       appearance: 'annotation'
     }));
 
     if (this.search) {
-      this.descriptionTextX = new qx.ui.form.TextField();
-      this.container.add(this.descriptionTextX);
+      this.descriptionTextX = new qx.ui.form.TextField().set({
+        width: 640
+      });
+      textContainer2.add(this.descriptionTextX);
     } else {
       this.descriptionTextX = new qx.ui.form.TextArea().set({
         maxLength: 65535,
-        height: 150
+        height: 150,
+        width: 640
       });
-      this.container.add(this.descriptionTextX);
+      textContainer2.add(this.descriptionTextX);
     }
 
-    this.container.add(new qx.ui.core.Spacer(10,3));
+    textContainer.add(textContainer1);
+    textContainer.add(textContainer2);
 
-    this.container.add(new qx.ui.basic.Label().set({
-      value: 'Group Membership',
-      rich: true,
-      appearance: 'window/title',
-      textColor: 'text-gray'
-    }));
-
-    var groupSeparator = new qx.ui.menu.Separator();
-    groupSeparator.setDecorator('separator-vertical');
-    this.container.add(groupSeparator);
+    this.container.add(textContainer);
 
     groupContainer = new qx.ui.container.Composite();
     groupContainer.setLayout(new qx.ui.layout.VBox(10));
@@ -198,10 +222,10 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     groupContainer3.setLayout(new qx.ui.layout.VBox(10));
 
     var permissionGroups = new qx.ui.tree.Tree().set({
-      hideRoot: true
+      hideRoot: true,
+      width: 350,
+      height: 150
     });
-    permissionGroups.setWidth(350);
-    permissionGroups.setHeight(110);
 
     this.permissionGroupsRoot = new qx.ui.tree.TreeFolder().set({
       open: true
@@ -212,6 +236,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     groupContainer.add(new qx.ui.basic.Label().set({
       value: 'Assigned Groups',
+      rich: true,
       appearance: 'annotation'
     }));
     groupContainer.add(permissionGroups);
@@ -302,6 +327,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       var that = this;
 
       var xref = this.xrefTextField.getValue();
+      var label = this.vialTextX.getValue();
       var description = this.descriptionTextX.getValue();
       var donor = this.donorTextField.getValue();
       var contact = this.contactSelectBox.getSelectables()[this.selectionPosition(this.contactSelectBox)].getLabel();
@@ -318,10 +344,11 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
         "FB2010_05",
         "x_stocks",
         parseInt(this.internalStockID.getValue()),
-        [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
+        [ "xref", "genotype", "label", "description", "donor", "contact", "wildtype" ],
         [
           xref,
           gazebo.Application.marshallString(this.genotype),
+          label,
           description,
           donor,
           contact,

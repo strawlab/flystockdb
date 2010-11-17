@@ -53,7 +53,7 @@ qx.Class.define("gazebo.fly.StockListViewer",
 
       for (var i = 0; i < model.getColumnCount(); i++) {
         // Search terms only apply to internal st.-id, gt, wt, descr., ext-id.
-        if (searchTerm && (i < 4 || i == 5)) {
+        if (searchTerm && (i < 5 || i == 6)) {
           tableColumnModel.setDataCellRenderer(i, new gazebo.fly.StockListModelRenderer(searchTerm));
         }
       }

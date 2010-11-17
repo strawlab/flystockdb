@@ -353,15 +353,19 @@ qx.Class.define("gazebo.fly.Contribution",
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 190,
+          width: 930,
           basketMinHeight: 110,
           canProceedWithEmptyBasket: true,
           populate: this.numberOfBaskets,
+          draggableItems: true,
+          dragAndDropFlavour: 'genomic feature',
+          compact: true,
           titles: [ 'Chromosome X',
                     'Chromosome 2',
                     'Chromosome 3',
                     'Chromosome 4',
                     'Chromosome Y',
-                    'Unknown'
+                    'Anywhere'
                   ],
           labels: [ 'X',
                     '2',
@@ -375,7 +379,7 @@ qx.Class.define("gazebo.fly.Contribution",
                     'group-dark',
                     'group',
                     'group-dark',
-                    'group'
+                    'group-blue'
                    ],
           hideProceedButton: true
         },
@@ -457,7 +461,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
-          title: 'User Administration',
+          title: 'Administration',
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 95,
           contents: new gazebo.ui.Administration(
