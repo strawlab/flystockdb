@@ -30,6 +30,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     var minWidth = parameters['textFieldMinimalWidth'] ? parameters['textFieldMinimalWidth'] : 300;
 
     this.disableSuggestions = parameters['disableSuggestions'];
+    this.database = parameters['database'];
 
     this.rpcRunning = null;
     this.openAll = false;
@@ -363,7 +364,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         },
         "query",
         options,
-        "FB2010_05",
+        this.database,
         [ "*" ],
         [ "x_searchables_" + ( textValue.length - 1 ) ],
         "searchable ilike ?",
@@ -438,7 +439,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           },
           "query",
           {},
-          "FB2010_05",
+          this.database,
           [ "*" ],
           [ "x_fast_transitions" ],
           "abstraction == ? ORDER BY concretisation ASC",
@@ -508,7 +509,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                   },
                   "query_union",
                   {},
-                  "FB2010_05",
+                  this.database,
                   columns,
                   tables,
                   queries,
@@ -533,7 +534,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         },
         "query",
         { limit: 1 },
-        "FB2010_05",
+        this.database,
         [ "*" ],
         [ "x_searchables_" + ( label.length - 1 ) ],
         "searchable like ?", // TODO: Figure out why = is not working.

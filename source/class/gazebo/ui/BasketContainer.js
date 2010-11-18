@@ -216,10 +216,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
             itemContainer.setDecorator(null);
 
-            var previewItem;
-            while(previewItem = itemContainer.myPreviewItems.pop()) {
-              itemContainer.remove(previewItem);
+            var originalContents = itemContainer.theOriginalContents;
+            itemContainer.removeAll();
+            for (i = 0; i < originalContents.length; i++) {
+              itemContainer.add(originalContents[i])
             }
+            itemContainer.theOriginalContents = null;
 
             var itemAddress = that.locateItem(itemContainer, item);
 
@@ -230,6 +232,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
               that.removeBasketItem(location, item.getLayoutParent());
 
               if (itemContainer.myDropHint) {
+                itemContainer.myPreviewItem.getChildren()[0].setDecorator('button-disabled');
                 that.addBasketItemBefore(thisBasket, item, itemContainer.myDropHint);
               } else {
                 that.addBasketItem(thisBasket, item, null);
@@ -243,36 +246,44 @@ qx.Class.define("gazebo.ui.BasketContainer",
             if (!e.supportsType(that.dragAndDropFlavour)) {
               e.preventDefault();
             } else {
+              itemContainer.myDropHint = null;
               itemContainer.setDecorator('button-hovered');
               itemContainer.getLayout().setSpacing(that.basketItemDNDSpacing);
 
-              contents = itemContainer.getChildren();
+              var contents = itemContainer.getChildren();
 
               for (i = 0; i < contents.length + 1; i++) {
                 var separatorItem = new qx.ui.menu.Separator();
                 separatorItem.setDecorator('separator-vertical');
-                separatorItem.setHeight(2);
+                separatorItem.setHeight(1);
                 separatorItem.setAllowStretchX(true, true);
+                separatorItem.setDecorator('button-disabled');
 
                 var previewItem = new qx.ui.container.Composite();
                 previewItem.setLayout(new qx.ui.layout.VBox(0));
                 previewItem.setAllowStretchX(true, true);
                 previewItem.add(separatorItem);
 
-                previewItem.myDropHint = i < contents.length ? contents[i] : null;
-
                 var thisItemContainer = itemContainer;
                 previewItem.addListener("mouseover",
                   function(e) {
-                    thisItemContainer.myDropHint = this.myDropHint;
-                    this.setDecorator('button-hovered');
+                    var currentContents = thisItemContainer.getChildren();
+                    for (j = 0; j < currentContents.length - 1; j++) {
+                      thisItemContainer.myDropHint = null;
+                      if (currentContents[j] == this) {
+                        thisItemContainer.myPreviewItem = this;
+                        thisItemContainer.myDropHint = currentContents[j + 1];
+                        break;
+                      }
+                    }
+                    this.getChildren()[0].setDecorator('button-hovered');
                   },
                   previewItem
                 );
                 previewItem.addListener("mouseout",
                   function(e) {
                     thisItemContainer.myDropHint = null;
-                    this.setDecorator(null);
+                    this.getChildren()[0].setDecorator('button-disabled');
                   },
                   previewItem
                 );
@@ -285,6 +296,14 @@ qx.Class.define("gazebo.ui.BasketContainer",
               for (i = 0; i < contents.length; i++) {
                 originalContents.push(contents[i]);
               }
+
+              // Fixes Issue #5.
+              // TODO Figure out WHY this actually works.
+              if (itemContainer.theOriginalContents) {
+                return;
+              }
+              itemContainer.theOriginalContents = originalContents;
+
               for (i = 0; i < originalContents.length; i++) {
                 itemContainer.addBefore(itemContainer.myPreviewItems[i], originalContents[i]);
               }
@@ -298,10 +317,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
           function(e) {
             itemContainer.setDecorator(null);
             itemContainer.getLayout().setSpacing(that.basketItemSpacing);
-            var previewItem;
-            while(previewItem = itemContainer.myPreviewItems.pop()) {
-              itemContainer.remove(previewItem);
+            var originalContents = itemContainer.theOriginalContents;
+            itemContainer.removeAll();
+            for (i = 0; i < originalContents.length; i++) {
+              itemContainer.add(originalContents[i])
             }
+            itemContainer.theOriginalContents = null;
           }
         );
       }
@@ -389,7 +410,12 @@ qx.Class.define("gazebo.ui.BasketContainer",
       this.addFlavouredBasketItem(index, item, gazebo.ui.BasketContainer.LIBERAL_BASKET_ITEM, null, beforeItem);
     },
 
-    addFlavouredBasketItem : function(index, item, flavor, weight, beforeItem)
+    addBasketItemAfter : function(index, item, afterItem)
+    {
+      this.addFlavouredBasketItem(index, item, gazebo.ui.BasketContainer.LIBERAL_BASKET_ITEM, null, null, afterItem);
+    },
+
+    addFlavouredBasketItem : function(index, item, flavor, weight, beforeItem, afterItem)
     {
       var baskets = this.basketComposite.getChildren();
       var itemContainer = baskets[index];
@@ -569,7 +595,11 @@ qx.Class.define("gazebo.ui.BasketContainer",
         if (beforeItem) {
           itemContainer.addBefore(itemComposite, beforeItem, 1);
           this.debug("COMPOSITE ADDED BEFORE " + beforeItem);
-        } else {
+        } else if (afterItem) {
+          itemContainer.addAfter(itemComposite, afterItem, 1);
+          this.debug("COMPOSITE ADDED AFTER " + afterItem);
+        }
+        else {
           itemContainer.add(itemComposite, 1);
           this.debug("COMPOSITE ADDED SOMEWHERE");
         }
