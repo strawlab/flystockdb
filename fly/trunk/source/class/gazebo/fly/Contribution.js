@@ -32,6 +32,7 @@ qx.Class.define("gazebo.fly.Contribution",
   statics :
   {
     FOOTER_PREAMBLE : 'FlyBase Nomenclature: ',
+    FLYBASE_DB : 'FB2010_05',
     // States are not used yet.
     UI_BLANK : 0,
     UI_LOGIN : 1,
@@ -150,7 +151,8 @@ qx.Class.define("gazebo.fly.Contribution",
           stripWhitespace: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/dialog-ok.png',
-          disableSuggestions: true
+          disableSuggestions: true,
+          database: gazebo.fly.Contribution.FLYBASE_DB
         },
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
@@ -325,7 +327,8 @@ qx.Class.define("gazebo.fly.Contribution",
           top: 90,
           stripWhitespace: true,
           searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
+          database: gazebo.fly.Contribution.FLYBASE_DB
         },
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
@@ -411,7 +414,8 @@ qx.Class.define("gazebo.fly.Contribution",
           top: 90,
           stripWhitespace: true,
           searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png'
+          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
+          database: gazebo.fly.Contribution.FLYBASE_DB
         },
         {
           onOpen: { call: this.searchDialogOpenListener, context: this },
@@ -707,7 +711,7 @@ qx.Class.define("gazebo.fly.Contribution",
         },
         "create_data",
         {},
-        "FB2010_05",
+        gazebo.fly.Contribution.FLYBASE_DB,
         "x_stocks",
         [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
         [ "", "", "", "", "", "" ]
@@ -1018,6 +1022,13 @@ qx.Class.define("gazebo.fly.Contribution",
               {},
               false);
           }, this);
+          label.setDroppable(true);
+          label.addListener('drop', function(e) {
+            e.stopPropagation();
+          });
+          label.addListener('dragover', function(e) {
+            e.preventDefault();
+          });
 
           label.plainModel = displayText;
           label.graphicalModel = label.getValue();

@@ -86,7 +86,7 @@ part.each { |prefix|
 		name.chomp!
 		uniquename.chomp!
 
-		name_by_synonym[name] = synonym
+		name_by_synonym[synonym] = name
 		flybase_id_by_synonym[synonym] = uniquename
 	end
 
