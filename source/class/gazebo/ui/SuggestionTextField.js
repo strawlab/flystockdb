@@ -37,7 +37,34 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
     var layout = new qx.ui.layout.Grid(5,0);
     this.setLayout(layout);
-    
+    this.layout = layout;
+
+    if (parameters['keepHistory']) {
+      this.makeHistoryTree();
+
+      this.showHistoryAtom = new qx.ui.basic.Atom('Show History', 'qx/decoration/Modern/arrows/right.png').set({
+        appearance: 'annotation'
+      });
+
+      this.showHistoryAtom.addListener('mouseover', function(mouseEvent) {
+        this.setDecorator('button-hovered');
+      }, this.showHistoryAtom);
+
+      this.showHistoryAtom.addListener('mouseout', function(mouseEvent) {
+        this.setDecorator(null);
+      }, this.showHistoryAtom);
+
+      this.showHistoryAtom.addListener('click', function(mouseEvent) {
+        this.showHistoryAtom.setDecorator(null);
+        this.remove(this.showHistoryAtom);
+
+        this.add(this.historyTree, { row: 1, column: 0 });
+        this.historyTree.focus();
+      }, this);
+
+      this.add(this.showHistoryAtom, { row: 1, column: 0 });
+    }
+
     this.textField = new qx.ui.form.TextField();
 
     // Bugfix for qooxdoo 1.0.1 and Chrome/Safari on OSX:
@@ -61,8 +88,21 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           }
           this.suggestionTree.focus();
           this.suggestionTree.activate();
+          if (this.history && this.indexOf(this.showHistoryAtom) >= 0) {
+            this.remove(this.showHistoryAtom);
+          }
+          this.suggestionTree.show();
+        } else if (keyEvent.getKeyIdentifier() == 'Escape') {
+          this.suggestionTree.hide();
+          if (this.history) {
+            this.add(this.showHistoryAtom, { row: 1, column: 0 });
+          }
         } else if (keyEvent.getKeyIdentifier() == 'Enter') {
-          this.searchForItem(this.textField.getValue());
+          var input = this.textField.getValue();
+          this.searchForItem(input);
+          if (this.history) {
+            this.addHistoryItem(input);
+          }
         }
     }, this);
 
@@ -72,7 +112,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.searchButton = new qx.ui.form.Button(searchButtonTitle.length == 0? null : searchButtonTitle, searchButtonIcon);
 
     this.searchButton.addListener('execute', function() {
-      this.searchForItem(this.textField.getValue());
+      var input = this.textField.getValue();
+      this.searchForItem(input);
+      if (this.history) {
+        this.addHistoryItem(input);
+      }
     }, this);
 
     layout.setRowAlign(0, "center", "middle");
@@ -116,21 +160,105 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
   members :
   {
+    addHistoryItem : function(inputText)
+    {
+      var currentHistory = this.history.getChildren();
+
+      // If an item exists in the history already, do not record it again.
+      for (var i = 0; i < currentHistory.length; i++) {
+        if (currentHistory[i].model_workaround == inputText) {
+          return;
+        }
+      }
+
+      var historyItem = new qx.ui.tree.TreeFile(inputText);
+      // Leaves a gap at the beginning of the layout. Looks unpleasant.
+      //historyItem.addWidget(new qx.ui.basic.Atom(null, 'qx/decoration/Modern/menu/radiobutton-invert.gif'));
+      //historyItem.addWidget(
+      //  new qx.ui.basic.Label(
+      //    inputText
+      //  ).set({ appearance: "annotation", rich: true })
+      //);
+
+      historyItem.model_workaround = inputText;
+
+      this.history.addAtBegin(historyItem);
+    },
+
+    getHistory : function()
+    {
+      var history = this.history.getChildren();
+      var historyArray = new Array();
+
+      for (var i = 0; i < history.length; i++) {
+        historyArray.push(history[i].model_workaround);
+      }
+
+      return historyArray;
+    },
+
+    // A history tree is only created once and then filled with elements
+    // as we go along..
+    makeHistoryTree : function()
+    {
+      this.historyTree = new qx.ui.tree.Tree();
+      this.historyTree.setHideRoot(true);
+
+      this.history = new qx.ui.tree.TreeFolder("Root");
+      this.history.setOpen(true);
+      this.historyTree.setRoot(this.history);
+
+      this.historyTree.addListener('dblclick', function() {
+        var selection = this.historyTree.getSelection();
+
+        if (selection && selection.length == 1) {
+          this.searchForItem(selection[0].model_workaround);
+        }
+
+        this.remove(this.historyTree);
+      }, this);
+      this.historyTree.addListener('keypress', function(keyEvent) {
+        if (keyEvent.getKeyIdentifier() == 'Enter') {
+          var selection = this.historyTree.getSelection();
+
+          if (selection && selection.length == 1) {
+            this.searchForItem(selection[0].model_workaround);
+          }
+
+          this.remove(this.historyTree);
+        }
+      }, this);
+      this.historyTree.addListener('focusout', function(focusEvent) {
+        if (this.indexOf(this.historyTree) >= 0) {
+          this.remove(this.historyTree);
+        }
+      }, this);
+    },
+
     makeSuggestionTree : function() {
       this.suggestionTree = new qx.ui.tree.Tree();
       this.suggestionTree.setHeight(0); // Pretend we do not exist.
       this.suggestionTree.setHideRoot(true);
       this.suggestionTree.hide();
-      this.suggestionTree.setOpacity(0);
-      this.suggestionTree.addListener("appear", function() {
-          animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
-          animation.set({
-            from : 0.0,
-            to : 1.0,
-            duration : 0.8
-           });
-          animation.start();
-      }, this);
+
+      if (this.history && this.indexOf(this.showHistoryAtom) >= 0) {
+        this.add(this.showHistoryAtom, { row: 1, column: 0 });
+      }
+
+      // Fading in works in principle, but shows some nasty flickering
+      // when reappearing after being hidden. Disable for now to make
+      // the interface seem snappier.
+      // this.suggestionTree.setOpacity(0);
+      //this.suggestionTree.addListener("appear", function() {
+      //    animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
+      //    animation.set({
+      //      from : 0.0,
+      //      to : 1.0,
+      //      duration : 0.8
+      //     });
+      //    animation.start();
+      //}, this);
+
       // Fading out does not seem to work.
       //    this.suggestionTree.addListener("disappear", function() {
       //        animation = new qx.fx.effect.core.Fade(this.suggestionTree.getContainerElement().getDomElement());
@@ -161,7 +289,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         }
       }, this);
 
-      this.add(this.suggestionTree, { row: 1, column: 0 });
+      this.add(this.suggestionTree, { row: 2, column: 0 });
     },
 
     clear : function() {
@@ -180,7 +308,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       var selection = this.suggestionTree.getSelection();
 
       if (selection && selection.length == 1) {
-        this.searchForItem(selection[0].getLabel());
+        var input = selection[0].getLabel();
+        this.searchForItem(input);
+        if (this.history) {
+          this.addHistoryItem(input);
+        }
       }
     },
 
@@ -252,11 +384,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       var textValue = dataEvent.getData();
 
       if (!textValue || textValue.length == 0) {
+        // Was used for fading out suggestionTree, but did not look nice.
         //this.suggestionTree.hide();
         //this.suggestionTree.setOpacity(0);
         if (this.suggestionTree) {
           this.suggestionTree.destroy();
           this.suggestionTree = null;
+        }
+
+        if (this.history) {
+          this.add(this.showHistoryAtom, { row: 1, column: 0 });
         }
 
         //this.treeRoot.removeAll();
@@ -353,6 +490,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               that.makeSuggestionTree();
             }
 
+            if (that.history && that.indexOf(that.showHistoryAtom) >= 0) {
+              that.remove(that.showHistoryAtom);
+            }
+
             that.suggestionTree.setMinHeight(303);
             that.suggestionTree.show();
             
@@ -434,6 +575,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                   folder.add(childFile);
                 }
               }
+
+              if (that.history) {
+                that.add(that.showHistoryAtom, { row: 1, column: 0 });
+              }
+
               that.suggestionTree.show();
             }
           },
@@ -509,7 +655,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                   },
                   "query_union",
                   {},
-                  this.database,
+                  that.database,
                   columns,
                   tables,
                   queries,
@@ -529,7 +675,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             // Setting the model in Qooxdoo 1.0 does not work. Bug.
             treeItem.model_workaround = result;
             treeItem.annotation = annotation;
-            that.fireDataEvent("searchRelay", [treeItem, result[0][0]]);
+            that.fireDataEvent("searchRelay", [treeItem, result[0][0], false]);
           }
         },
         "query",

@@ -37,6 +37,9 @@
 #asset(qx/icon/Tango/32/places/user-trash.png)
 #asset(qx/icon/Tango/32/places/user-trash-full.png)
 
+#asset(qx/decoration/Modern/arrows/right.png)
+#asset(qx/decoration/Modern/menu/radiobutton-invert.gif)
+
 ************************************************************************ */
 
 qx.Class.define("gazebo.Application",
