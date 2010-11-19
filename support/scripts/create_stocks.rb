@@ -28,7 +28,7 @@ for i in ['x_stocks'] do
 	end
 end
 
-flybase.execute('CREATE TABLE x_stocks (id bigserial PRIMARY KEY, limbo_key varchar(128) UNIQUE, xref varchar(200), genotype text, label text, description text, donor varchar(1024), contact varchar(1024), wildtype varchar(1024), created_by varchar(40), created_on timestamp)')
+flybase.execute('CREATE TABLE x_stocks (id bigserial PRIMARY KEY, limbo_key varchar(128) UNIQUE, xref varchar(200), genotype text, label text, description text, donor varchar(1024), contact varchar(1024), wildtype varchar(1024), history text, created_by varchar(40), created_on timestamp)')
 
 flybase.execute('CREATE INDEX x_stocks__xref ON x_stocks (xref)')
 flybase.execute('CREATE INDEX x_stocks__genotype ON x_stocks (genotype)')
@@ -37,6 +37,7 @@ flybase.execute('CREATE INDEX x_stocks__description ON x_stocks (description)')
 flybase.execute('CREATE INDEX x_stocks__donor ON x_stocks (donor)')
 flybase.execute('CREATE INDEX x_stocks__contact ON x_stocks (contact)')
 flybase.execute('CREATE INDEX x_stocks__wildtype ON x_stocks (wildtype)')
+flybase.execute('CREATE INDEX x_stocks__history ON x_stocks (history)')
 flybase.execute('CREATE INDEX x_stocks__created_by ON x_stocks (created_by)')
 flybase.execute('CREATE INDEX x_stocks__created_on ON x_stocks (created_on)')
 

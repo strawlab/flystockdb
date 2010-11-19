@@ -38,8 +38,8 @@ qx.Class.define("gazebo.fly.StockListModel",
         "7",
         "2",
         "6",
-        "11", // TODO "10" and "11" are hacks. See below.
-        "12"
+        "12", // TODO "12" and "13" are hacks. See below.
+        "13"
       ]);
 
     this.searchTerm = parameters['searchTerm'];
@@ -86,6 +86,8 @@ qx.Class.define("gazebo.fly.StockListModel",
       }
 
       // TODO HACK
+      // Searches anywhere in the genotype, even though precise positions have
+      // been given.
       if (this.searchChromosomeX ||
         this.searchChromosome2 ||
         this.searchChromosome3 ||

@@ -27,6 +27,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     this.search = parameters['search'];
     this.genotype = parameters['genotype'];
+    this.genotypeHistory = parameters['genotypeHistory'];
 
     this.setLayout(new qx.ui.layout.HBox(10));
 
@@ -344,7 +345,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
         gazebo.fly.Contribution.FLYBASE_DB,
         "x_stocks",
         parseInt(this.internalStockID.getValue()),
-        [ "xref", "genotype", "label", "description", "donor", "contact", "wildtype" ],
+        [ "xref", "genotype", "label", "description", "donor", "contact", "wildtype", "history" ],
         [
           xref,
           gazebo.Application.marshallString(this.genotype),
@@ -352,7 +353,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
           description,
           donor,
           contact,
-          wildtype
+          wildtype,
+          gazebo.Application.marshallString(this.genotypeHistory)
         ]
       );
     },

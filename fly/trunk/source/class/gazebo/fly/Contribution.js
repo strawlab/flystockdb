@@ -32,16 +32,7 @@ qx.Class.define("gazebo.fly.Contribution",
   statics :
   {
     FOOTER_PREAMBLE : 'FlyBase Nomenclature: ',
-    FLYBASE_DB : 'FB2010_05',
-    // States are not used yet.
-    UI_BLANK : 0,
-    UI_LOGIN : 1,
-    UI_DASHBOARD : 2,
-    UI_STOCKLIST : 3,
-    UI_GENOTYPE_SEARCH : 4,
-    UI_GENOTYPE_ENTRY : 5,
-    UI_METADATA_ENTRY : 6,
-    UI_LOGOUT : 7
+    FLYBASE_DB : 'fb2010_05_stable'
   },
 
   construct : function()
@@ -66,26 +57,12 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       this.inquirer = inquirer;
 
-      this.uiState = gazebo.fly.Contribution.UI_BLANK;
-
       this.generateDispatcher(inquirer);
     },
 
     registerNextScreen : function(inquirer)
     {
-      switch(this.uiState) {
-      case gazebo.fly.Contribution.UI_BLANK:
-        break;
-      case gazebo.fly.Contribution.UI_LOGIN:
-        //inquirer.closeScreen(inquirer.disposeConnectionDialog, inquirer, {});
-        break;
-      }
 
-      //this.generateLoginUI(inquirer);
-      //inquirer.closeScreen(inquirer.disposeSearchDialog, inquirer, {});
-      //inquirer.closeScreen(inquirer.disposeBasket, inquirer, {});
-
-      //this.generateMetaDataUI(inquirer);
     },
 
     generateDispatcher : function(inquirer) {
@@ -326,6 +303,7 @@ qx.Class.define("gazebo.fly.Contribution",
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 90,
           stripWhitespace: true,
+          keepHistory: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
           database: gazebo.fly.Contribution.FLYBASE_DB
@@ -590,7 +568,8 @@ qx.Class.define("gazebo.fly.Contribution",
           contents: new gazebo.fly.GenotypeMetadata(
             {
               inquirer: inquirer,
-              genotype: this.getFlyBaseNotation()
+              genotype: this.getFlyBaseNotation(),
+              genotypeHistory: this.getGenotypeHistory()
             },
             {
               onOpen: { call: this.metadataEditorOpenListener, context: this },
@@ -713,8 +692,8 @@ qx.Class.define("gazebo.fly.Contribution",
         {},
         gazebo.fly.Contribution.FLYBASE_DB,
         "x_stocks",
-        [ "xref", "genotype", "description", "donor", "contact", "wildtype" ],
-        [ "", "", "", "", "", "" ]
+        [ "xref", "genotype", "description", "donor", "contact", "wildtype", "history" ],
+        [ "", "", "", "", "", "", "" ]
       );
     },
 
@@ -766,6 +745,18 @@ qx.Class.define("gazebo.fly.Contribution",
       }
 
       return chromosomes;
+    },
+
+    getGenotypeHistory : function()
+    {
+      var historyString = '';
+      var history = this.searchDialog.getHistory();
+
+      for (var i = 0; i < history.length; i++) {
+        historyString += history[i] + "\n";
+      }
+
+      return historyString;
     },
 
     getFlyBaseNotation : function()
