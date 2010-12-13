@@ -32,7 +32,7 @@ qx.Class.define("gazebo.fly.Contribution",
   statics :
   {
     FOOTER_PREAMBLE : 'FlyBase Nomenclature: ',
-    FLYBASE_DB : 'fb2010_05_stable'
+    FLYBASE_DB : 'FB2010_05'
   },
 
   construct : function()
