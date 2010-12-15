@@ -4,7 +4,20 @@ require 'rubygems'
 require 'dbi'
 require 'date'
 
-FEATURE_DEPTH = 3
+FEATURE_DEPTH = 1
+
+def extract_location(string)
+	chromosome = ''
+	arm = ''
+
+	if string.match(/^\w+\(\d[LR]{0,2}\).*/) then
+		chromosome, arm = string.scan(/^\w+\((\d)([LR]{0,2})\).*/)[0]
+
+		chromosome = 'X' if chromosome == 1
+	end
+
+	return [ chromosome, arm ]
+end
 
 if ARGV.length != 3 then
         program = File.basename($0)
@@ -51,6 +64,8 @@ flybase_id_by_feature = {}
 puts DateTime.now       
 puts 'Determining kind of all features (without considering synonyms)..'
                         
+#part = ['b', 'In', 'TM']
+
 part = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
 	's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -73,6 +88,9 @@ part.each { |prefix|
 puts DateTime.now
 puts 'Determining FlyBase IDs by feature and synonym name..'
 
+seen_synonyms = {}
+seen_features = {}
+
 part.each { |prefix|
 	ids = flybase.execute('SELECT DISTINCT s.name, f.name, f.uniquename FROM feature f, synonym s, cvterm c, feature_synonym fs ' <<
 		'WHERE s.type_id = c.cvterm_id AND (c.name = \'symbol\' OR c.name = \'nickname\' OR c.name = \'fullname\') AND ' <<
@@ -86,8 +104,14 @@ part.each { |prefix|
 		name.chomp!
 		uniquename.chomp!
 
-		name_by_synonym[synonym] = name
-		flybase_id_by_synonym[synonym] = uniquename
+		if seen_synonyms[synonym] then
+			name_by_synonym.delete(synonym)
+			flybase_id_by_synonym.delete(synonym)
+		else
+			name_by_synonym[synonym] = name
+			flybase_id_by_synonym[synonym] = uniquename
+			seen_synonyms[synonym] = true
+		end
 	end
 
 	ids = flybase.execute('SELECT DISTINCT f.name, f.uniquename FROM feature f ' <<
@@ -99,7 +123,12 @@ part.each { |prefix|
 		name.chomp!
 		uniquename.chomp!
 
-		flybase_id_by_feature[name] = uniquename
+		if seen_features[name] then
+			flybase_id_by_feature.delete(name)
+		else
+			flybase_id_by_feature[name] = uniquename
+			seen_features[name] = true
+		end
 	end
 }
 
@@ -108,7 +137,7 @@ puts 'Fetching locations..'
 
 locations = flybase.execute('SELECT DISTINCT s.name FROM ' <<
                                	'synonym s, cvterm c WHERE ' <<
-#					'(s.name = \'h\' OR s.name = \'CyO\' OR s.name = \'CyO23\' OR s.name = \'Df(2)chic[221]\') AND ' <<
+		#			'(s.name LIKE \'b%\' OR s.name LIKE \'In%\' OR s.name LIKE \'TM%\') AND ' << # TEMP
                                        	's.type_id = c.cvterm_id AND ' <<
                                        	'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\')')
 
@@ -116,10 +145,40 @@ for i in 0..FEATURE_DEPTH do
 	loci[i] = {}
 end
 
+seen_synonyms = {}
+
 locations.fetch do |row|
 	synonym = row[0]
 
 	synonym.chomp!
+
+	found_location = false
+
+	# TODO Hack: cvterm 'chromosome_arm' has the type_id 210
+	location_s = flybase.prepare('SELECT f.name, chr.name, chr.uniquename FROM ' <<
+				'feature f, featureloc fl, feature chr WHERE ' <<
+				'f.name = ? AND ' <<
+				'fl.feature_id = f.feature_id AND ' <<
+				'fl.srcfeature_id = chr.feature_id AND ' <<
+				'chr.type_id = 210 ' <<
+				#'chr_term.name = \'chromosome_arm\' ' <<
+				'LIMIT 1')
+	location_s.execute(synonym)
+	location_s.fetch do |row|
+		name, chromosome, arm = row
+
+		name.chomp!
+		chromosome.chomp!
+		arm.chomp!
+
+		found_location = true if chromosome != ''
+
+		loci[0][name] = [chromosome, arm]
+		seen_synonyms[name] = true
+	end
+	location_s.finish
+
+	next if found_location
 
 	synonyms = [synonym]
 	for i in 0..FEATURE_DEPTH do
@@ -166,7 +225,13 @@ locations.fetch do |row|
 				chromosome.chomp!
 				arm.chomp!
 
-				loci[i][synonym] = [chromosome, arm]
+				if i > 0 and seen_synonyms[synonym] then
+					loci[i].delete(synonym)
+				else
+                                        chromosome, arm = extract_location(synonym) if chromosome == ''
+					loci[i][synonym] = [chromosome, arm]
+					seen_synonyms[synonym] = true
+				end
 			end
 			ref_locations_st.finish
 		}
@@ -377,6 +442,9 @@ flybase.execute('CREATE TABLE x_non_searchables (non_searchable VARCHAR(200))')
 puts DateTime.now
 query = ''
 key = ''
+total_searchables = 0
+direct_locations = 0
+known_locations = 0
 for i in 0..max_length - 1 do
 	puts 'Searchables[' << i.to_s << ']: ' << searchables[i].length.to_s
 	begin
@@ -389,11 +457,37 @@ for i in 0..max_length - 1 do
 			key = searchable
 			chromosome = ''
 			arm = ''
+			direct_hit = false
 			for j in 0..FEATURE_DEPTH do
 				if loci[j].has_key?(searchable) then
 					chromosome, arm = loci[j][searchable]
+					direct_hit = true if occurrences == 1 and j == 0 and chromosome != ''
 					break
 				end
+			end
+			if chromosome == '' then
+				chromosome, arm = extract_location(searchable)
+				direct_hit = true if occurrences == 1 and chromosome != ''
+			end
+			if chromosome == '' then
+				sql_parent = flybase.prepare('SELECT obj.name FROM ' <<
+					'cvterm c, feature sub, feature obj, feature_relationship fr WHERE ' <<
+					'c.name = \'variant_of\' AND ' <<
+					'sub.name = ? AND ' <<
+					'fr.subject_id = sub.feature_id AND ' <<
+					'fr.type_id = c.cvterm_id AND ' <<
+					'obj.feature_id = fr.object_id'
+				)
+				sql_parent.execute(searchable)
+				sql_parent.fetch { |row|
+					name = row[0]
+
+					name.chomp!
+
+					chromosome, arm = extract_location(name)
+				}
+				sql_parent.finish
+				direct_hit = true if occurrences == 1 and chromosome != ''
 			end
 			searchable_kind = ''
 			if kind_by_name.has_key?(searchable) then
@@ -413,6 +507,10 @@ for i in 0..max_length - 1 do
 			sql_insert = flybase.prepare('INSERT INTO x_searchables_' << i.to_s << ' VALUES (?, ?, ?, ?, ?, ?, ?)')
 			sql_insert.execute(searchable, occurrences, searchable_kind, chromosome, arm, uniquename, name)
 			sql_insert.finish
+
+			total_searchables += 1 if occurrences == 1
+			direct_locations += 1 if direct_hit
+			known_locations += 1 if occurrences == 1 and chromosome != ''
 		}
 	rescue RuntimeError => e
 		puts 'Woops..'
@@ -458,6 +556,10 @@ bad.each do |name|
 end
 
 flybase.disconnect
+
+puts 'Direct locations:  ' << direct_locations.to_s
+puts 'Known locations:   ' << known_locations.to_s
+puts 'Total searchables: ' << total_searchables.to_s
 
 puts DateTime.now
 puts 'Done.'
