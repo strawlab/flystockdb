@@ -3,15 +3,30 @@
 
 [We](http://bergmanlab.smith.man.ac.uk) are currently developing a web-based database for fly-stock keeping. A short introduction and a screencast about the project: [Preview of the Dmel-stock-keeping database "<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>"](http://bergmanlab.smith.man.ac.uk/?p=704)
 
-Installation
-------------
+Documentation
+-------------
 
-PostgreSQL needs to be installed and running; FlyBase needs to be loaded as a database, where I assume that the database is named FBYYYY_MM in the following. As in the instructions given by FlyBase, YYYY and MM will correspond to the year and month of the FlyBase release. For example, your database might be called FB2010_09.
+Documentation is been prepared and can be found on-line as a [wiki](https://github.com/joejimbo/flystockdb/wiki), or it can be downloaded in markdown format:
+
+    git clone git://github.com/joejimbo/flystockdb.wiki.git
+
+Quick Installation Guide
+------------------------
+
+PostgreSQL needs to be installed and running; FlyBase needs to be loaded as a database, where I assume that the database is named FBYYYY_MM in the following. As in the instructions given by FlyBase, YYYY and MM will correspond to the year and month of the FlyBase release. For example, your database might be called FB2010_09. There needs to be a PostgreSQL user 'gazebo' with password 'gazebo' set-up, who has the permission to create databases.
 
 Get the web-application framework Gazebo and the flystockdb implementation from GitHub:
 
-    git clone git@github.com:joejimbo/Gazebo
-    git clone git@github.com:joejimbo/flystockdb
+    git clone git://github.com/joejimbo/Gazebo.git
+    git clone git://github.com/joejimbo/flystockdb.git
+
+First, we need to generate and extract some positional and feature-type
+information from FlyBase, which will be used when entering genotypes:
+
+    cd flystockdb/support/scripts
+    ./create_stocks.rb FBYYYY_MM gazebo gazebo
+    ./doall.sh FBYYYY_MM gazebo gazebo
+    cd ../../..
 
 Gazebo is dependend on supporting software, which has to installed as well:
 
