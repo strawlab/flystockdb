@@ -32,7 +32,7 @@ qx.Class.define("gazebo.fly.Contribution",
   statics :
   {
     FOOTER_PREAMBLE : 'FlyBase Nomenclature: ',
-    FLYBASE_DB : 'FB2010_05'
+    FLYBASE_DB : 'FB2010_09'
   },
 
   construct : function()
@@ -833,7 +833,19 @@ qx.Class.define("gazebo.fly.Contribution",
       var chromosomeName = 'Unknown'
       var flybaseId = null;
 
-      this.debug('INPUT LISTENER: Item: ' + treeItem + ' / ' + userInput);
+      if (treeItem) {
+        if (userInput) {
+          this.debug('INPUT LISTENER: Item: ' + treeItem + ' / ' + userInput);
+        } else {
+          this.debug('INPUT LISTENER: Item: ' + treeItem + ' / null');
+        }
+      } else {
+        if (userInput) {
+          this.debug('INPUT LISTENER: Item: null / ' + userInput);
+        } else {
+          this.debug('INPUT LISTENER: Item: null / null');
+        }
+      }
 
       if (treeItem) {
         var parameters = treeItem.model_workaround[0];
@@ -854,11 +866,15 @@ qx.Class.define("gazebo.fly.Contribution",
 
             treeItem.model_workaround = parameters;
           } else {
-            parameters[0] = null;
-            parameters[1] = null;
-            parameters[2] = null;
-            parameters[5] = null;
-            parameters[6] = null;
+            if (parameters) {
+              parameters[0] = null;
+              parameters[1] = null;
+              parameters[2] = null;
+              parameters[5] = null;
+              parameters[6] = null;
+            } else {
+              parameters = [null, null, null, 'U', null, null, null];
+            }
 
             treeItem.model_workaround = parameters;
           }
@@ -902,6 +918,21 @@ qx.Class.define("gazebo.fly.Contribution",
 
             if (chromosome > 3) {
               break;
+            }
+          }
+        }
+
+        // If the feature is on Y or U, then make sure we do not put it
+        // there twice. This is important whenever a genotype is entered,
+        // because for each feature of the genotype it is assumed that there
+        // are two chromosomes available and hence the feature strings are
+        // doubled by default.
+        if (this.numberOfBaskets == 10 && chromosome >= 5 && chromosome <= 6) {
+          var thisChromosome = this.getChromosomes(10)[chromosome][0];
+
+          for (j = 0; j < thisChromosome.length; j++) {
+            if (thisChromosome[j].plainModel == userInput) {
+              return;
             }
           }
         }

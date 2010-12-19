@@ -64,8 +64,6 @@ flybase_id_by_feature = {}
 puts DateTime.now       
 puts 'Determining kind of all features (without considering synonyms)..'
                         
-#part = ['b', 'In', 'TM']
-
 part = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
 	's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
