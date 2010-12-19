@@ -997,6 +997,23 @@ qx.Class.define("gazebo.fly.Contribution",
                   aides = chromosomeBagDuplicate.concat([ possibleBalancer ]);
                 }
 
+                // Check for inversions or deletions and use them
+                // to obtain absolute chromosomal positions.
+                // Note: Do this before the token itself is removed
+                // fromthe aides, because it may reveal information about
+                // its own location.
+                for (i = 0; i < aides.length; i++) {
+                  if (aides[i].match(/^\w+\(\d[LR]{0,2}\).*/)) {
+                    var chromosomeLetter = aides[i].match(/\(\d[LR]{0,2}\)/)[0].match(/\d/);
+
+                    if (chromosomeLetter == '1') {
+                      aides = aides.concat([ 'w' ]);
+                    } else if (chromosomeLetter == '2') {
+                      aides = aides.concat([ 'b' ]);
+                    } // TODO remaining locations
+                  }
+                }
+
                 // Remove the token itself from the aides.
                 while ((splicePoint = aides.indexOf(token)) >= 0) {
                   aides.splice(splicePoint, 1);
@@ -1017,6 +1034,19 @@ qx.Class.define("gazebo.fly.Contribution",
           }
 
           return;
+        } else {
+          // In case the feature is put on Unknown:
+          // Check for inversions or deletions which may
+          // contain information about their own location.
+          if (chromosome == 5 && userInput.match(/^\w+\(\d[LR]{0,2}\).*/)) {
+            chromosomeLetter = userInput.match(/\(\d[LR]{0,2}\)/)[0].match(/\d/);
+
+            if (chromosomeLetter == '1') {
+              chromosome = 0;
+            } else if (chromosomeLetter == '2') {
+              chromosome = 1;
+            } // TODO remaining locations
+          }
         }
 
         var container = new qx.ui.container.Composite();
