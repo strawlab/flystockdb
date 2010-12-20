@@ -10,7 +10,7 @@ def extract_location(string)
 	chromosome = ''
 	arm = ''
 
-	if string.match(/^\w+\(\d[LR]{0,2}\).*/) then
+	if string.match(/^(In|Df)\(\d[LR]{0,2}\).*/) then
 		chromosome, arm = string.scan(/^\w+\((\d)([LR]{0,2})\).*/)[0]
 
 		chromosome = 'X' if chromosome == 1

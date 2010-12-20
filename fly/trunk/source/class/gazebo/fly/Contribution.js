@@ -997,20 +997,35 @@ qx.Class.define("gazebo.fly.Contribution",
                   aides = chromosomeBagDuplicate.concat([ possibleBalancer ]);
                 }
 
-                // Check for inversions or deletions and use them
-                // to obtain absolute chromosomal positions.
                 // Note: Do this before the token itself is removed
-                // fromthe aides, because it may reveal information about
+                // fromthe aides, because itself may reveal information about
                 // its own location.
                 for (i = 0; i < aides.length; i++) {
-                  if (aides[i].match(/^\w+\(\d[LR]{0,2}\).*/)) {
+                  // Check for inversions or deficiencies and use them
+                  // to obtain absolute chromosomal positions.
+                  if (aides[i].match(/^(In|Df)\(\d[LR]{0,2}\).*/)) {
                     var chromosomeLetter = aides[i].match(/\(\d[LR]{0,2}\)/)[0].match(/\d/);
 
+                    // The following genes (w, b, e and ci) appear on the
+                    // chromosomes X, 2, 3 and 4 respectively, hence, will
+                    // aide the positioning of the inversion/deficiency.
                     if (chromosomeLetter == '1') {
                       aides = aides.concat([ 'w' ]);
                     } else if (chromosomeLetter == '2') {
                       aides = aides.concat([ 'b' ]);
-                    } // TODO remaining locations
+                    } else if (chromosomeLetter == '3') {
+                      aides = aides.concat([ 'e' ]);
+                    } else if (chromosomeLetter == '4') {
+                      aides = aides.concat([ 'ci' ]);
+                    } // There are no In/Df on Y (FB2010_05)
+                  }
+
+                  // If we are dealing with a simple symbol + superscript, then
+                  // treat it as an allele and give the gene here as an aide.
+                  if (aides[i].match(/^\w+\[\w+\]$/)) {
+                    var geneSymbol = aides[i].match(/^\w+/)[0];
+
+                    aides = aides.concat([ geneSymbol ]);
                   }
                 }
 
@@ -1036,16 +1051,20 @@ qx.Class.define("gazebo.fly.Contribution",
           return;
         } else {
           // In case the feature is put on Unknown:
-          // Check for inversions or deletions which may
+          // Check for inversions or deficiencies which may
           // contain information about their own location.
-          if (chromosome == 5 && userInput.match(/^\w+\(\d[LR]{0,2}\).*/)) {
+          if (chromosome == 5 && userInput.match(/^(In|Df)\(\d[LR]{0,2}\).*/)) {
             chromosomeLetter = userInput.match(/\(\d[LR]{0,2}\)/)[0].match(/\d/);
 
             if (chromosomeLetter == '1') {
               chromosome = 0;
             } else if (chromosomeLetter == '2') {
               chromosome = 1;
-            } // TODO remaining locations
+            } else if (chromosomeLetter == '3') {
+              chromosome = 2;
+            } else if (chromosomeLetter == '4') {
+              chromosome = 3;
+            } // Not known what an In/Df would be named on Y.
           }
         }
 
