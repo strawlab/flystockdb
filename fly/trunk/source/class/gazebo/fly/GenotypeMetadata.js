@@ -320,7 +320,41 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     saveStock : function()
     {
-      var rpc = new qx.io.remote.Rpc();
+      var groups = this.permissionGroupsRoot.getChildren();
+
+      // Assumption: A stock is only added to a dozen of groups and
+      // not to hundreds or thousands of groups, which would make the
+      // individual requests (probably) impossible.
+      for (var i = 0; i < groups.length; i++) {
+        var group = groups[i].model_workaround;
+        var group_id = groups[i].model_group_id;
+        var selected = groups[i].model_groupCheckbox.getValue();
+
+        if (selected) {
+          var rpc = new qx.io.remote.Rpc();
+          rpc.setTimeout(gazebo.Application.delayedTimeout);
+          rpc.setUrl(gazebo.Application.getServerURL());
+          rpc.setServiceName("gazebo.cgi");
+
+          rpc.callAsync(
+            function(result, ex, id)
+            {
+              // TODO Do to the swarm of requests, error handling will be
+              // difficult here. Might have to adopt a "quasi-synchronous"
+              // approach, where asynchronous calls are send in sequence.
+            },
+            'create_metadata',
+            {
+            },
+            [
+              this.internalStockID.getValue(),
+              group_id
+            ]
+          );
+        }
+      }
+
+      rpc = new qx.io.remote.Rpc();
 			rpc.setTimeout(gazebo.Application.timeout);
 			rpc.setUrl(gazebo.Application.getServerURL());
 			rpc.setServiceName("gazebo.cgi");
@@ -470,13 +504,17 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
             group.addWidget(new qx.ui.core.Spacer(5));
             group.addWidget(new qx.ui.basic.Label(result[i][0]));
             group.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
-            group.addWidget(new qx.ui.basic.Label(result[i][1]));
+            group.addWidget(new qx.ui.basic.Label(result[i][2]));
+
+            group.model_workaround = result[i][0];
+            group.model_group_id = result[i][1];
+            group.model_groupCheckbox = groupCheckbox;
 
             that.permissionGroupsRoot.add(group);
           }
         },
         'get_grouplist',
-        { detailed: true },
+        { detailed: true, contributeOnly: true },
         "true",
         []
       );
