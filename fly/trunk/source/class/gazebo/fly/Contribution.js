@@ -908,7 +908,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
           for (i = 0; i < 4; i++) {
             var topChromosome = currentChromosomes[i][0];
-            
+
             for (var j = 0; j < topChromosome.length; j++) {
               if (topChromosome[j].plainModel == userInput) {
                 chromosome += 6;
@@ -927,7 +927,7 @@ qx.Class.define("gazebo.fly.Contribution",
         // because for each feature of the genotype it is assumed that there
         // are two chromosomes available and hence the feature strings are
         // doubled by default.
-        if (this.numberOfBaskets == 10 && chromosome >= 5 && chromosome <= 6) {
+        if (this.numberOfBaskets == 10 && chromosome >= 4 && chromosome <= 5) {
           var thisChromosome = this.getChromosomes(10)[chromosome][0];
 
           for (j = 0; j < thisChromosome.length; j++) {
@@ -941,7 +941,13 @@ qx.Class.define("gazebo.fly.Contribution",
       if (userInput.length > 0 && this.requestTransition) {
         this.requestTransition = false;
 
+        // Eliminate leading and trailing white space:
         userInput = userInput.replace(/^\s+|\s+$/g, "");
+
+        // Allels may require re-querying, so fake a genotype:
+        if (!reQuery && userInput.match(/^\w+\[\w+\]$/)) {
+          userInput = userInput + ' / ';
+        }
 
         // Simple test to see whether a complete genotype might have been entered:
         if (!this.reader.isAtom(userInput)) {
