@@ -814,7 +814,7 @@ qx.Class.define("gazebo.ui.Administration",
             } else if (fields[i].magicMapping) {
               selectables = fields[i].getSelectables(true);
 
-              if (result[0][i] && result[0][i] < selectables.length) {
+              if (result[0][i] < selectables.length) {
                 fields[i].setSelection([ selectables[ result[0][i] ] ]);
               } else {
                 // TODO Woops...
