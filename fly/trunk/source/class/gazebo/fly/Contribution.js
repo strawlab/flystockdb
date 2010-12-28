@@ -568,7 +568,8 @@ qx.Class.define("gazebo.fly.Contribution",
           contents: new gazebo.fly.GenotypeMetadata(
             {
               inquirer: inquirer,
-              genotype: this.getFlyBaseNotation(),
+              // TODO 10 hardcoded..
+              genotype: new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)),
               genotypeHistory: this.getGenotypeHistory()
             },
             {
@@ -1107,6 +1108,7 @@ qx.Class.define("gazebo.fly.Contribution",
             e.preventDefault();
           });
 
+          label.flybaseModel = flybaseId;
           label.plainModel = displayText;
           label.graphicalModel = label.getValue();
 

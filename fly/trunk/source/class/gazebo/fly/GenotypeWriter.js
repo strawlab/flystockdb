@@ -21,13 +21,23 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
 
   members:
   {
-    flattenChromosome : function(chromosome)
+    // rich toggles the generation of the machine readable format. 'true'
+    // means that machine output is generated.
+    flattenChromosome : function(chromosome, rich, context)
     {
       var flat = ""
 
       for (var i = 0; i < chromosome.length; i++) {
         if (chromosome[i].plainModel) {
-          flat += chromosome[i].plainModel;
+          if (rich) {
+            flat += '@';
+            if (chromosome[i].flybaseModel) {
+              flat += chromosome[i].flybaseModel;
+            }
+            flat += ':' + chromosome[i].plainModel + '$' + context + '@';
+          } else {
+            flat += chromosome[i].plainModel;
+          }
 
           if (chromosome[i].commaSwitchedOn) {
             flat += ', ';
@@ -41,7 +51,7 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
         flat = '+';
       }
 
-      return flat;
+      return flat.replace(/^\s+|\s+$/g, '');
     },
 
     // TODO Something that can be used to uniquely reconstruct the genotype.
@@ -51,20 +61,23 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
       var chromosomeContents = "";
 
       for (var i = 0; i < chromosomes.length; i++) {
-        string += '[ ';
+        var context = '' + i % 6;
 
         if (chromosomes[i].length == 1) {
           // Y or U
-          string += this.flattenChromosome(chromosomes[i][0]);
+          string += this.flattenChromosome(chromosomes[i][0], true, context);
         } else if (chromosomes[i].length == 2) {
           // X, 2, 3 or 4
           var parent1 = chromosomes[i][0];
           var parent2 = chromosomes[i][1];
 
-          string += this.flattenChromosome(parent1) + ' / ' + this.flattenChromosome(parent2);
+          string += this.flattenChromosome(parent1, true, context) + '/' +
+            this.flattenChromosome(parent2, true, context);
         }
-        
-        string += ' ]'
+
+        if (i + 1 < chromosomes.length) {
+          string += ';';
+        }
       }
 
       return string;      
