@@ -75,9 +75,9 @@ qx.Class.define("gazebo.Application",
     // characters.
     marshallString : function(string)
     {
-      string = string.replace("@", "@@")
-      string = string.replace(";", "@S")
-      string = string.replace("+", "@P")
+      string = string.replace(/@/g, "@@")
+      string = string.replace(/;/g, "@S")
+      string = string.replace(/\+/g, "@P")
 
       return string;
     }
