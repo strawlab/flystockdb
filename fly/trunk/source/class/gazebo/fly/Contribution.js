@@ -1057,6 +1057,31 @@ qx.Class.define("gazebo.fly.Contribution",
 
           return;
         } else {
+          // Else-path: We are seeing an atom here.
+          
+          // Find annotations in flystockdb-notation:
+          var hint = userInput.match(/^@[^@]+@/);
+
+          if (hint) {
+            var flybaseIdHint = userInput.match(/^@\w*:/)[0].match(/\w+/);
+            var chromosomeHint = userInput.match(/\$\d+@$/);
+            bottom = treeItem.annotation ? treeItem.annotation[0] : false;
+
+            if (flybaseIdHint) {
+              flybaseId = flybaseIdHint[0];
+            }
+
+            if (chromosomeHint) {
+              chromosome = parseInt(chromosomeHint[0].match(/\d+/)[0]);
+
+              if (bottom && chromosome < 4) {
+                chromosome += 6;
+              }
+            }
+
+            userInput = userInput.replace(/^@\w*:/, '').replace(/\$\d+@$/, '');
+          }
+
           // In case the feature is put on Unknown:
           // Check for inversions or deficiencies which may
           // contain information about their own location.

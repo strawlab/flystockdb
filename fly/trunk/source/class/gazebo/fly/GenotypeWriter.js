@@ -39,6 +39,8 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
             flat += chromosome[i].plainModel;
           }
 
+          // The space is important for the decompositioning algorithm
+          // in Contribution.js.
           if (chromosome[i].commaSwitchedOn) {
             flat += ', ';
           } else {
