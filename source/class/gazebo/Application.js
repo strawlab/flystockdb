@@ -34,6 +34,8 @@
 
 #asset(qx/icon/Oxygen/16/apps/utilities-keyring.png)
 
+#asset(qx/icon/Oxygen/16/actions/zoom-in.png)
+
 #asset(qx/icon/Tango/32/places/user-trash.png)
 #asset(qx/icon/Tango/32/places/user-trash-full.png)
 
