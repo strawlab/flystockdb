@@ -34,6 +34,9 @@ qx.Class.define("gazebo.fly.StockListViewer",
 
     var tableColumnModel = this.getTableColumnModel();
 
+    // Edit-/view-buttons:
+    tableColumnModel.setDataCellRenderer(0, new qx.ui.table.cellrenderer.Image(16, 16));
+
     // TODO HACK Chr search becomes term search for highlighting..
     if (!searchTerm) {
       searchTerm = '';
@@ -45,20 +48,29 @@ qx.Class.define("gazebo.fly.StockListViewer",
       searchTerm += searchChromosomeU ? searchChromosomeU : '';
 
       if (searchTerm.length > 0) {
-        tableColumnModel.setDataCellRenderer(1, new gazebo.fly.StockListModelRenderer(searchTerm));
+        tableColumnModel.setDataCellRenderer(3, new gazebo.fly.StockListModelRenderer(searchTerm));
       }
     } else {
 
-      // Propoer implementation if a search term is present..
+      // TODO Proper implementation if a search term is present..
 
-      for (var i = 0; i < model.getColumnCount(); i++) {
+      // Column 0 contains the edit-/view-buttons.
+      for (var i = 1; i < model.getColumnCount(); i++) {
         // Search terms only apply to internal st.-id, gt, wt, descr., ext-id.
-        if (searchTerm && (i < 5 || i == 6)) {
+        if (searchTerm && (i < 7 || i == 8)) {
           tableColumnModel.setDataCellRenderer(i, new gazebo.fly.StockListModelRenderer(searchTerm));
         }
       }
 
     }
+
+    this.addListener('cellClick', function(cellEvent) {
+      if (cellEvent.getColumn() == 0) {
+        alert('-> ' + this.getTableModel().getValue(1, cellEvent.getRow()));
+      }
+    }, this);
+
+    this.setColumnWidth(0, 28);
   },
 
   members:

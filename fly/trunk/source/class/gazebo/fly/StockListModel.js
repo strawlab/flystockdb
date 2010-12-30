@@ -19,6 +19,7 @@ qx.Class.define("gazebo.fly.StockListModel",
     this.base(arguments);
 
     this.setColumns([
+        "",
         "Internal Stock-ID",
         "Vial- / Bottle-Label",
         "Genotype",
@@ -31,15 +32,16 @@ qx.Class.define("gazebo.fly.StockListModel",
         "Entered By"
       ], [
         "0",
-        "4",
-        "3",
-        "8",
+        "1",
         "5",
-        "7",
-        "2",
+        "4",
+        "9",
         "6",
-        "12", // TODO "12" and "13" are hacks. See below.
-        "13"
+        "8",
+        "3",
+        "7",
+        "13", // TODO "13" and "14" are hacks. See below.
+        "14"
       ]);
 
     this.searchTerm = parameters['searchTerm'];
@@ -149,12 +151,13 @@ qx.Class.define("gazebo.fly.StockListModel",
             var resultList = new Array();
             for (i = 0; i < result.length; i++) {
               var rowHash = {};
+              rowHash['0'] = 'qx/icon/Oxygen/16/actions/zoom-in.png';
               for (j = 0; j < result[i].length; j++) {
-                rowHash[j + ''] = result[i][j];
+                rowHash[j + 1 + ''] = result[i][j];
               }
               // TODO Temporary hack for now..
-              rowHash[result[i].length + ''] = 'Public'
-              rowHash['' + (result[i].length + 1)] = result[i][7]
+              rowHash[result[i].length + 1 + ''] = 'Public'
+              rowHash['' + (result[i].length + 2)] = result[i][7]
               resultList.push(rowHash);
             }
             that._onRowDataLoaded(resultList);
