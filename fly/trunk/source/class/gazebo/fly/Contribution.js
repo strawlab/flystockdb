@@ -716,8 +716,6 @@ qx.Class.define("gazebo.fly.Contribution",
     metadataEditorOpenListener : function(dataEvent) {
       var genotypeMetadataUI = dataEvent.getData();
 
-      // TODO Load groups here..
-
       // If we already know then internal stock-ID, well, then don't update it.
       if (this.stockInternalID) {
         return;

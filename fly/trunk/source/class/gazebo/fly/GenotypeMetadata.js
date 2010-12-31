@@ -29,6 +29,10 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.genotype = parameters['genotype'];
     this.genotypeHistory = parameters['genotypeHistory'];
 
+    if (parameters['internalID']) {
+      this.editingMode = true;
+    }
+
     var stockInternalID = parameters['internalID'] ? '' + parameters['internalID'] : '';
     var stockExternalID = parameters['externalID'] ? parameters['externalID'] : '';
     var stockSource = parameters['source'] ? parameters['source'] : '';
@@ -505,7 +509,11 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
             groupCheckbox = new qx.ui.form.CheckBox();
             groupCheckbox.setFocusable(false);
 
-            if (result[i][0] == 'Public') {
+            if (!this.editingMode && result[i][0] == 'Public') {
+              groupCheckbox.setValue(true);
+            }
+
+            if (result[i][6]) {
               groupCheckbox.setValue(true);
             }
 
@@ -523,7 +531,11 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
           }
         },
         'get_grouplist',
-        { detailed: true, contributeOnly: true },
+        {
+          detailed: true,
+          contributeOnly: true,
+          queryDataID: parseInt(this.internalStockID.getValue())
+        },
         "true",
         []
       );
