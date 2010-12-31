@@ -178,6 +178,14 @@ qx.Class.define("gazebo.fly.Contribution",
         padding: [2, 6, 2, 6]
       });
       addLink.addListener('click', function(mouseEvent) {
+        this.stockInternalID = null;
+        this.stockExternalID = null;
+        this.stockSource = null;
+        this.stockWildtypeName = null;
+        this.stockContact = null;
+        this.stockLabel = null;
+        this.stockNotes = null;
+
         that.generateGenotypeInputUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
       }, this);
@@ -226,8 +234,9 @@ qx.Class.define("gazebo.fly.Contribution",
       this.generateStockListUI(inquirer);
     },
 
-    generateGenotypeInputUI : function(inquirer) {
+    generateGenotypeInputUI : function(inquirer, stockData) {
 
+      this.stockData = stockData;
       this.numberOfBaskets = 10;
 
       inquirer.openScreen(inquirer.generateBasket, inquirer,
@@ -473,7 +482,16 @@ qx.Class.define("gazebo.fly.Contribution",
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 190,
           maxHeight: 270,
-          contents: new gazebo.fly.StockListViewer({})
+          contents: new gazebo.fly.StockListViewer(
+            {},
+            {
+              onStockSelect: {
+                call: this.onStockSelectListener,
+                context: this
+              }
+            },
+            {}
+          )
         },
         {
           onTransitionCloseScreen: {
@@ -493,7 +511,16 @@ qx.Class.define("gazebo.fly.Contribution",
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 470,
           maxHeight: 270,
-          contents: new gazebo.fly.StockListViewer({})
+          contents: new gazebo.fly.StockListViewer(
+            {},
+            {
+              onStockSelect: {
+                call: this.onStockSelectListener,
+                context: this
+              }
+            },
+            {}
+          )
         },
         {
           onTransitionCloseScreen: {
@@ -517,7 +544,16 @@ qx.Class.define("gazebo.fly.Contribution",
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 90,
           maxHeight: 630,
-          contents: new gazebo.fly.StockListViewer(searchQuery)
+          contents: new gazebo.fly.StockListViewer(
+            searchQuery,
+            {
+              onStockSelect: {
+                call: this.onStockSelectListener,
+                context: this
+              }
+            },
+            {}
+          )
         },
         {
           onTransitionCloseScreen: {
@@ -570,7 +606,14 @@ qx.Class.define("gazebo.fly.Contribution",
               inquirer: inquirer,
               // TODO 10 hardcoded..
               genotype: new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)),
-              genotypeHistory: this.getGenotypeHistory()
+              genotypeHistory: this.getGenotypeHistory(),
+              internalID: this.stockInternalID,
+              externalID: this.stockExternalID,
+              source: this.stockSource,
+              wildtypeName: this.stockWildtypeName,
+              contact: this.stockContact,
+              label: this.stockLabel,
+              notes: this.stockNotes
             },
             {
               onOpen: { call: this.metadataEditorOpenListener, context: this },
@@ -673,6 +716,13 @@ qx.Class.define("gazebo.fly.Contribution",
     metadataEditorOpenListener : function(dataEvent) {
       var genotypeMetadataUI = dataEvent.getData();
 
+      // TODO Load groups here..
+
+      // If we already know then internal stock-ID, well, then don't update it.
+      if (this.stockInternalID) {
+        return;
+      }
+
       var rpc = new qx.io.remote.Rpc();
 			rpc.setTimeout(gazebo.Application.timeout);
 			rpc.setUrl(gazebo.Application.getServerURL());
@@ -703,9 +753,58 @@ qx.Class.define("gazebo.fly.Contribution",
       this.inquirer.suggestScreenTransition();
     },
 
+    onStockSelectListener : function(dataEvent) {
+      var stockID = dataEvent.getData();
+
+      //alert('ID: ' + stockID);
+
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.delayedTimeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+      this.rpcRunning = rpc.callAsync(
+        function(result, ex, id)
+        {
+          if (result && result.length > 0) {
+            that.generateGenotypeInputUI(that.inquirer, result[0]);
+            that.inquirer.suggestScreenTransition();
+          }
+        },
+        "query_data",
+        {},
+        gazebo.fly.Contribution.FLYBASE_DB,
+        [ '*' ],
+        [ "x_stocks s" ],
+        's.id == ?',
+        [ stockID ]
+      );
+    },
+
+    // TODO The listener gets called twice.. for *some* reason. As a
+    // workaround, this.stockData is set to 'null' below, so that the
+    // baskets are not populated twice.
     searchDialogOpenListener : function(dataEvent)
     {
       this.searchDialog = dataEvent.getData();
+
+      // It is important that the baskets are set-up beforehand!
+      if (this.stockData) {
+        var genotype = this.stockData[3];
+
+        this.stockInternalID = this.stockData[0];
+        this.stockExternalID = this.stockData[2];
+        this.stockSource = this.stockData[6];
+        this.stockWildtypeName = this.stockData[8];
+        this.stockContact = this.stockData[7];
+        this.stockLabel = this.stockData[4];
+        this.stockNotes = this.stockData[5];
+
+        this.requestTransition = true;
+        this.stockData = null;
+        this.searchListener(new qx.event.type.Data().init([null, genotype, null]));
+      }
     },
 
     inputBasketOpenListener : function(dataEvent)
@@ -827,6 +926,12 @@ qx.Class.define("gazebo.fly.Contribution",
       var userInput = compound[1];
       var reQuery = compound[2];
       var initialParameters = dataEvent.getOldData();
+
+      // '+' should be ignored. It is only there to denote
+      // an unambiguous genotype:
+      if (userInput == '+') {
+        return;
+      }
 
       var suggestedAides = compound.length > 2 ? compound[2] : null;
 
@@ -1005,7 +1110,7 @@ qx.Class.define("gazebo.fly.Contribution",
                 }
 
                 // Note: Do this before the token itself is removed
-                // fromthe aides, because itself may reveal information about
+                // from the aides, because it may reveal information about
                 // its own location.
                 for (i = 0; i < aides.length; i++) {
                   // Check for inversions or deficiencies and use them
@@ -1058,10 +1163,11 @@ qx.Class.define("gazebo.fly.Contribution",
           return;
         } else {
           // Else-path: We are seeing an atom here.
-          
+
           // Find annotations in flystockdb-notation:
           var hint = userInput.match(/^@[^@]+@/);
 
+          this.debug('HINT: ' + hint + ' on ' + userInput);
           if (hint) {
             var flybaseIdHint = userInput.match(/^@\w*:/)[0].match(/\w+/);
             var chromosomeHint = userInput.match(/\$\d+@$/);

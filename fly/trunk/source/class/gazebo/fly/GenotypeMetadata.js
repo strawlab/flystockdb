@@ -29,6 +29,15 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     this.genotype = parameters['genotype'];
     this.genotypeHistory = parameters['genotypeHistory'];
 
+    var stockInternalID = parameters['internalID'] ? '' + parameters['internalID'] : '';
+    var stockExternalID = parameters['externalID'] ? parameters['externalID'] : '';
+    var stockSource = parameters['source'] ? parameters['source'] : '';
+    var stockWildtypeName = parameters['wildtypeName'] ? parameters['wildtypeName'] : '';
+    // TODO stockContact.. because it is a select-field.
+    var stockContact = parameters['contact'] ? parameters['contact'] : '';
+    var stockLabel = parameters['label'] ? parameters['label'] : '';
+    var stockNotes = parameters['notes'] ? parameters['notes'] : '';
+
     this.setLayout(new qx.ui.layout.HBox(10));
 
     this.setMinWidth(800);
@@ -68,7 +77,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       rich: true,
       appearance: 'annotation'
     }));
-    this.internalStockID = new qx.ui.form.TextField().set({
+    this.internalStockID = new qx.ui.form.TextField(stockInternalID).set({
       readOnly: true,
       width: 110
     });
@@ -79,7 +88,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       rich: true,
       appearance: 'annotation'
     }));
-    this.xrefTextField = new qx.ui.form.TextField().set({
+    this.xrefTextField = new qx.ui.form.TextField(stockExternalID).set({
       width: 110
     });
     idContainer2.add(this.xrefTextField);
@@ -89,7 +98,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       rich: true,
       appearance: 'annotation'
     }));
-    this.donorTextField = new qx.ui.form.TextField().set({
+    this.donorTextField = new qx.ui.form.TextField(stockSource).set({
       width: 180
     });
     idContainer3.add(this.donorTextField);
@@ -105,7 +114,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       rich: true,
       appearance: 'annotation'
     }));
-    this.wildtypeTextField = new qx.ui.form.TextField().set({
+    this.wildtypeTextField = new qx.ui.form.TextField(stockWildtypeName).set({
       width: 130
     });
     idContainer5.add(this.wildtypeTextField);
@@ -172,12 +181,12 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }));
 
     if (this.search) {
-      this.vialTextX = new qx.ui.form.TextField().set({
+      this.vialTextX = new qx.ui.form.TextField(stockLabel).set({
         width: 230
       });
       textContainer1.add(this.vialTextX);
     } else {
-      this.vialTextX = new qx.ui.form.TextArea().set({
+      this.vialTextX = new qx.ui.form.TextArea(stockLabel).set({
         maxLength: 65535,
         height: 150,
         width: 230
@@ -192,12 +201,12 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     }));
 
     if (this.search) {
-      this.descriptionTextX = new qx.ui.form.TextField().set({
+      this.descriptionTextX = new qx.ui.form.TextField(stockNotes).set({
         width: 640
       });
       textContainer2.add(this.descriptionTextX);
     } else {
-      this.descriptionTextX = new qx.ui.form.TextArea().set({
+      this.descriptionTextX = new qx.ui.form.TextArea(stockNotes).set({
         maxLength: 65535,
         height: 150,
         width: 640

@@ -14,7 +14,7 @@ qx.Class.define("gazebo.fly.StockListViewer",
 {
   extend : qx.ui.table.Table,
 
-  construct : function(parameters)
+  construct : function(parameters, listeners, overrides)
   {
     this.base(arguments);
 
@@ -64,13 +64,21 @@ qx.Class.define("gazebo.fly.StockListViewer",
 
     }
 
-    this.addListener('cellClick', function(cellEvent) {
-      if (cellEvent.getColumn() == 0) {
-        alert('-> ' + this.getTableModel().getValue(1, cellEvent.getRow()));
-      }
-    }, this);
+    this.setColumnWidth(0, 28); // Centered 16x16 icon.
 
-    this.setColumnWidth(0, 28);
+    // Install custom listeners:
+    if (listeners['onStockSelect']) {
+      var listener = listeners['onStockSelect'];
+      var that = this;
+      this.addListener('onStockSelectRelay', listener['call'], listener['context']);
+      this.addListener('cellClick', function(cellEvent) {
+            if (cellEvent.getColumn() == 0) {
+              this.fireDataEvent('onStockSelectRelay', that.getTableModel().getValue(1, cellEvent.getRow()));
+            }
+          },
+          this
+        );
+    }
   },
 
   members:
