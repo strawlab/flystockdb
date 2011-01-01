@@ -37,8 +37,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     var stockExternalID = parameters['externalID'] ? parameters['externalID'] : '';
     var stockSource = parameters['source'] ? parameters['source'] : '';
     var stockWildtypeName = parameters['wildtypeName'] ? parameters['wildtypeName'] : '';
-    // TODO stockContact.. because it is a select-field.
-    var stockContact = parameters['contact'] ? parameters['contact'] : '';
+    this.initStockContact = parameters['contact'];
     var stockLabel = parameters['label'] ? parameters['label'] : '';
     var stockNotes = parameters['notes'] ? parameters['notes'] : '';
 
@@ -331,8 +330,32 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
       return -1;
     },
 
-    saveStock : function()
+    saveStock : function(skipPurge)
     {
+      if (this.editingMode && !skipPurge) {
+        var rpc = new qx.io.remote.Rpc();
+        rpc.setTimeout(gazebo.Application.delayedTimeout);
+        rpc.setUrl(gazebo.Application.getServerURL());
+        rpc.setServiceName("gazebo.cgi");
+
+        var that = this;
+        rpc.callAsync(
+          function(result, ex, id)
+          {
+            // TODO Test for success..
+            that.saveStock(true);
+          },
+          'delete_metadata',
+          {
+          },
+          [
+            this.internalStockID.getValue()
+          ]
+        );
+
+        return;
+      }
+
       var groups = this.permissionGroupsRoot.getChildren();
 
       // Assumption: A stock is only added to a dozen of groups and
@@ -344,7 +367,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
         var selected = groups[i].model_groupCheckbox.getValue();
 
         if (selected) {
-          var rpc = new qx.io.remote.Rpc();
+          rpc = new qx.io.remote.Rpc();
           rpc.setTimeout(gazebo.Application.delayedTimeout);
           rpc.setUrl(gazebo.Application.getServerURL());
           rpc.setServiceName("gazebo.cgi");
@@ -352,7 +375,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
           rpc.callAsync(
             function(result, ex, id)
             {
-              // TODO Do to the swarm of requests, error handling will be
+              // TODO Due to the swarm of requests, error handling will be
               // difficult here. Might have to adopt a "quasi-synchronous"
               // approach, where asynchronous calls are send in sequence.
             },
@@ -372,7 +395,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 			rpc.setUrl(gazebo.Application.getServerURL());
 			rpc.setServiceName("gazebo.cgi");
 
-      var that = this;
+      that = this;
 
       var xref = this.xrefTextField.getValue();
       var label = this.vialTextX.getValue();
@@ -444,6 +467,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
           that.contactSelectBox.removeAll();
 
+          // The following is used in 'Advanced Search':
           // Add default selection when searching, which searches everyone.
           if (that.search) {
             var defaultUser = new qx.ui.form.ListItem().set({
@@ -458,13 +482,19 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
             that.usernameSelectBox.add(defaultUser);
           }
 
-          var thisUser = null;
+          var userToSelect = null;
 
           for (var i = 0; i < result.length; i++) {
             var user = new qx.ui.form.ListItem(result[i][0]);
 
-            if (!that.search && result[i][0] == that.usernameTextField.getValue()) {
-              thisUser = user;
+            // No search, no contact to load for editing:
+            if (!that.search && !that.initStockContact && result[i][0] == that.usernameTextField.getValue()) {
+              userToSelect = user;
+            }
+
+            // No search, but a contact is set for editing meta-data:
+            if (!that.search && that.initStockContact && result[i][0] == that.initStockContact) {
+              userToSelect = user;
             }
 
             that.contactSelectBox.add(user);
@@ -475,8 +505,8 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
             }
           }
 
-          if (thisUser) {
-            that.contactSelectBox.setSelection([ thisUser ]);
+          if (userToSelect) {
+            that.contactSelectBox.setSelection([ userToSelect ]);
           }
         },
         'get_userlist',
@@ -509,7 +539,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
             groupCheckbox = new qx.ui.form.CheckBox();
             groupCheckbox.setFocusable(false);
 
-            if (!this.editingMode && result[i][0] == 'Public') {
+            if (!that.editingMode && result[i][0] == 'Public') {
               groupCheckbox.setValue(true);
             }
 
