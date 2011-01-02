@@ -59,7 +59,7 @@ qx.Class.define("gazebo.fly.StockListModel",
     generateQuery : function()
     {
       if (this.searchTerm) {
-        return 's.id ~ ? OR s.xref ~ ? OR s.genotype ~ ? OR s.description ~ ? OR s.wildtype ~ ?';
+        return 's.id == ? OR s.xref ~ ? OR s.genotype ~ ? OR s.description ~ ? OR s.wildtype ~ ?';
       }
 
       // TODO HACK
@@ -78,12 +78,18 @@ qx.Class.define("gazebo.fly.StockListModel",
     generateQueryArguments : function()
     {
       if (this.searchTerm) {
+        var id = parseInt(this.searchTerm);
+
+        if (isNaN(id)) {
+          id = 0; // searchTerm is not a number, so pick '0', which is not a stock-id.
+        }
+
         return [
-          '(^|\\W)' + this.searchTerm + '(\\W|$)',
-          '(^|\\W)' + this.searchTerm + '(\\W|$)',
-          '(^|\\W)' + this.searchTerm + '(\\W|$)',
-          '(^|\\W)' + this.searchTerm + '(\\W|$)',
-          '(^|\\W)' + this.searchTerm + '(\\W|$)'
+          id,
+          '(^|.*\\W)' + this.searchTerm + '(\\W.*|$)',
+          '.*:' + this.searchTerm + '\\\$.*',
+          '(^|.*\\W)' + this.searchTerm + '(\\W.*|$)',
+          '(^|.*\\W)' + this.searchTerm + '(\\W.*|$)'
         ];
       }
 
@@ -98,14 +104,38 @@ qx.Class.define("gazebo.fly.StockListModel",
         this.searchChromosomeU) {
         var searchTerm = '';
 
-        searchTerm += this.searchChromosomeX ? this.searchChromosomeX : '';
-        searchTerm += this.searchChromosome2 ? this.searchChromosome2 : '';
-        searchTerm += this.searchChromosome3 ? this.searchChromosome3 : '';
-        searchTerm += this.searchChromosome4 ? this.searchChromosome4 : '';
-        searchTerm += this.searchChromosomeY ? this.searchChromosomeY : '';
-        searchTerm += this.searchChromosomeU ? this.searchChromosomeU : '';
+        // Top chromosomes:
+        searchTerm += this.searchChromosomeX ? '.*:' + this.searchChromosomeX + '\\\$0@.*' : '';
+        searchTerm += this.searchChromosome2 ? '.*:' + this.searchChromosome2 + '\\\$1@.*' : '';
+        searchTerm += this.searchChromosome3 ? '.*:' + this.searchChromosome3 + '\\\$2@.*' : '';
+        searchTerm += this.searchChromosome4 ? '.*:' + this.searchChromosome4 + '\\\$3@.*' : '';
+        searchTerm += this.searchChromosomeY ? '.*:' + this.searchChromosomeY + '\\\$4@.*' : '';
+        searchTerm += this.searchChromosomeU ? '.*:' + this.searchChromosomeU + '\\\$5@.*' : '';
 
-        return '(^|\\W)' + searchTerm + '(\\W|$)';
+        if (this.searchChromosomeX ||
+          this.searchChromosome2 ||
+          this.searchChromosome3 ||
+          this.searchChromosome4) {
+          searchTerm = '(' + searchTerm + ')|('
+        }
+
+        // Bottom chromosomes:
+        searchTerm += this.searchChromosomeY ? '.*:' + this.searchChromosomeY + '\\\$4@.*' : '';
+        searchTerm += this.searchChromosomeU ? '.*:' + this.searchChromosomeU + '\\\$5@.*' : '';
+        searchTerm += this.searchChromosomeX ? '.*:' + this.searchChromosomeX + '\\\$6@.*' : '';
+        searchTerm += this.searchChromosome2 ? '.*:' + this.searchChromosome2 + '\\\$7@.*' : '';
+        searchTerm += this.searchChromosome3 ? '.*:' + this.searchChromosome3 + '\\\$8@.*' : '';
+        searchTerm += this.searchChromosome4 ? '.*:' + this.searchChromosome4 + '\\\$9@.*' : '';
+
+        if (this.searchChromosomeX ||
+          this.searchChromosome2 ||
+          this.searchChromosome3 ||
+          this.searchChromosome4) {
+          searchTerm += ')'
+        }
+
+alert('Searching for: ' + searchTerm);
+        return searchTerm;
       }
 
       return [];
@@ -142,7 +172,7 @@ qx.Class.define("gazebo.fly.StockListModel",
       rpc.setTimeout(gazebo.Application.delayedTimeout);
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
-        
+
       var that = this;
       this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
