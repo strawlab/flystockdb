@@ -4,7 +4,7 @@ require 'rubygems'
 require 'dbi'
 require 'date'
 
-FEATURE_DEPTH = 1
+FEATURE_DEPTH = 2
 
 def extract_location(string)
 	chromosome = ''
@@ -12,9 +12,38 @@ def extract_location(string)
 
 	if string.match(/^(In|Df)\(\d[LR]{0,2}\).*/) then
 		chromosome, arm = string.scan(/^\w+\((\d)([LR]{0,2})\).*/)[0]
-
-		chromosome = 'X' if chromosome == 1
 	end
+
+	if string.match(/^(D|T)\w?\(\d;\d\).*/) then
+		chromosome = string.scan(/^\w+\(\d;(\d)\).*/)[0][0]
+	end
+
+	chromosome = 'X' if chromosome == 1
+
+	return [ chromosome, arm ]
+end
+
+def query_relationship(flybase, cvterm_name, searchable)
+	chromosome = ''
+	arm = ''
+
+        sql_parent = flybase.prepare('SELECT obj.name FROM ' <<
+                                      'cvterm c, feature sub, feature obj, feature_relationship fr WHERE ' <<
+                                      'c.name = \'' << cvterm_name << '\' AND ' <<
+                                      'sub.name = ? AND ' <<
+                                      'fr.subject_id = sub.feature_id AND ' <<
+                                      'fr.type_id = c.cvterm_id AND ' <<
+                                      'obj.feature_id = fr.object_id'
+        )
+        sql_parent.execute(searchable)
+        sql_parent.fetch { |row|
+                name = row[0]
+
+                name.chomp!
+
+                chromosome, arm = extract_location(name)
+        }
+        sql_parent.finish
 
 	return [ chromosome, arm ]
 end
@@ -63,7 +92,7 @@ flybase_id_by_feature = {}
 
 puts DateTime.now       
 puts 'Determining kind of all features (without considering synonyms)..'
-                        
+ 
 part = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
 	's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -88,6 +117,7 @@ puts 'Determining FlyBase IDs by feature and synonym name..'
 
 seen_synonyms = {}
 seen_features = {}
+whoa_a_balancer = {}
 
 part.each { |prefix|
 	ids = flybase.execute('SELECT DISTINCT s.name, f.name, f.uniquename FROM feature f, synonym s, cvterm c, feature_synonym fs ' <<
@@ -103,8 +133,16 @@ part.each { |prefix|
 		uniquename.chomp!
 
 		if seen_synonyms[synonym] then
-			name_by_synonym.delete(synonym)
-			flybase_id_by_synonym.delete(synonym)
+			unless whoa_a_balancer[synonym] then
+				if synonym.match(/^FBba\d+/) then
+					whoa_a_balancer[synonym] = true
+					name_by_synonym[synonym] = name
+					flybase_id_by_synonym[synonym] = uniquename
+				else
+					name_by_synonym.delete(synonym)
+					flybase_id_by_synonym.delete(synonym)
+				end
+			end
 		else
 			name_by_synonym[synonym] = name
 			flybase_id_by_synonym[synonym] = uniquename
@@ -153,15 +191,24 @@ locations.fetch do |row|
 	found_location = false
 
 	# TODO Hack: cvterm 'chromosome_arm' has the type_id 210
-	location_s = flybase.prepare('SELECT f.name, chr.name, chr.uniquename FROM ' <<
-				'feature f, featureloc fl, feature chr WHERE ' <<
-				'f.name = ? AND ' <<
-				'fl.feature_id = f.feature_id AND ' <<
-				'fl.srcfeature_id = chr.feature_id AND ' <<
-				'chr.type_id = 210 ' <<
-				#'chr_term.name = \'chromosome_arm\' ' <<
-				'LIMIT 1')
-	location_s.execute(synonym)
+	query_string = 'SELECT f.name, chr.name, chr.uniquename FROM ' <<
+		'feature f, featureloc fl, feature chr WHERE '
+	if flybase_id_by_synonym[synonym] then
+		query_string << 'f.uniquename = ? AND '
+	else
+		query_string << 'f.name = ? AND '
+	end
+	query_string << 'fl.feature_id = f.feature_id AND ' <<
+		'fl.srcfeature_id = chr.feature_id AND ' <<
+		'chr.type_id = 210 ' <<
+		#'chr_term.name = \'chromosome_arm\' ' <<
+		'LIMIT 1'
+	location_s = flybase.prepare(query_string)
+	if flybase_id_by_synonym[synonym] then
+		location_s.execute(flybase_id_by_synonym[synonym])
+	else
+		location_s.execute(synonym)
+	end
 	location_s.fetch do |row|
 		name, chromosome, arm = row
 
@@ -468,23 +515,8 @@ for i in 0..max_length - 1 do
 				direct_hit = true if occurrences == 1 and chromosome != ''
 			end
 			if chromosome == '' then
-				sql_parent = flybase.prepare('SELECT obj.name FROM ' <<
-					'cvterm c, feature sub, feature obj, feature_relationship fr WHERE ' <<
-					'c.name = \'variant_of\' AND ' <<
-					'sub.name = ? AND ' <<
-					'fr.subject_id = sub.feature_id AND ' <<
-					'fr.type_id = c.cvterm_id AND ' <<
-					'obj.feature_id = fr.object_id'
-				)
-				sql_parent.execute(searchable)
-				sql_parent.fetch { |row|
-					name = row[0]
-
-					name.chomp!
-
-					chromosome, arm = extract_location(name)
-				}
-				sql_parent.finish
+				chromosome, arm = query_relationship(flybase, 'variant_of', searchable)
+				chromosome, arm = query_relationship(flybase, 'chromosome_structure_variation', searchable) if chromosome == ''
 				direct_hit = true if occurrences == 1 and chromosome != ''
 			end
 			searchable_kind = ''
