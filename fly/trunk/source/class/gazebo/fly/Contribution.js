@@ -308,7 +308,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Add Gene, Allele, Balancer, ...',
+          title: 'Add Fly-Stock',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 90,
           stripWhitespace: true,
@@ -396,7 +396,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
-          title: 'Add Gene, Allele, Balancer, ...',
+          title: 'Advanced Search',
           left: inquirer.LEFT_SO_THAT_CENTERED,
           top: 90,
           stripWhitespace: true,
@@ -928,6 +928,10 @@ qx.Class.define("gazebo.fly.Contribution",
       // '+' should be ignored. It is only there to denote
       // an unambiguous genotype:
       if (userInput == '+') {
+        if (this.globules) {
+          this.globules -= 1;
+          this.debug('!!! GLOBULES: ' + this.globules);
+        }
         return;
       }
 
@@ -1036,6 +1040,10 @@ qx.Class.define("gazebo.fly.Contribution",
 
           for (j = 0; j < thisChromosome.length; j++) {
             if (thisChromosome[j].plainModel == userInput) {
+              if (this.globules) {
+                this.globules -= 1;
+                this.debug(']]] GLOBULES: ' + this.globules);
+              }
               return;
             }
           }
@@ -1056,6 +1064,9 @@ qx.Class.define("gazebo.fly.Contribution",
         // Simple test to see whether a complete genotype might have been entered:
         if (!this.reader.isAtom(userInput)) {
           var chromosomes = this.reader.decompose(userInput);
+
+          this.busyBee = true;
+          this.globules = 0;
 
           while (chromosomes.length > 0) {
             var chromosomeBag = chromosomes.shift();
@@ -1150,6 +1161,7 @@ qx.Class.define("gazebo.fly.Contribution",
                 }
 
                 this.debug('TOKEN ADDED:   ' + token + " (" + possibleBalancer + ") [" + position + "]");
+                this.globules += 1;
                 this.searchDialog.searchForItem(token, [bottom, comma, position], aides, 3);
                 position++;
               } else {
@@ -1326,6 +1338,8 @@ qx.Class.define("gazebo.fly.Contribution",
         // the 'Unknown' chromosome without any particular ordering.
         var weight = treeItem && treeItem.annotation ? treeItem.annotation[2] : null;
 
+        this.globules -= 1;
+        this.debug('>>> GLOBULES: ' + this.globules);
         this.genotypeBasket.addBasketItem(chromosome, container, weight);
         
         this.searchDialog.clear();
