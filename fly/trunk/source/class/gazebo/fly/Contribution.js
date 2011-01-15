@@ -478,7 +478,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
-          title: 'Popular Stocks',
+          title: 'My Stocks',
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 190,
           maxHeight: 270,
@@ -507,7 +507,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
-          title: 'Most Recently Entered Stocks',
+          title: 'All Stocks',
           left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 470,
           maxHeight: 270,
@@ -1057,7 +1057,7 @@ qx.Class.define("gazebo.fly.Contribution",
         userInput = userInput.replace(/^\s+|\s+$/g, "");
 
         // Allels may require re-querying, so fake a genotype:
-        if (!reQuery && userInput.match(/^\w+\[\w+\]$/)) {
+        if (!this.busyBee && userInput.match(/^\w+\[\w+\]$/)) {
           userInput = userInput + ' / ';
         }
 
