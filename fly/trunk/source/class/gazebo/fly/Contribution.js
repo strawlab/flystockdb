@@ -965,7 +965,7 @@ qx.Class.define("gazebo.fly.Contribution",
             }
           }
 
-          if (initialParameters) {
+          if (initialParameters && parameters) {
             parameters[0] = initialParameters[0];
             parameters[1] = initialParameters[1];
             parameters[2] = initialParameters[2];
