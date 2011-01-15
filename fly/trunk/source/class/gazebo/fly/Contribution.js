@@ -1057,7 +1057,7 @@ qx.Class.define("gazebo.fly.Contribution",
         userInput = userInput.replace(/^\s+|\s+$/g, "");
 
         // Allels may require re-querying, so fake a genotype:
-        if (!this.busyBee && userInput.match(/^\w+\[\w+\]$/)) {
+        if (!this.busyBee && userInput.match(/^\w+\[\w+|\*\]$/)) {
           userInput = userInput + ' / ';
         }
 
@@ -1143,7 +1143,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
                   // If we are dealing with a simple symbol + superscript, then
                   // treat it as an allele and give the gene here as an aide.
-                  if (aides[i].match(/^\w+\[\w+\]$/)) {
+                  if (aides[i].match(/^\w+\[\w+|\*\]$/)) {
                     var geneSymbol = aides[i].match(/^\w+/)[0];
 
                     aides = aides.concat([ geneSymbol ]);
