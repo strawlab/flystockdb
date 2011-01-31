@@ -123,7 +123,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Quick Search',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 100,
+          top: 65,
           textFieldMinimalWidth: 250,
           stripWhitespace: true,
           searchButtonTitle: '',
@@ -214,7 +214,7 @@ qx.Class.define("gazebo.fly.Contribution",
           {
             title: ' ',
             left: inquirer.LEFT_SO_THAT_CENTERED,
-            top: 10,
+            top: -25,
             minWidth: 700,
             customElements: linkContainer
           },
@@ -239,97 +239,151 @@ qx.Class.define("gazebo.fly.Contribution",
       this.stockData = stockData;
       this.numberOfBaskets = 10;
 
-      inquirer.openScreen(inquirer.generateBasket, inquirer,
+      inquirer.openScreen(inquirer.generateTabbedInterface, inquirer,
         {
-          title: 'Genotype',
+          top: 55,
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          footer: gazebo.fly.Contribution.FOOTER_PREAMBLE + '+',
-          top: 180,
-          canProceedWithEmptyBasket: true, // For entering wild-type stocks.
-          populate: this.numberOfBaskets,
-          draggableItems: true,
-          dragAndDropFlavour: 'genomic feature',
-          titles: [ 'Chromosome X',
-                    'Chromosome 2',
-                    'Chromosome 3',
-                    'Chromosome 4',
-                    'Chromosome Y',
-                    'Unknown',
-                    '',
-                    '',
-                    '',
-                    ''
-                  ],
-          labels: [ 'X, top',
-                    '2, top',
-                    '3, top',
-                    '4, top',
-                    'Y',
-                    'U',
-                    'X, bottom',
-                    '2, bottom',
-                    '3, bottom',
-                    '4, bottom'
-                   ],
-          decorations: [ 'group-dark',
-                    'group',
-                    'group-dark',
-                    'group',
-                    'group-dark',
-                    'group',
-                    'group-dark',
-                    'group',
-                    'group-dark',
-                    'group'
-                   ]
-        },
-        {
-          onOpen: { call: this.inputBasketOpenListener, context: this },
-          onProceed: { call: this.proceedListener, context: this },
-          onBasketChange: { call: this.basketChangeListener, context: this },
-          onTransitionCloseScreen: {
-            call: inquirer.disposeBasket,
-            context: inquirer,
-            parameters: {}
-          }
-        },
-        {
-          makeEmptyBasketLabel: function(index) {
-            var container = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
-            container.add(
-              new qx.ui.basic.Label().set({
-                value: '+',
-                rich: true
-              })
-            );
-            return container;
-          }
-        });
-
-      inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
-        {
+          createNewPageOn: [ 2 ],
           title: 'Add Fly-Stock',
-          left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 90,
-          stripWhitespace: true,
-          keepHistory: true,
-          searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
-          database: gazebo.fly.Contribution.FLYBASE_DB
-        },
-        {
-          onOpen: { call: this.searchDialogOpenListener, context: this },
-          onSearch: { call: this.searchListener, context: this },
-          onInput: { call: this.inputListener, context: this },
-          onTransitionCloseScreen: {
-            call: inquirer.disposeSearchDialog,
-            context: inquirer,
-            parameters: {}
-          }
-        },
-        {
-          prepareFileSuggestion: this.prepareSuggestion
-        });
+          title0: 'Stock Entry',
+          title2: 'Bulk Import',
+          generatorCall0: inquirer.generateSearchDialog,
+          generatorContext0: inquirer,
+          parameters0: {
+            title: 'Add Fly-Stock',
+            left: inquirer.LEFT_SO_THAT_CENTERED,
+            top: 55,
+            stripWhitespace: true,
+            keepHistory: true,
+            searchButtonTitle: '',
+            searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
+            database: gazebo.fly.Contribution.FLYBASE_DB
+          },
+          listeners0: {
+            onOpen: { call: this.searchDialogOpenListener, context: this },
+            onSearch: { call: this.searchListener, context: this },
+            onInput: { call: this.inputListener, context: this },
+            onTransitionCloseScreen: {
+              call: inquirer.disposeSearchDialog,
+              context: inquirer,
+              parameters: {}
+            }
+          },
+          overrides0: {
+            prepareFileSuggestion: this.prepareSuggestion
+          },
+
+          generatorCall1: inquirer.generateBasket,
+          generatorContext1: inquirer,
+          parameters1:
+            {
+              title: 'Genotype',
+              // left: inquirer.LEFT_SO_THAT_CENTERED,
+              footer: gazebo.fly.Contribution.FOOTER_PREAMBLE + '+',
+              // top: 180,
+              canProceedWithEmptyBasket: true, // For entering wild-type stocks.
+              populate: this.numberOfBaskets,
+              draggableItems: true,
+              dragAndDropFlavour: 'genomic feature',
+              titles: [ 'Chromosome X',
+                        'Chromosome 2',
+                        'Chromosome 3',
+                        'Chromosome 4',
+                        'Chromosome Y',
+                        'Unknown',
+                        '',
+                        '',
+                        '',
+                        ''
+                      ],
+              labels: [ 'X, top',
+                        '2, top',
+                        '3, top',
+                        '4, top',
+                        'Y',
+                        'U',
+                        'X, bottom',
+                        '2, bottom',
+                        '3, bottom',
+                        '4, bottom'
+                       ],
+              decorations: [ 'group-dark',
+                        'group',
+                        'group-dark',
+                        'group',
+                        'group-dark',
+                        'group',
+                        'group-dark',
+                        'group',
+                        'group-dark',
+                        'group'
+                       ]
+            },
+          listeners1:
+            {
+              onOpen: { call: this.inputBasketOpenListener, context: this },
+              onProceed: { call: this.proceedListener, context: this },
+              onBasketChange: { call: this.basketChangeListener, context: this },
+              onTransitionCloseScreen: {
+                call: inquirer.disposeBasket,
+                context: inquirer,
+                parameters: {}
+              }
+            },
+          overrides1:
+            {
+              makeEmptyBasketLabel: function(index) {
+                var container = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+                container.add(
+                  new qx.ui.basic.Label().set({
+                    value: '+',
+                    rich: true
+                  })
+                );
+                return container;
+              }
+            },
+          generatorCall2: inquirer.generateCustomInterface,
+          generatorContext2: inquirer,
+          parameters2:
+            {
+              title: 'Stock Import',
+              left: inquirer.LEFT_SO_THAT_CENTERED,
+              top: 345,
+              contents: new gazebo.fly.StockImport(
+                {
+                  inquirer: inquirer,
+                  search: true
+                },
+                {
+                  // TODO Define and implement the method..
+                  onProceed: { call: this.stockImportListener, context: this }
+                },
+                {}
+              )
+            },
+          listeners2:
+            {
+              onTransitionCloseScreen: {
+                call: inquirer.disposeCustomInterface,
+                context: inquirer,
+                parameters: {}
+              }
+            },
+          overrides2:
+            {
+
+            }
+          },
+          {
+            onTransitionCloseScreen: {
+              call: inquirer.disposeTabbedInterface,
+              context: inquirer,
+              parameters: {}
+            }
+          },
+          {}
+      );
 
     },
 
@@ -342,7 +396,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 190,
+          top: 155,
           width: 930,
           basketMinHeight: 110,
           canProceedWithEmptyBasket: true,
@@ -398,7 +452,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Advanced Search',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 90,
+          top: 55,
           stripWhitespace: true,
           searchButtonTitle: '',
           searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
@@ -422,7 +476,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 380,
+          top: 345,
           contents: new gazebo.fly.GenotypeMetadata(
             {
               inquirer: inquirer,
@@ -454,7 +508,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Administration',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 95,
+          top: 60,
           contents: new gazebo.ui.Administration(
             { inquirer: inquirer },
             {},
@@ -480,7 +534,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'My Stocks',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 190,
+          top: 155,
           maxHeight: 270,
           contents: new gazebo.fly.StockListViewer(
             {},
@@ -509,7 +563,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'All Stocks',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 470,
+          top: 435,
           maxHeight: 270,
           contents: new gazebo.fly.StockListViewer(
             {},
@@ -542,7 +596,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Search Results',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 90,
+          top: 55,
           maxHeight: 630,
           contents: new gazebo.fly.StockListViewer(
             searchQuery,
@@ -575,7 +629,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Genotype',
           left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 90,
+          top: 55,
           contents: new gazebo.fly.GenotypeViewer(
             {
               height: 106,
@@ -600,7 +654,7 @@ qx.Class.define("gazebo.fly.Contribution",
         {
           title: 'Metadata',
           left: inquirer.LEFT_SO_THAT_CENTERED,
-          top: 260,
+          top: 225,
           contents: new gazebo.fly.GenotypeMetadata(
             {
               inquirer: inquirer,
