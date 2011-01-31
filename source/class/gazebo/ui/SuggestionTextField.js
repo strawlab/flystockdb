@@ -236,10 +236,26 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     },
 
     makeSuggestionTree : function() {
+      this.suggestionTreePopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(10));
       this.suggestionTree = new qx.ui.tree.Tree();
       this.suggestionTree.setHeight(0); // Pretend we do not exist.
       this.suggestionTree.setHideRoot(true);
       this.suggestionTree.hide();
+
+      // TODO Hack to show proof-of-principle.
+      var that = this;
+      this.suggestionTreePopup.getRoot = function() {
+        return that.suggestionTree.getRoot();
+      };
+      this.suggestionTreePopup.isSelectionEmpty = function() {
+        return that.suggestionTree.isSelectionEmpty();
+      };
+      this.suggestionTreePopup.getSelection = function() {
+        return that.suggestionTree.getSelection();
+      };
+      this.suggestionTreePopup.setSelection = function(a) {
+        return that.suggestionTree.setSelection(a);
+      };
 
       if (this.history && this.indexOf(this.showHistoryAtom) >= 0) {
         this.add(this.showHistoryAtom, { row: 1, column: 0 });
@@ -289,7 +305,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         }
       }, this);
 
-      this.add(this.suggestionTree, { row: 2, column: 0 });
+      this.suggestionTreePopup.placeToWidget(this.textField, true);
+      this.suggestionTreePopup.add(this.suggestionTree);
+      //this.add(this.suggestionTreePopup, { row: 2, column: 0 });
+      this.suggestionTreePopup.show();
     },
 
     clear : function() {

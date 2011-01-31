@@ -371,25 +371,31 @@ qx.Class.define("gazebo.Application",
       var title = parameters['title'];
       var left = parameters['left'];
       var top = parameters['top'];
-      
+
+      var composite = parameters['composite'];
+
       if (parameters['stripWhitespace']) {
         searchDialog.setStripWhitespace(parameters['stripWhitespace']);
       }
 
-      this.searchWindow = new qx.ui.window.Window(title ? title : "Search");
-      this.searchWindow.setMaxWidth(500);
-      this.searchWindow.setLayout(new qx.ui.layout.HBox(10));
-      this.searchWindow.add(searchDialog);
-      this.searchWindow.setResizable(false, false, false, false);
-			this.searchWindow.setMovable(false);
-			this.searchWindow.setShowClose(false);
-			this.searchWindow.setShowMaximize(false);
-			this.searchWindow.setShowMinimize(false);
+      if (composite) {
+        composite.add(searchDialog);
+      } else {
+        this.searchWindow = new qx.ui.window.Window(title ? title : "Search");
+        this.searchWindow.setMaxWidth(500);
+        this.searchWindow.setLayout(new qx.ui.layout.HBox(10));
+        this.searchWindow.add(searchDialog);
+        this.searchWindow.setResizable(false, false, false, false);
+        this.searchWindow.setMovable(false);
+        this.searchWindow.setShowClose(false);
+        this.searchWindow.setShowMaximize(false);
+        this.searchWindow.setShowMinimize(false);
 
-      this.searchWindow.addListenerOnce("resize", this.getPositioningFunction(left, top), this.searchWindow);
+        this.searchWindow.addListenerOnce("resize", this.getPositioningFunction(left, top), this.searchWindow);
 
-      this.searchWindow.open();
-      this.getRoot().add(this.searchWindow);
+        this.searchWindow.open();
+        this.getRoot().add(this.searchWindow);
+      }
 
       if (listeners['onOpen']) {
         listener = listeners['onOpen'];
@@ -412,27 +418,46 @@ qx.Class.define("gazebo.Application",
       var left = parameters['left'];
       var top = parameters['top'];
 
-      this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
-      this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
-      this.basketWindow.setResizable(false, false, false, false);
-			this.basketWindow.setMovable(false);
-			this.basketWindow.setShowClose(false);
-			this.basketWindow.setShowMaximize(false);
-			this.basketWindow.setShowMinimize(false);
+      var composite = parameters['composite'];
+      var proceedButton;
 
-      this.basketWindow.addListener("resize", this.getPositioningFunction(left, top), this.basketWindow);
+      if (composite) {
+        var interfaceContainer = new qx.ui.container.Composite();
+        interfaceContainer.setLayout(new qx.ui.layout.HBox(10));
 
-      this.basketWindow.add(this.basketContainer);
+        interfaceContainer.add(this.basketContainer);
 
-      if (!parameters['hideProceedButton']) {
-        this.basketWindow.add(new qx.ui.toolbar.Separator());
+        if (!parameters['hideProceedButton']) {
+          interfaceContainer.add(new qx.ui.toolbar.Separator());
 
-        var proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
-        this.basketWindow.add(proceedButton);
+          proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
+          interfaceContainer.add(proceedButton);
+        }
+
+        composite.add(interfaceContainer);
+      } else {
+        this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
+        this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
+        this.basketWindow.setResizable(false, false, false, false);
+        this.basketWindow.setMovable(false);
+        this.basketWindow.setShowClose(false);
+        this.basketWindow.setShowMaximize(false);
+        this.basketWindow.setShowMinimize(false);
+
+        this.basketWindow.addListener("resize", this.getPositioningFunction(left, top), this.basketWindow);
+
+        this.basketWindow.add(this.basketContainer);
+
+        if (!parameters['hideProceedButton']) {
+          this.basketWindow.add(new qx.ui.toolbar.Separator());
+
+          proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
+          this.basketWindow.add(proceedButton);
+        }
+
+        this.basketWindow.open();
+        this.getRoot().add(this.basketWindow);
       }
-
-      this.basketWindow.open();
-      this.getRoot().add(this.basketWindow);
 
       if (listeners['onProceed']) {
         listener = listeners['onProceed'];
@@ -467,6 +492,79 @@ qx.Class.define("gazebo.Application",
 
     },
 
+    generateTabbedInterface : function(parameters, listeners, overrides)
+    {
+      var createNewPageOn = parameters['createNewPageOn'];
+      var title = parameters['title'];
+      var left = parameters['left'];
+      var top = parameters['top'];
+
+      var window = new qx.ui.window.Window(title ? title : "Title");
+
+      // TODO Introduce uid to all generate* calls where relays are used.
+      var uid = '' + window.toHashCode();
+
+      window.setLayout(new qx.ui.layout.HBox(5));
+      window.setResizable(false, false, false, false);
+      window.setMovable(false);
+      window.setShowClose(false);
+      window.setShowMaximize(false);
+      window.setShowMinimize(false);
+
+      if (parameters['maxHeight']) {
+        window.setMaxHeight(parameters['maxHeight']);
+      }
+
+      window.addListener("resize", this.getPositioningFunction(left, top), window);
+
+      var tabInterface = new qx.ui.tabview.TabView();
+
+      title = parameters['title0'];
+
+      var page = new qx.ui.tabview.Page(title ? title : '');
+      page.setLayout(new qx.ui.layout.VBox(20));
+
+      var i = 0;
+      while (parameters['generatorCall' + i]) {
+        for (var j = 0; j < createNewPageOn.length; j++) {
+          if (i == createNewPageOn[j]) {
+            tabInterface.add(page);
+
+            title = parameters['title' + i]
+            page = new qx.ui.tabview.Page(title ? title : '');
+            page.setLayout(new qx.ui.layout.VBox(20));
+          }
+        }
+
+        var tabParameters = parameters['parameters' + i];
+        var tabListeners = parameters['listeners' + i];
+        var tabOverrides = parameters['overrides' + i];
+
+        tabParameters['composite'] = page;
+
+        parameters['generatorContext' + i].anonymousMethod = parameters['generatorCall' + i];
+        parameters['generatorContext' + i].anonymousMethod(tabParameters, tabListeners, tabOverrides);
+
+        i++;
+      }
+      tabInterface.add(page);
+
+      window.add(tabInterface);
+      window.open();
+      this.getRoot().add(window);
+
+      var onTransitionCloseScreen = listeners['onTransitionCloseScreen'];
+      if (onTransitionCloseScreen) {
+        var onTransitionCloseScreenParameters = onTransitionCloseScreen['parameters'];
+        onTransitionCloseScreenParameters['windowHandle'] = window;
+      }
+    },
+
+    disposeTabbedInterface : function(parameters)
+    {
+      this.disposeCustomInterface(parameters);
+    },
+
     generateCustomInterface : function(parameters, listeners, overrides)
     {
       var customContainer = parameters['contents'];
@@ -475,28 +573,43 @@ qx.Class.define("gazebo.Application",
       var left = parameters['left'];
       var top = parameters['top'];
 
-      this.customWindow = new qx.ui.window.Window(title ? title : "Title");
+      var composite = parameters['composite'];
 
-      // TODO Introduce uid to all generate* calls where relays are used.
-      var uid = '' + this.customWindow.toHashCode();
+      if (composite) {
+        composite.add(customContainer);
+      } else {
+        this.customWindow = new qx.ui.window.Window(title ? title : "Title");
 
-      this.customWindow.setLayout(new qx.ui.layout.HBox(5));
-      this.customWindow.setResizable(false, false, false, false);
-			this.customWindow.setMovable(false);
-			this.customWindow.setShowClose(false);
-			this.customWindow.setShowMaximize(false);
-			this.customWindow.setShowMinimize(false);
+        // TODO Introduce uid to all generate* calls where relays are used.
+        var uid = '' + this.customWindow.toHashCode();
 
-      if (parameters['maxHeight']) {
-        this.customWindow.setMaxHeight(parameters['maxHeight']);
+        this.customWindow.setLayout(new qx.ui.layout.HBox(5));
+        this.customWindow.setResizable(false, false, false, false);
+        this.customWindow.setMovable(false);
+        this.customWindow.setShowClose(false);
+        this.customWindow.setShowMaximize(false);
+        this.customWindow.setShowMinimize(false);
+
+        if (parameters['maxHeight']) {
+          this.customWindow.setMaxHeight(parameters['maxHeight']);
+        }
+
+        this.customWindow.addListener("resize", this.getPositioningFunction(left, top), this.customWindow);
+
+        this.customWindow.add(customContainer);
+
+        this.customWindow.open();
+
+        // TODO Below: proof-of-concept of a desktop scroller
+        //var desktop = new qx.ui.window.Desktop(new qx.ui.window.Manager());
+        //desktop.add(this.customWindow);
+        //var scroll = new qx.ui.container.Scroll();
+        //scroll.setWidth(500);
+        //scroll.setHeight(500);
+        //scroll.add(desktop);
+        //this.getRoot().add(scroll);
+        this.getRoot().add(this.customWindow);
       }
-
-      this.customWindow.addListener("resize", this.getPositioningFunction(left, top), this.customWindow);
-
-      this.customWindow.add(customContainer);
-
-      this.customWindow.open();
-      this.getRoot().add(this.customWindow);
 
       if (listeners['onOpen']) {
         listener = listeners['onOpen'];
