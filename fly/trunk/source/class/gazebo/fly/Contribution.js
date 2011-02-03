@@ -86,7 +86,12 @@ qx.Class.define("gazebo.fly.Contribution",
 
     generateLoginUI : function(inquirer) {
 
+      var presentationContainer = new qx.ui.container.Composite();
       var logoContainer = new qx.ui.container.Composite();
+
+      presentationContainer.setLayout(new qx.ui.layout.HBox(10).set({
+        alignY: "top"
+      }));
 
       logoContainer.setLayout(new qx.ui.layout.VBox(10).set({
         alignX: "center"
@@ -99,11 +104,28 @@ qx.Class.define("gazebo.fly.Contribution",
       }));
       logoContainer.add(new qx.ui.core.Spacer(10,10));
 
+      presentationContainer.add(new qx.ui.core.Spacer(5, 5));
+      presentationContainer.add(logoContainer);
+      presentationContainer.add(new qx.ui.core.Spacer(25, 5));
+      presentationContainer.add(new qx.ui.basic.Label().set({
+        value: '&nbsp;<br />' +
+          '<a style="color: #0099cc;">fly</a><a style="color: #009966;">stock</a><a style="color: #333333;">db</a>' +
+          ' is the first <b>free</b> web-based database for<br />managing and sharing Drosophila melanogaster stocks.' +
+          '<br />&nbsp;<br />' +
+          'Its source-code is available under the Simplified BSD<br />License at: <a href="https://github.com/joejimbo/flystockdb">https://github.com/joejimbo/flystockdb</a>' +
+          '<br />Contributors, collaborators and competitors are welcome<br />' +
+          'to contribute, to collaborate, and to compete as they please.' +
+          '<br />&nbsp;<br /><div style="text-align: right;">Joachim<br />' +
+          '<span style="color: #777777;">joachim.baran [ <i>at</i> ] gmail.com</span></div>',
+        rich: true,
+        appearance: 'annotation'
+      }));
+      
       inquirer.openScreen(inquirer.generateConnectionDialog, inquirer,
         {
-          title: 'Login',
+          title: 'Sneak Peek Preview: For Invitees',
           passwordRequired: true,
-          logo: logoContainer
+          logo: presentationContainer
         },
         {
           onConnect: { call: this.loginListener, context: this },
