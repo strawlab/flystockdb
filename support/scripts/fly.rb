@@ -4,7 +4,7 @@ require 'rubygems'
 require 'dbi'
 require 'date'
 
-FEATURE_DEPTH = 2
+FEATURE_DEPTH = 1
 
 def extract_location(string)
 	chromosome = ''
@@ -26,8 +26,9 @@ end
 def query_relationship(flybase, cvterm_name, searchable)
 	chromosome = ''
 	arm = ''
+	flybase_id = ''
 
-        sql_parent = flybase.prepare('SELECT obj.name FROM ' <<
+        sql_parent = flybase.prepare('SELECT obj.name, sub.uniquename FROM ' <<
                                       'cvterm c, feature sub, feature obj, feature_relationship fr WHERE ' <<
                                       'c.name = \'' << cvterm_name << '\' AND ' <<
                                       'sub.name = ? AND ' <<
@@ -37,15 +38,13 @@ def query_relationship(flybase, cvterm_name, searchable)
         )
         sql_parent.execute(searchable)
         sql_parent.fetch { |row|
-                name = row[0]
-
-                name.chomp!
+                name, flybase_id = row
 
                 chromosome, arm = extract_location(name)
         }
         sql_parent.finish
 
-	return [ chromosome, arm ]
+	return [ chromosome, arm, flybase_id ]
 end
 
 if ARGV.length != 3 then
@@ -83,6 +82,7 @@ transitions = []
 bad = []
 
 loci = []
+loci_flybase_id = []
 kind_by_popularity = {}
 kind_by_name = {}
 
@@ -100,14 +100,14 @@ part = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 part.each { |prefix|
-	kinds = flybase.execute('SELECT DISTINCT f.name, c.name FROM feature f, cvterm c WHERE f.type_id = c.cvterm_id AND f.name LIKE \'' << prefix << '%\'')
+	kinds = flybase.execute('SELECT f.name, c.name FROM feature f, cvterm c WHERE ' <<
+		'(c.name = \'symbol\' OR c.name = \'nickname\' OR c.name = \'fullname\') AND ' <<
+		'f.organism_id = 1 AND f.uniquename LIKE \'FB%\' AND ' <<
+		'f.type_id = c.cvterm_id AND f.name LIKE \'' << prefix << '%\'')
                         
 	kinds.fetch do |row|    
         	feature, kind = row
                 
-        	feature.chomp!
-        	kind.chomp!
-                        
        		kind_by_name[feature] = kind
 	end
 }
@@ -128,10 +128,6 @@ part.each { |prefix|
 	ids.fetch do |row|
 		synonym, name, uniquename = row
 
-		synonym.chomp!
-		name.chomp!
-		uniquename.chomp!
-
 		if seen_synonyms[synonym] then
 			unless whoa_a_balancer[synonym] then
 				if synonym.match(/^FBba\d+/) then
@@ -139,8 +135,10 @@ part.each { |prefix|
 					name_by_synonym[synonym] = name
 					flybase_id_by_synonym[synonym] = uniquename
 				else
-					name_by_synonym.delete(synonym)
-					flybase_id_by_synonym.delete(synonym)
+					unless name_by_synonym[synonym] == name then
+						name_by_synonym.delete(synonym)
+						flybase_id_by_synonym.delete(synonym)
+					end
 				end
 			end
 		else
@@ -155,9 +153,6 @@ part.each { |prefix|
 
 	ids.fetch do |row|
 		name, uniquename = row
-
-		name.chomp!
-		uniquename.chomp!
 
 		if seen_features[name] then
 			flybase_id_by_feature.delete(name)
@@ -179,6 +174,7 @@ locations = flybase.execute('SELECT DISTINCT s.name FROM ' <<
 
 for i in 0..FEATURE_DEPTH do
 	loci[i] = {}
+	loci_flybase_id[i] = {}
 end
 
 seen_synonyms = {}
@@ -186,12 +182,10 @@ seen_synonyms = {}
 locations.fetch do |row|
 	synonym = row[0]
 
-	synonym.chomp!
-
 	found_location = false
 
 	# TODO Hack: cvterm 'chromosome_arm' has the type_id 210
-	query_string = 'SELECT f.name, chr.name, chr.uniquename FROM ' <<
+	query_string = 'SELECT f.name, chr.name, chr.uniquename, f.uniquename FROM ' <<
 		'feature f, featureloc fl, feature chr WHERE '
 	if flybase_id_by_synonym[synonym] then
 		query_string << 'f.uniquename = ? AND '
@@ -210,15 +204,12 @@ locations.fetch do |row|
 		location_s.execute(synonym)
 	end
 	location_s.fetch do |row|
-		name, chromosome, arm = row
-
-		name.chomp!
-		chromosome.chomp!
-		arm.chomp!
+		name, chromosome, arm, flybase_id = row
 
 		found_location = true if chromosome != ''
 
 		loci[0][name] = [chromosome, arm]
+		loci_flybase_id[0][name] = flybase_id
 		seen_synonyms[name] = true
 	end
 	location_s.finish
@@ -248,33 +239,31 @@ locations.fetch do |row|
 				
 				next if next_synonym == nil
 
-				next_synonym.chomp!
 				next_synonyms |= [next_synonym]
 			end
 			references_st.finish
-			ref_locations_st = flybase.prepare('SELECT DISTINCT s.name, chr.name, chr.uniquename FROM ' <<
-			                                'synonym s, cvterm c, feature_synonym fs, featureloc fl, feature chr, cvterm chr_term WHERE ' <<
+			ref_locations_st = flybase.prepare('SELECT DISTINCT s.name, chr.name, chr.uniquename, f.uniquename FROM ' <<
+			                                'synonym s, cvterm c, feature_synonym fs, featureloc fl, feature f, feature chr, cvterm chr_term WHERE ' <<
 							's.name = ? AND ' <<
                         		                's.type_id = c.cvterm_id AND ' <<
                                         		'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\') AND ' <<
                                         		's.synonym_id = fs.synonym_id AND ' <<
                                         		'fs.feature_id = fl.feature_id AND ' <<
+							'f.feature_id = fs.feature_id AND ' <<
                                         		'fl.srcfeature_id = chr.feature_id AND ' <<
                                         		'chr.type_id = chr_term.cvterm_id AND ' <<
                                         		'chr_term.name = \'chromosome_arm\'')
 			ref_locations_st.execute(ref)
 			ref_locations_st.fetch do |loc_row|
-				loc_synonym, chromosome, arm = loc_row
-
-				synonym.chomp!
-				chromosome.chomp!
-				arm.chomp!
+				loc_synonym, chromosome, arm, flybase_id = loc_row
 
 				if i > 0 and seen_synonyms[synonym] then
 					loci[i].delete(synonym)
+					loci_flybase_id[i].delete(synonym)
 				else
                                         chromosome, arm = extract_location(synonym) if chromosome == ''
 					loci[i][synonym] = [chromosome, arm]
+					loci_flybase_id[i][synonym] = flybase_id
 					seen_synonyms[synonym] = true
 				end
 			end
@@ -310,42 +299,81 @@ puts 'Prefix.. ' << synonym_prefix
 #					'f.type_id = cf.cvterm_id ' <<
 #			  	'GROUP BY s.name ' <<
 #			  	'ORDER BY frequency DESC')
-synonyms = flybase.execute('SELECT intersection.synonym_name, intersection.name, intersection.frequency FROM ' <<
-		'(SELECT x.synonym_name, x.name, x.frequency, MAX(y.frequency) FROM ' <<
-		'(SELECT DISTINCT ' <<
-			's.name AS synonym_name, cf.name, COUNT(DISTINCT fp.pub_id) AS frequency ' <<
-		'FROM ' <<
-			'synonym s, cvterm c, feature_synonym fs, feature_pub fp, feature f, cvterm cf ' <<
-		'WHERE ' <<
-			's.type_id = c.cvterm_id AND ' <<
-			'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\') AND ' <<
-			's.synonym_id = fs.synonym_id AND ' <<
-			's.name LIKE \'' << synonym_prefix << '%\' AND ' <<
-			'fs.feature_id = fp.feature_id AND ' <<
-			'fs.feature_id = f.feature_id AND ' <<
-			'cf.cvterm_id = f.type_id AND ' <<
-			'(cf.name = \'gene\' OR cf.name = \'single balancer\' OR cf.name = \'chromosome_structure_variation\' OR cf.name = \'transgenic_transposon\' OR cf.name = \'transposable_element_insertion_site\') ' <<
-		'GROUP BY s.name, cf.name ' <<
-		'ORDER BY frequency DESC) AS x, ' <<
-		'(SELECT DISTINCT ' <<
-			's.name AS synonym_name, cf.name, COUNT(DISTINCT fp.pub_id) AS frequency ' <<
-		'FROM ' <<
-			'synonym s, cvterm c, feature_synonym fs, feature_pub fp, feature f, cvterm cf ' <<
-		'WHERE ' <<
-			's.type_id = c.cvterm_id AND ' <<
-			'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\') AND ' <<
-			's.synonym_id = fs.synonym_id AND ' <<
-			's.name LIKE \'' << synonym_prefix << '%\' AND ' <<
-			'fs.feature_id = fp.feature_id AND ' <<
-			'fs.feature_id = f.feature_id AND ' <<
-			'cf.cvterm_id = f.type_id AND ' <<
-			'(cf.name = \'gene\' OR cf.name = \'single balancer\' OR cf.name = \'chromosome_structure_variation\' OR cf.name = \'transgenic_transposon\' OR cf.name = \'transposable_element_insertion_site\') ' <<
-		'GROUP BY s.name, cf.name ' <<
-		'ORDER BY frequency DESC) AS y ' <<
-		'WHERE ' <<
-			'x.synonym_name = y.synonym_name ' <<
-		'GROUP BY x.synonym_name, x.name, x.frequency) AS intersection ' <<
-			'WHERE intersection.frequency = intersection.max')
+
+#synonyms = flybase.execute('SELECT intersection.synonym_name, intersection.name, intersection.frequency FROM ' <<
+#		'(SELECT x.synonym_name, x.name, x.frequency, MAX(y.frequency) FROM ' <<
+#		'(SELECT DISTINCT ' <<
+#			's.name AS synonym_name, cf.name, COUNT(DISTINCT fp.pub_id) AS frequency ' <<
+#		'FROM ' <<
+#			'synonym s, cvterm c, feature_synonym fs, feature_pub fp, feature f, cvterm cf ' <<
+#		'WHERE ' <<
+#			's.type_id = c.cvterm_id AND ' <<
+#			'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\') AND ' <<
+#			's.synonym_id = fs.synonym_id AND ' <<
+#			's.name LIKE \'' << synonym_prefix << '%\' AND ' <<
+#			'fs.feature_id = fp.feature_id AND ' <<
+#			'fs.feature_id = f.feature_id AND ' <<
+#			'cf.cvterm_id = f.type_id AND ' <<
+#			'(cf.name = \'gene\' OR cf.name = \'single balancer\' OR cf.name = \'chromosome_structure_variation\' OR cf.name = \'transgenic_transposon\' OR cf.name = \'transposable_element_insertion_site\') ' <<
+#		'GROUP BY s.name, cf.name ' <<
+#		'ORDER BY frequency DESC) AS x, ' <<
+#		'(SELECT DISTINCT ' <<
+#			's.name AS synonym_name, cf.name, COUNT(DISTINCT fp.pub_id) AS frequency ' <<
+#		'FROM ' <<
+#			'synonym s, cvterm c, feature_synonym fs, feature_pub fp, feature f, cvterm cf ' <<
+#		'WHERE ' <<
+#			's.type_id = c.cvterm_id AND ' <<
+#			'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\') AND ' <<
+#			's.synonym_id = fs.synonym_id AND ' <<
+#			's.name LIKE \'' << synonym_prefix << '%\' AND ' <<
+#			'fs.feature_id = fp.feature_id AND ' <<
+#			'fs.feature_id = f.feature_id AND ' <<
+#			'cf.cvterm_id = f.type_id AND ' <<
+#			'(cf.name = \'gene\' OR cf.name = \'single balancer\' OR cf.name = \'chromosome_structure_variation\' OR cf.name = \'transgenic_transposon\' OR cf.name = \'transposable_element_insertion_site\') ' <<
+#		'GROUP BY s.name, cf.name ' <<
+#		'ORDER BY frequency DESC) AS y ' <<
+#		'WHERE ' <<
+#			'x.synonym_name = y.synonym_name ' <<
+#		'GROUP BY x.synonym_name, x.name, x.frequency) AS intersection ' <<
+#			'WHERE intersection.frequency = intersection.max')
+
+#
+cvterm_freq_by_synonym = {}
+syn_pubs = flybase.execute('SELECT s.name, cf.name, COUNT(DISTINCT fp.pub_id) FROM ' <<
+		'synonym s, cvterm c, feature_synonym fs, feature_pub fp, feature f, cvterm cf WHERE ' <<
+		's.type_id = c.cvterm_id AND ' <<
+		'(c.name = \'symbol\' OR c.name = \'fullname\' OR c.name = \'nickname\') AND ' <<
+		's.synonym_id = fs.synonym_id AND ' <<
+		's.name LIKE \'' << synonym_prefix << '%\' AND ' <<
+		'fs.feature_id = fp.feature_id AND ' <<
+		'fs.feature_id = f.feature_id AND ' <<
+		'cf.cvterm_id = f.type_id AND ' <<
+		'(cf.name = \'gene\' OR cf.name = \'single balancer\' OR cf.name = \'chromosome_structure_variation\' OR cf.name = \'transgenic_transposon\' OR cf.name = \'transposable_element_insertion_site\') ' <<
+		'GROUP BY s.name, cf.name'
+	)
+syn_pubs.fetch do |row|
+	synonym = row[0]
+	cvterm = row[1]
+	frequency = row[2].to_i
+
+	cvterm_freq = cvterm_freq_by_synonym[synonym]
+
+	if cvterm_freq then
+		if cvterm_freq[1] < frequency then
+			cvterm_freq[0] = cvterm
+			cvterm_freq[1] = frequency
+		end
+	else
+		cvterm_freq_by_synonym[synonym] = [ cvterm, frequency ]
+	end
+end
+
+synonyms = []
+cvterm_freq_by_synonym.keys.each { |synonym|
+	cvterm, frequency = cvterm_freq_by_synonym[synonym]
+	synonyms << [ synonym, cvterm, frequency ]
+}
+cvterm_freq_by_synonym = nil
 #synonyms = flybase.execute('SELECT DISTINCT s.name, COUNT(DISTINCT fp.pub_id) as frequency FROM ' <<
 #                              'synonym s, cvterm c, feature_synonym fs, feature_pub fp WHERE ' << 
 #                              's.type_id = c.cvterm_id AND ' <<
@@ -354,12 +382,11 @@ synonyms = flybase.execute('SELECT intersection.synonym_name, intersection.name,
 #                              'fs.feature_id = fp.feature_id ' <<
 #                              'GROUP BY s.name LIMIT 5')
 
-synonyms.fetch do |row|
+#synonyms.fetch do |row|
+synonyms.each { |row|
 	synonym = row[0]
-	synonym.chomp!
 
 	cvterm = row[1]
-	cvterm.chomp!
 
 	frequency = row[2].to_i
 
@@ -375,8 +402,8 @@ synonyms.fetch do |row|
 
 	index = synonym.length - 1
 	while index >= 0 do
-		prefix = synonym.dup[0, index]
-		postfix = synonym.dup[index, synonym.length]
+		prefix = synonym[0, index]
+		postfix = synonym[index, synonym.length]
 
 		postfix.sub!(/^\.\w+/, '. ...')
 		postfix.sub!(/^,\w+/, ', ...')
@@ -419,9 +446,9 @@ synonyms.fetch do |row|
 
 		if postfix != synonym[index, synonym.length] then
 			synonym_new = synonym[0, index] << postfix
-			transitions.push([synonym_new,  synonym.clone])
+			transitions.push([synonym_new,  synonym])
 			# puts 'T: ' << synonym_new << ' -> ' << synonym
-			synonym = synonym_new.dup
+			synonym = synonym_new
 		end
 		
 		#index = index - 1
@@ -449,7 +476,8 @@ synonyms.fetch do |row|
 	#	searchables[index][synonym] = 1
 	#	frequencies[synonym] = frequency
 	#end
-end
+#end
+}
 }
 
 for i in 0..max_length - 1 do
@@ -502,10 +530,13 @@ for i in 0..max_length - 1 do
 			key = searchable
 			chromosome = ''
 			arm = ''
+			uniquename = ''
+			name = ''
 			direct_hit = false
 			for j in 0..FEATURE_DEPTH do
 				if loci[j].has_key?(searchable) then
 					chromosome, arm = loci[j][searchable]
+					uniquename = loci_flybase_id[j][searchable]
 					direct_hit = true if occurrences == 1 and j == 0 and chromosome != ''
 					break
 				end
@@ -515,8 +546,8 @@ for i in 0..max_length - 1 do
 				direct_hit = true if occurrences == 1 and chromosome != ''
 			end
 			if chromosome == '' then
-				chromosome, arm = query_relationship(flybase, 'variant_of', searchable)
-				chromosome, arm = query_relationship(flybase, 'chromosome_structure_variation', searchable) if chromosome == ''
+				chromosome, arm, uniquename = query_relationship(flybase, 'variant_of', searchable)
+				chromosome, arm, uniquename = query_relationship(flybase, 'chromosome_structure_variation', searchable) if chromosome == ''
 				direct_hit = true if occurrences == 1 and chromosome != ''
 			end
 			searchable_kind = ''
@@ -525,18 +556,19 @@ for i in 0..max_length - 1 do
 			elsif kind_by_popularity.has_key?(searchable) then
 				searchable_kind = kind_by_popularity[searchable]
 			end
-			uniquename = ''
-			name = ''
-			if flybase_id_by_feature.has_key?(searchable) then
-				uniquename = flybase_id_by_feature[searchable]
-				name = searchable
-			elsif flybase_id_by_synonym.has_key?(searchable) then
-				uniquename = flybase_id_by_synonym[searchable]
-				name = name_by_synonym[searchable] if name_by_synonym.has_key?(searchable)
+			if uniquename == '' then
+				if flybase_id_by_feature.has_key?(searchable) then
+					uniquename = flybase_id_by_feature[searchable]
+					name = searchable
+				elsif flybase_id_by_synonym.has_key?(searchable) then
+					uniquename = flybase_id_by_synonym[searchable]
+					name = name_by_synonym[searchable] if name_by_synonym.has_key?(searchable)
+				end
 			end
 			sql_insert = flybase.prepare('INSERT INTO x_searchables_' << i.to_s << ' VALUES (?, ?, ?, ?, ?, ?, ?)')
 			sql_insert.execute(searchable, occurrences, searchable_kind, chromosome, arm, uniquename, name)
 			sql_insert.finish
+			flybase.commit
 
 			total_searchables += 1 if occurrences == 1
 			direct_locations += 1 if direct_hit
@@ -568,6 +600,7 @@ begin
 		sql_insert = flybase.prepare('INSERT INTO x_transitions VALUES (?, ?, ?)')
 		sql_insert.execute(abstraction, concretisation, occurrences)
 		sql_insert.finish
+		flybase.commit
 	}
 rescue RuntimeError => e
 	puts 'Woops..'
@@ -583,6 +616,7 @@ bad.each do |name|
 	sql_insert = flybase.prepare('INSERT INTO x_non_searchables VALUES (?)')
 	sql_insert.execute(name)
 	sql_insert.finish
+	flybase.commit
 end
 
 flybase.disconnect
