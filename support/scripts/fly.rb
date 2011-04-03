@@ -98,6 +98,7 @@ def insert_searchable(flybase, searchable, i)
 		end
 
 		flybase_id = @flybase_id_by_synonym[searchable]
+		feature_name = @name_by_synonym[searchable]
 		searchable_kind = @kind_by_flybase_id[flybase_id]
 		searchable_kind = '' unless searchable_kind
 
@@ -108,7 +109,7 @@ def insert_searchable(flybase, searchable, i)
 			arm = ref_arm unless ref_arm == ''
 		end
 		sql_insert = flybase.prepare('INSERT INTO x_searchables_' << i.to_s << ' VALUES (?, ?, ?, ?, ?, ?, ?)')
-		sql_insert.execute(searchable, occurrences, searchable_kind, chromosome, arm, uniquename, name)
+		sql_insert.execute(searchable, occurrences, searchable_kind, chromosome, arm, flybase_id, feature_name)
 		sql_insert.finish
 		flybase.commit
 
@@ -182,7 +183,7 @@ part.each { |prefix|
 
 		if @seen_synonyms[synonym] then
 			unless @whoa_a_balancer[synonym] then
-				if synonym.match(/^FBba\d+/) then
+				if uniquename.match(/^FBba\d+/) then
 					@whoa_a_balancer[synonym] = true
 					@name_by_synonym[synonym] = name
 					@flybase_id_by_synonym[synonym] = uniquename
@@ -208,7 +209,14 @@ part.each { |prefix|
 		else
 			@name_by_synonym[synonym] = name
 			@flybase_id_by_synonym[synonym] = uniquename
-			@pubs_by_synonym[synonym] = pubs.to_i
+			if uniquename.match(/^FBba\d+/) then
+				@whoa_a_balancer[synonym] = true
+				@pubs_by_synonym[synonym] = 2147483648 # 2^31
+			elsif synonym == name then
+				@pubs_by_synonym[synonym] = 2147483648 # 2^31
+			else
+				@pubs_by_synonym[synonym] = pubs.to_i
+			end
 			@seen_synonyms[synonym] = true
 		end
 	end
