@@ -53,6 +53,10 @@ qx.Class.define("gazebo.Application",
     LEFT_SO_THAT_CENTERED : -1,
     TOP_SO_THAT_CENTERED : -1,
 
+    // 2 pixel offset for a null decorator, so that the widget does not
+    // "jump" when a decorator is applied.
+    NULL_BUTTON_DECORATOR_OFFSET : 2,
+
 		// Hostname of the application's server
 		hostname : qx.core.Setting.get("gazebo.server.hostname"),
 		// HTTP port on the application's server, which might be null
@@ -111,18 +115,6 @@ qx.Class.define("gazebo.Application",
         // support additional cross-browser console. Press F7 to toggle visibility
         qx.log.appender.Console;
       }
-						
-			// Remember how to work with tables for later...
-			// var tableModel = new qx.ui.table.model.Simple();			
-			// tableModel.setColumns(['a', 'b']);
-			// tableModel.setData([['abc', 'sdfsd'],['def', 'wefew']]);
-			// var table = new qx.ui.table.Table(tableModel);
-			// table.set({ width: 300, height: 200, decorator: null });
-			// tableWindow.add(table);
-			// table.updateContent();
-
-			// this.generateConnectionDialog();
-			// this.generateAuthenticationDialog();
 
       var contributionArray = null;
       try {

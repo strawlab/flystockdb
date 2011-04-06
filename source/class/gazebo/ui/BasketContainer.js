@@ -124,17 +124,23 @@ qx.Class.define("gazebo.ui.BasketContainer",
       alignY: 'middle'
     }));
 
-    var clearAll = new qx.ui.basic.Atom(null, 'qx/icon/Oxygen/16/actions/edit-delete.png');
+    var clearAll = new qx.ui.basic.Atom(null, 'qx/icon/Oxygen/16/actions/edit-delete.png').set({
+      width: 21,
+      height: 24,
+      paddingLeft: gazebo.Application.NULL_BUTTON_DECORATOR_OFFSET
+    });
 
     clearAll.addListener('mouseover',
       function(mouseEvent) {
         this.setDecorator('button-hovered');
+        this.setPaddingLeft(0);
       },
       clearAll
     );
     clearAll.addListener('mouseout',
       function(mouseEvent) {
         this.setDecorator(null);
+        this.setPaddingLeft(gazebo.Application.NULL_BUTTON_DECORATOR_OFFSET);
       },
       clearAll
     );

@@ -42,8 +42,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     if (parameters['keepHistory']) {
       this.makeHistoryTree();
 
+      // Set fixed height or widget will jump when decorator is added/removed.
       this.showHistoryAtom = new qx.ui.basic.Atom('Show History', 'qx/decoration/Modern/arrows/right.png').set({
-        appearance: 'annotation'
+        appearance: 'annotation',
+        height: 20
       });
 
       this.showHistoryAtom.addListener('mouseover', function(mouseEvent) {
@@ -122,18 +124,21 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     layout.setRowAlign(0, "center", "middle");
     this.add(this.textField, { row: 0, column: 0 });
 
-    var helpAtom = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/actions/help-about.png");
-
-    helpAtom.setWidth(20);
-    helpAtom.setHeight(20);
+    var helpAtom = new qx.ui.basic.Atom(null, "qx/icon/Oxygen/16/actions/help-about.png").set({
+      width: 20,
+      height: 20,
+      paddingLeft: gazebo.Application.NULL_BUTTON_DECORATOR_OFFSET
+    });
 
     helpAtom.addListener('mouseover', function(mouseEvent) {
       this.setDecorator('button-hovered');
+      this.setPaddingLeft(0);
     }, helpAtom);
     helpAtom.addListener('mouseout', function(mouseEvent) {
       this.setDecorator(null);
+      this.setPaddingLeft(gazebo.Application.NULL_BUTTON_DECORATOR_OFFSET);
     }, helpAtom);
-        
+
     this.add(helpAtom, { row: 0, column: 1 });
     this.add(this.searchButton, { row: 0, column: 3 });
 
