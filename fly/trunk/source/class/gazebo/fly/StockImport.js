@@ -8,7 +8,7 @@
 ************************************************************************ */
 
 /**
- * A class for importing stocks.
+ * A class for bulk stock-imports.
  */
 qx.Class.define("gazebo.fly.StockImport",
 {
@@ -39,7 +39,7 @@ qx.Class.define("gazebo.fly.StockImport",
     }));
 
     this.stockTextArea = new qx.ui.form.TextArea().set({
-      maxLength: 1500000, // Remark: 65k is approx. enough for 100 stocks.
+      maxLength: 1500000, // 1.5M. Remark: 65k is approx. enough for 100 stocks.
       height: 575,
       width: 900
     });

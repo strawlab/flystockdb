@@ -22,7 +22,7 @@
 
 
 /**
- * This is the main class of contribution "fly"
+ * This is the main class of the contribution "flystockdb"
  */
 qx.Class.define("gazebo.fly.Contribution",
 {
