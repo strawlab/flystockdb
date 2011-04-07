@@ -1,7 +1,7 @@
 <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>
 ==========
 
-[<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>](http://www.flystockdb.org) is a free web-database for keeping Drosophila melanogaster stocks. A short screencast-preview about the project can be found here: [Preview of the Dmel-stock-keeping database "<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>"](http://bergmanlab.smith.man.ac.uk/?p=704)
+[<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>](http://www.flystockdb.org) is a free web-database for keeping Drosophila melanogaster stocks. A short screencast-preview about the project can be found here: [Preview of the Dmel-stock-keeping database "<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>"](http://bergmanlab.smith.man.ac.uk/?p=704). Occasionally I [blog](http://joachimbaran.wordpress.com/tag/flystockdb/) about <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span> news and developments.
 
 Documentation
 -------------
