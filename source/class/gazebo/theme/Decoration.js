@@ -15,7 +15,7 @@
 
 qx.Theme.define("gazebo.theme.Decoration",
 {
-  extend : qx.theme.modern.Decoration,
+  extend : qx.theme.simple.Decoration,
 	
   decorations :
   {
@@ -30,7 +30,11 @@ qx.Theme.define("gazebo.theme.Decoration",
 
     "window" :
     {
-      decorator: qx.ui.decoration.Double,
+      decorator: [
+        qx.ui.decoration.MDoubleBorder,
+        qx.ui.decoration.MBoxShadow,
+        qx.ui.decoration.MBackgroundColor
+      ],
 
       style :
       {
@@ -49,7 +53,11 @@ qx.Theme.define("gazebo.theme.Decoration",
 
     "window-captionbar" :
     {
-      decorator : qx.ui.decoration.Double,
+      decorator: [
+        qx.ui.decoration.MDoubleBorder,
+        qx.ui.decoration.MBoxShadow,
+        qx.ui.decoration.MBackgroundColor
+      ],
 
       style : {
         backgroundColor : "background-pane",
@@ -89,7 +97,7 @@ qx.Theme.define("gazebo.theme.Decoration",
         baseImage : "gazebo/decoration/groupbox/groupbox-blue.png"
       }
     },
-
+/* Was used with "Modern" theme, now obsolete? */
     "scrollbar-slider-horizontal" :
     {
       decorator : qx.ui.decoration.Beveled,

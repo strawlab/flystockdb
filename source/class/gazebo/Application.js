@@ -273,7 +273,7 @@ qx.Class.define("gazebo.Application",
       }
 
       var rpc = new qx.io.remote.Rpc();
-			rpc.setTimeout(2000); // 2sec time-out, arbitrarily chosen.
+			rpc.setTimeout(gazebo.Application.timeout);
 			rpc.setUrl(gazebo.Application.getServerURL());
 			rpc.setServiceName("gazebo.cgi");
 

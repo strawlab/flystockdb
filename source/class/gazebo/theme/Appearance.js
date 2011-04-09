@@ -7,7 +7,7 @@
 
 qx.Theme.define("gazebo.theme.Appearance",
 {
-  extend : qx.theme.modern.Appearance,
+  extend : qx.theme.simple.Appearance,
 
   appearances :
   {
