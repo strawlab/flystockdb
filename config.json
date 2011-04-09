@@ -69,7 +69,7 @@
 	"gazebo.server.protocol" : [ "http" ],
         "gazebo.server.hostname" : [ "localhost" ],
         "gazebo.server.port" : [ 8080 ],
-	"gazebo.server.interface" : [ "fcgi" ]
+	"gazebo.server.interface" : [ "fcgi" ],
 
         // Overwrite the default hostname and port for the database.
         "gazebo.database.hostname" : [ "localhost" ],
