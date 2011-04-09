@@ -57,10 +57,14 @@ qx.Class.define("gazebo.Application",
     // "jump" when a decorator is applied.
     NULL_BUTTON_DECORATOR_OFFSET : 2,
 
+    // Protocol used to connect to the server
+    protocol : qx.core.Setting.get("gazebo.server.protocol"),
 		// Hostname of the application's server
 		hostname : qx.core.Setting.get("gazebo.server.hostname"),
 		// HTTP port on the application's server, which might be null
 		port : qx.core.Setting.get("gazebo.server.port"),
+    // Common Gateway Interface that should be used
+    cgi : qx.core.Setting.get("gazebo.server.interface"),
 
     // Time-out for common UI tasks
     timeout : 8000,
@@ -70,9 +74,9 @@ qx.Class.define("gazebo.Application",
 		getServerURL : function()
 		{
 			if (this.port) {
-				return "http://" + this.hostname + ":" + this.port + "/gazebo.cgi";
+				return this.protocol + "://" + this.hostname + ":" + this.port + "/gazebo." + this.cgi;
 			} else {
-				return "http://" + this.hostname + "/gazebo.cgi";
+				return this.protocol + "://" + this.hostname + "/gazebo." + this.cgi;
 			}
 		},
 
