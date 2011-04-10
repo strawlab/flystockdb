@@ -106,7 +106,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
 		}, this);
 		form.addButton(connectButton);
 			
-		this.add(new qx.ui.form.renderer.Single(form));
+		this.add(new gazebo.ui.FormRenderer(form));
   },
 
   members :

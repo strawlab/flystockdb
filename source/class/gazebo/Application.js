@@ -315,35 +315,29 @@ qx.Class.define("gazebo.Application",
 		{
       var title = parameters['title'];
       var logo = parameters['logo'];
+      var top = parameters['top'];
+      var left = parameters['left'];
+      var right = parameters['right'];
+      var bottom = parameters['bottom'];
 
-			var connectionDialog = new gazebo.ui.ConnectionDialog(parameters, listeners, overrides);
-			connectionDialog.addListener("connect", this.establishConnection, this);
-
-			this.connectionWindow = new qx.ui.window.Window(title ? title :"Database Connection");
-			this.connectionWindow.setLayout(new qx.ui.layout.VBox(10));
-
-			this.connectionWindow.setResizable(false, false, false, false);
-			this.connectionWindow.setMovable(false);
-			this.connectionWindow.setShowClose(false);
-			this.connectionWindow.setShowMaximize(false);
-			this.connectionWindow.setShowMinimize(false);
-
-			this.connectionWindow.addListener("resize", this.connectionWindow.center, this.connectionWindow);
+			this.connectionDialog = new gazebo.ui.ConnectionDialog(parameters, listeners, overrides);
+			this.connectionDialog.addListener("connect", this.establishConnection, this);
 
       if (logo) {
-        this.connectionWindow.add(logo);
+        var container = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
+
+        container.add(logo);
+        container.add(this.connectionDialog);
+
+        this.connectionDialog = container;
       }
 
-			this.connectionWindow.add(connectionDialog);
-
-      this.connectionWindow.open();      
-      this.getRoot().add(this.connectionWindow);
+      this.getRoot().add(this.connectionDialog, { top: top, left: left, right: right, bottom: bottom });
 		},
 
     disposeConnectionDialog : function(parameters)
     {
-      this.connectionWindow.close();
-      this.connectionWindow.destroy();
+      this.connectionDialog.destroy();
     },
 
     // Only for testing purposes, yet.
@@ -362,48 +356,36 @@ qx.Class.define("gazebo.Application",
 
     generateSearchDialog : function(parameters, listeners, overrides)
     {
-      var searchDialog = new gazebo.ui.SuggestionTextField(parameters, listeners, overrides);
+      this.searchDialog = new gazebo.ui.SuggestionTextField(parameters, listeners, overrides);
       
       var title = parameters['title'];
-      var left = parameters['left'];
       var top = parameters['top'];
+      var left = parameters['left'];
+      var right = parameters['right'];
+      var bottom = parameters['bottom'];
 
       var composite = parameters['composite'];
 
       if (parameters['stripWhitespace']) {
-        searchDialog.setStripWhitespace(parameters['stripWhitespace']);
+        this.searchDialog.setStripWhitespace(parameters['stripWhitespace']);
       }
 
       if (composite) {
-        composite.add(searchDialog);
+        composite.add(this.searchDialog);
       } else {
-        this.searchWindow = new qx.ui.window.Window(title ? title : "Search");
-        this.searchWindow.setMaxWidth(500);
-        this.searchWindow.setLayout(new qx.ui.layout.HBox(10));
-        this.searchWindow.add(searchDialog);
-        this.searchWindow.setResizable(false, false, false, false);
-        this.searchWindow.setMovable(false);
-        this.searchWindow.setShowClose(false);
-        this.searchWindow.setShowMaximize(false);
-        this.searchWindow.setShowMinimize(false);
-
-        this.searchWindow.addListenerOnce("resize", this.getPositioningFunction(left, top), this.searchWindow);
-
-        this.searchWindow.open();
-        this.getRoot().add(this.searchWindow);
+        this.getRoot().add(this.searchDialog, { top: top, left: left, right: right, bottom: bottom });
       }
 
       if (listeners['onOpen']) {
         listener = listeners['onOpen'];
         this.addListener('openSearchDialogRelay', listener['call'], listener['context']);
       }
-      this.fireDataEvent('openSearchDialogRelay', searchDialog);
+      this.fireDataEvent('openSearchDialogRelay', this.searchDialog);
     },
 
     disposeSearchDialog : function(parameters)
     {
-      this.searchWindow.close();
-      this.searchWindow.destroy();
+      this.searchDialog.destroy();
     },
 
     generateBasket : function(parameters, listeners, overrides)
@@ -411,8 +393,10 @@ qx.Class.define("gazebo.Application",
       this.basketContainer = new gazebo.ui.BasketContainer(parameters, listeners, overrides);
 
       var title = parameters['title'];
-      var left = parameters['left'];
       var top = parameters['top'];
+      var left = parameters['left'];
+      var right = parameters['right'];
+      var bottom = parameters['bottom'];
 
       var composite = parameters['composite'];
       var proceedButton;
@@ -432,27 +416,16 @@ qx.Class.define("gazebo.Application",
 
         composite.add(interfaceContainer);
       } else {
-        this.basketWindow = new qx.ui.window.Window(title ? title : "Basket");
-        this.basketWindow.setLayout(new qx.ui.layout.HBox(5));
-        this.basketWindow.setResizable(false, false, false, false);
-        this.basketWindow.setMovable(false);
-        this.basketWindow.setShowClose(false);
-        this.basketWindow.setShowMaximize(false);
-        this.basketWindow.setShowMinimize(false);
-
-        this.basketWindow.addListener("resize", this.getPositioningFunction(left, top), this.basketWindow);
-
-        this.basketWindow.add(this.basketContainer);
-
+        /*
         if (!parameters['hideProceedButton']) {
           this.basketWindow.add(new qx.ui.toolbar.Separator());
 
           proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
           this.basketWindow.add(proceedButton);
         }
+        */
 
-        this.basketWindow.open();
-        this.getRoot().add(this.basketWindow);
+        this.getRoot().add(this.basketContainer, { top: top, left: left, right: right, bottom: bottom });
       }
 
       if (listeners['onProceed']) {
@@ -474,8 +447,7 @@ qx.Class.define("gazebo.Application",
 
     disposeBasket : function(parameters)
     {
-      this.basketWindow.close();
-      this.basketWindow.destroy();
+      this.basketContainer.destroy();
     },
 
     generateForm : function(parameters)
@@ -492,26 +464,23 @@ qx.Class.define("gazebo.Application",
     {
       var createNewPageOn = parameters['createNewPageOn'];
       var title = parameters['title'];
-      var left = parameters['left'];
       var top = parameters['top'];
+      var left = parameters['left'];
+      var right = parameters['right'];
+      var bottom = parameters['bottom'];
 
-      var window = new qx.ui.window.Window(title ? title : "Title");
+      // TODO Deal with title parameter.
+      // var window = new qx.ui.window.Window(title ? title : "Title");
+      var window = new qx.ui.container.Composite();
 
       // TODO Introduce uid to all generate* calls where relays are used.
       var uid = '' + window.toHashCode();
 
       window.setLayout(new qx.ui.layout.HBox(5));
-      window.setResizable(false, false, false, false);
-      window.setMovable(false);
-      window.setShowClose(false);
-      window.setShowMaximize(false);
-      window.setShowMinimize(false);
 
       if (parameters['maxHeight']) {
         window.setMaxHeight(parameters['maxHeight']);
       }
-
-      window.addListener("resize", this.getPositioningFunction(left, top), window);
 
       var tabInterface = new qx.ui.tabview.TabView();
 
@@ -546,8 +515,8 @@ qx.Class.define("gazebo.Application",
       tabInterface.add(page);
 
       window.add(tabInterface);
-      window.open();
-      this.getRoot().add(window);
+
+      this.getRoot().add(window, { top: top, left: left, right: right, bottom: bottom });
 
       var onTransitionCloseScreen = listeners['onTransitionCloseScreen'];
       if (onTransitionCloseScreen) {
@@ -566,35 +535,21 @@ qx.Class.define("gazebo.Application",
       var customContainer = parameters['contents'];
 
       var title = parameters['title'];
-      var left = parameters['left'];
       var top = parameters['top'];
+      var left = parameters['left'];
+      var right = parameters['right'];
+      var bottom = parameters['bottom'];
 
       var composite = parameters['composite'];
 
       if (composite) {
         composite.add(customContainer);
       } else {
-        this.customWindow = new qx.ui.window.Window(title ? title : "Title");
+        // TODO Deal with title parameter.
+        //this.customWindow = new qx.ui.window.Window(title ? title : "Title");
 
         // TODO Introduce uid to all generate* calls where relays are used.
-        var uid = '' + this.customWindow.toHashCode();
-
-        this.customWindow.setLayout(new qx.ui.layout.HBox(5));
-        this.customWindow.setResizable(false, false, false, false);
-        this.customWindow.setMovable(false);
-        this.customWindow.setShowClose(false);
-        this.customWindow.setShowMaximize(false);
-        this.customWindow.setShowMinimize(false);
-
-        if (parameters['maxHeight']) {
-          this.customWindow.setMaxHeight(parameters['maxHeight']);
-        }
-
-        this.customWindow.addListener("resize", this.getPositioningFunction(left, top), this.customWindow);
-
-        this.customWindow.add(customContainer);
-
-        this.customWindow.open();
+        var uid = '' + customContainer.toHashCode();
 
         // TODO Below: proof-of-concept of a desktop scroller
         //var desktop = new qx.ui.window.Desktop(new qx.ui.window.Manager());
@@ -604,7 +559,7 @@ qx.Class.define("gazebo.Application",
         //scroll.setHeight(500);
         //scroll.add(desktop);
         //this.getRoot().add(scroll);
-        this.getRoot().add(this.customWindow);
+        this.getRoot().add(customContainer, { top: top, left: left, right: right, bottom: bottom });
       }
 
       if (listeners['onOpen']) {
@@ -617,7 +572,7 @@ qx.Class.define("gazebo.Application",
       var onTransitionCloseScreen = listeners['onTransitionCloseScreen'];
       if (onTransitionCloseScreen) {
         var onTransitionCloseScreenParameters = onTransitionCloseScreen['parameters'];
-        onTransitionCloseScreenParameters['windowHandle'] = this.customWindow;
+        onTransitionCloseScreenParameters['windowHandle'] = customContainer;
       }
     },
 
@@ -629,7 +584,6 @@ qx.Class.define("gazebo.Application",
         windowHandle = parameters['windowHandle'];
       }
 
-      windowHandle.close();
       windowHandle.destroy();
     },
 
