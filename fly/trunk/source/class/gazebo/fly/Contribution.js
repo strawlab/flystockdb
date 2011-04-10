@@ -144,7 +144,8 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
         {
           title: 'Quick Search',
-          left: inquirer.LEFT_SO_THAT_CENTERED,
+          left: '0%',
+          width: '100%',
           top: 65,
           textFieldMinimalWidth: 250,
           stripWhitespace: true,
@@ -235,9 +236,9 @@ qx.Class.define("gazebo.fly.Contribution",
         inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
           {
             title: ' ',
-            left: inquirer.LEFT_SO_THAT_CENTERED,
-            top: -25,
-            minWidth: 700,
+            top: 0,
+            left: '0',
+            width: '100%',
             customElements: linkContainer
           },
           {
@@ -552,62 +553,90 @@ qx.Class.define("gazebo.fly.Contribution",
 
     generateStockListUI : function(inquirer) {
 
-      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
+      inquirer.openScreen(inquirer.generateTabbedInterface, inquirer,
         {
-          title: 'My Stocks',
-          left : inquirer.LEFT_SO_THAT_CENTERED,
           top: 155,
-          maxHeight: 270,
-          contents: new gazebo.fly.StockListViewer(
-            {},
+          left: '10%',
+          right: '90%',
+          createNewPageOn: [ 1 ],
+
+          title: 'Stocklists',
+          title0: 'My Stocks',
+          title1: 'All Stocks',
+
+          generatorCall0: inquirer.generateCustomInterface,
+          generatorContext0: inquirer,
+          parameters0:
             {
-              onStockSelect: {
-                call: this.onStockSelectListener,
-                context: this
+              title: 'My Stocks',
+              left : inquirer.LEFT_SO_THAT_CENTERED,
+//              top: 155,
+//              maxHeight: 270,
+              contents: new gazebo.fly.StockListViewer(
+                {},
+                {
+                  onStockSelect: {
+                    call: this.onStockSelectListener,
+                    context: this
+                  }
+                },
+                {}
+              )
+            },
+          listeners0:
+            {
+              onTransitionCloseScreen: {
+                call: inquirer.disposeCustomInterface,
+                context: inquirer,
+                parameters: {}
               }
             },
-            {}
-          )
-        },
-        {
-          onTransitionCloseScreen: {
-            call: inquirer.disposeCustomInterface,
-            context: inquirer,
-            parameters: {}
-          }
-        },
-        {
-
-        }
-      );
-
-      inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
-        {
-          title: 'All Stocks',
-          left : inquirer.LEFT_SO_THAT_CENTERED,
-          top: 435,
-          maxHeight: 270,
-          contents: new gazebo.fly.StockListViewer(
-            {},
+          overrides0:
             {
-              onStockSelect: {
-                call: this.onStockSelectListener,
-                context: this
+
+            },
+
+          generatorCall1: inquirer.generateCustomInterface,
+          generatorContext1: inquirer,
+          parameters1:
+            {
+              title: 'All Stocks',
+              left : inquirer.LEFT_SO_THAT_CENTERED,
+//              top: 155,
+//              maxHeight: 270,
+              contents: new gazebo.fly.StockListViewer(
+                {},
+                {
+                  onStockSelect: {
+                    call: this.onStockSelectListener,
+                    context: this
+                  }
+                },
+                {}
+              )
+            },
+          listeners1:
+            {
+              onTransitionCloseScreen: {
+                call: inquirer.disposeCustomInterface,
+                context: inquirer,
+                parameters: {}
               }
             },
-            {}
-          )
-        },
-        {
-          onTransitionCloseScreen: {
-            call: inquirer.disposeCustomInterface,
-            context: inquirer,
-            parameters: {}
-          }
-        },
-        {
+          overrides1:
+            {
 
-        }
+            }
+          },
+
+          {
+            onTransitionCloseScreen: {
+              call: inquirer.disposeTabbedInterface,
+              context: inquirer,
+              parameters: {}
+            }
+          },
+          {}
       );
 
     },
