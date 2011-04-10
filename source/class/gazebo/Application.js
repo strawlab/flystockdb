@@ -154,52 +154,41 @@ qx.Class.define("gazebo.Application",
       this.screenTransition();
     },
 
-    getPositioningFunction : function(left, top)
+    getLayoutOptions : function(parameters)
     {
-      return function() {
-        var parent = this.getLayoutParent();
+      var top = parameters['top'];
+      var left = parameters['left'];
+      var right = parameters['right'];
+      var bottom = parameters['bottom'];
+      var width = parameters['width'];
+      var height = parameters['height'];
 
-        if (parent) {
-          var bounds = parent.getBounds();
-
-          if (bounds) {
-            var hint = this.getSizeHint();
-
-            if (left == this.LEFT_SO_THAT_CENTERED) {
-              left = Math.round((bounds.width - hint.width) / 2);
-            }
-
-            if (top == this.TOP_SO_THAT_CENTERED) {
-              top = Math.round((bounds.height - hint.height) / 2);
-            }
-
-            this.moveTo(left, top);
-          }
-        }
-      };
+      return { top: top, bottom: bottom, left: left, right: right, width: width, height: height };
     },
 
     generateStatusDisplay : function(parameters, listeners, overrides)
     {
       var title = parameters['title'];
-      var left = parameters['left'];
-      var top = parameters['top'];
-      var minWidth = parameters['minWidth'] ? parameters['minWidth'] : 500;
       var customElements = parameters['customElements'];
+      var separator;
 
-      this.statusWindow = new qx.ui.window.Window(title ? title : "Status");
-      this.statusWindow.setMinWidth(minWidth);
-      this.statusWindow.setLayout(new qx.ui.layout.HBox(10).set({
-        alignY: 'middle'
-      }));
-      this.statusWindow.setResizable(false, false, false, false);
-			this.statusWindow.setMovable(false);
-			this.statusWindow.setShowClose(false);
-			this.statusWindow.setShowMaximize(false);
-			this.statusWindow.setShowMinimize(false);
+      var vertical = parameters['vertical'];
 
-      this.statusWindow.addListenerOnce("resize", this.getPositioningFunction(left, top), this.statusWindow);
+      this.statusWindow = new qx.ui.container.Composite();
 
+      if (vertical) {
+        separator = " - ";
+        this.statusWindow.setLayout(new qx.ui.layout.VBox(10).set({
+          alignX: 'left',
+          alignY: 'middle'
+        }));
+      } else {
+        separator = " | "
+        this.statusWindow.setLayout(new qx.ui.layout.HBox(10).set({
+          alignX: 'center',
+          alignY: 'middle'
+        }));
+      }
       this.statusDisplayUsername = new qx.ui.basic.Label().set({
         value: '-',
         rich: true
@@ -226,13 +215,12 @@ qx.Class.define("gazebo.Application",
 
       this.statusWindow.add(this.statusDisplayUsername);
       this.statusWindow.add(new qx.ui.basic.Label().set({
-        value: " | ",
+        value: separator,
         rich: true
       }));
       this.statusWindow.add(this.statusDisplayAuthenticationLink);
 
-      this.statusWindow.open();
-      this.getRoot().add(this.statusWindow);
+      this.getRoot().add(this.statusWindow, this.getLayoutOptions(parameters));
 
       this.generateAuthenticationDispatcher(
         {},
@@ -259,7 +247,6 @@ qx.Class.define("gazebo.Application",
 
     disposeStatusDisplay : function(parameters)
     {
-      this.statusWindow.close();
       this.statusWindow.destroy();
     },
 
@@ -315,10 +302,6 @@ qx.Class.define("gazebo.Application",
 		{
       var title = parameters['title'];
       var logo = parameters['logo'];
-      var top = parameters['top'];
-      var left = parameters['left'];
-      var right = parameters['right'];
-      var bottom = parameters['bottom'];
 
 			this.connectionDialog = new gazebo.ui.ConnectionDialog(parameters, listeners, overrides);
 			this.connectionDialog.addListener("connect", this.establishConnection, this);
@@ -332,7 +315,7 @@ qx.Class.define("gazebo.Application",
         this.connectionDialog = container;
       }
 
-      this.getRoot().add(this.connectionDialog, { top: top, left: left, right: right, bottom: bottom });
+      this.getRoot().add(this.connectionDialog, this.getLayoutOptions(parameters));
 		},
 
     disposeConnectionDialog : function(parameters)
@@ -359,10 +342,6 @@ qx.Class.define("gazebo.Application",
       this.searchDialog = new gazebo.ui.SuggestionTextField(parameters, listeners, overrides);
       
       var title = parameters['title'];
-      var top = parameters['top'];
-      var left = parameters['left'];
-      var right = parameters['right'];
-      var bottom = parameters['bottom'];
 
       var composite = parameters['composite'];
 
@@ -373,7 +352,23 @@ qx.Class.define("gazebo.Application",
       if (composite) {
         composite.add(this.searchDialog);
       } else {
-        this.getRoot().add(this.searchDialog, { top: top, left: left, right: right, bottom: bottom });
+        var centeringContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(0).set({
+          alignX: 'center',
+          alignY: 'middle'
+        }));
+        var container = new qx.ui.container.Composite(new qx.ui.layout.VBox(2));
+
+        container.add(new qx.ui.basic.Label().set({
+          value: title,
+          rich: true,
+          appearance: 'annotation'
+        }));
+
+        container.add(this.searchDialog);
+        centeringContainer.add(container);
+        this.searchDialog = centeringContainer;
+        
+        this.getRoot().add(this.searchDialog, this.getLayoutOptions(parameters));
       }
 
       if (listeners['onOpen']) {
@@ -393,10 +388,6 @@ qx.Class.define("gazebo.Application",
       this.basketContainer = new gazebo.ui.BasketContainer(parameters, listeners, overrides);
 
       var title = parameters['title'];
-      var top = parameters['top'];
-      var left = parameters['left'];
-      var right = parameters['right'];
-      var bottom = parameters['bottom'];
 
       var composite = parameters['composite'];
       var proceedButton;
@@ -425,7 +416,7 @@ qx.Class.define("gazebo.Application",
         }
         */
 
-        this.getRoot().add(this.basketContainer, { top: top, left: left, right: right, bottom: bottom });
+        this.getRoot().add(this.basketContainer, this.getLayoutOptions(parameters));
       }
 
       if (listeners['onProceed']) {
@@ -464,10 +455,6 @@ qx.Class.define("gazebo.Application",
     {
       var createNewPageOn = parameters['createNewPageOn'];
       var title = parameters['title'];
-      var top = parameters['top'];
-      var left = parameters['left'];
-      var right = parameters['right'];
-      var bottom = parameters['bottom'];
 
       // TODO Deal with title parameter.
       // var window = new qx.ui.window.Window(title ? title : "Title");
@@ -516,7 +503,7 @@ qx.Class.define("gazebo.Application",
 
       window.add(tabInterface);
 
-      this.getRoot().add(window, { top: top, left: left, right: right, bottom: bottom });
+      this.getRoot().add(window, this.getLayoutOptions(parameters));
 
       var onTransitionCloseScreen = listeners['onTransitionCloseScreen'];
       if (onTransitionCloseScreen) {
@@ -535,10 +522,6 @@ qx.Class.define("gazebo.Application",
       var customContainer = parameters['contents'];
 
       var title = parameters['title'];
-      var top = parameters['top'];
-      var left = parameters['left'];
-      var right = parameters['right'];
-      var bottom = parameters['bottom'];
 
       var composite = parameters['composite'];
 
@@ -559,7 +542,7 @@ qx.Class.define("gazebo.Application",
         //scroll.setHeight(500);
         //scroll.add(desktop);
         //this.getRoot().add(scroll);
-        this.getRoot().add(customContainer, { top: top, left: left, right: right, bottom: bottom });
+        this.getRoot().add(customContainer, this.getLayoutOptions(parameters));
       }
 
       if (listeners['onOpen']) {
