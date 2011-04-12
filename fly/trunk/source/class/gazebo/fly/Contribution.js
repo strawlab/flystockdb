@@ -139,6 +139,11 @@ qx.Class.define("gazebo.fly.Contribution",
 
     },
 
+    highlightMenu : function()
+    {
+      // TODO
+    },
+
     generateDashboardUI : function(inquirer) {
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
@@ -168,39 +173,36 @@ qx.Class.define("gazebo.fly.Contribution",
           // prepareFileSuggestion: this.prepareSuggestion
         });
 
-      var linkContainer = new qx.ui.container.Composite();
+      var linkContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
 
       var that = this;
 
-      homeLink = new qx.ui.basic.Atom().set({
-        label: '<u>Home</u>',
+      this.homeLink = new qx.ui.basic.Atom().set({
+        label: 'Home',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/actions/go-home.png',
-        padding: [2, 6, 2, 6]
+        icon: 'qx/icon/Oxygen/16/actions/go-home.png'
       });
-      homeLink.addListener('click', function(mouseEvent) {
+      this.homeLink.addListener('click', function(mouseEvent) {
         that.generateDashboardUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
       }, this);
 
-      searchLink = new qx.ui.basic.Atom().set({
-        label: '<u>Advanced Search</u>',
+      this.searchLink = new qx.ui.basic.Atom().set({
+        label: 'Advanced Search',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/actions/edit-find.png',
-        padding: [2, 6, 2, 6]
+        icon: 'qx/icon/Oxygen/16/actions/edit-find.png'
       });
-      searchLink.addListener('click', function(mouseEvent) {
+      this.searchLink.addListener('click', function(mouseEvent) {
         that.generateSearchUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
       }, this);
 
-      addLink = new qx.ui.basic.Atom().set({
-        label: '<u>Add Fly-Stock</u>',
+      this.addLink = new qx.ui.basic.Atom().set({
+        label: 'Add Fly-Stock',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/actions/list-add.png',
-        padding: [2, 6, 2, 6]
+        icon: 'qx/icon/Oxygen/16/actions/list-add.png'
       });
-      addLink.addListener('click', function(mouseEvent) {
+      this.addLink.addListener('click', function(mouseEvent) {
         this.stockInternalID = null;
         this.stockExternalID = null;
         this.stockSource = null;
@@ -213,22 +215,49 @@ qx.Class.define("gazebo.fly.Contribution",
         that.inquirer.suggestScreenTransition();
       }, this);
 
-      administrationLink = new qx.ui.basic.Atom().set({
-        label: '<u>Administration</u>',
+      this.administrationLink = new qx.ui.basic.Atom().set({
+        label: 'Administration',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/apps/utilities-keyring.png',
-        padding: [2, 6, 2, 6]
+        icon: 'qx/icon/Oxygen/16/apps/utilities-keyring.png'
       });
-      administrationLink.addListener('click', function(mouseEvent) {
+      this.administrationLink.addListener('click', function(mouseEvent) {
         that.generateAdministrationUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
       }, this);
 
-      linkContainer.setLayout(new qx.ui.layout.HBox(10));
-      linkContainer.add(homeLink);
-      linkContainer.add(searchLink);
-      linkContainer.add(addLink);
-      linkContainer.add(administrationLink);
+      linkContainer.add(this.homeLink);
+      linkContainer.add(this.searchLink);
+      linkContainer.add(this.addLink);
+      linkContainer.add(this.administrationLink);
+
+      this.selectedScreen = this.homeLink;
+
+      this.statusWidgets = [
+        this.homeLink,
+        this.searchLink,
+        this.addLink,
+        this.administrationLink
+      ];
+
+      var onMouseOver = function(mouseEvent) {
+            if (this == that.selectedScreen) {
+              return;
+            }
+
+            this.setTextColor('#333333');
+            this.setBackgroundColor('#6694E3');
+          };
+      var onMouseOut = function(mouseEvent) {
+            if (this == that.selectedScreen) {
+              this.setTextColor('#333333');
+              this.setBackgroundColor('#ffffff');
+            } else {
+              this.setTextColor('#ffffff');
+              this.setBackgroundColor(null);
+            }
+          };
+
+      this.highlightMenu();
 
       if (!this.statusOpen) {
         this.statusOpen = true;
@@ -239,7 +268,13 @@ qx.Class.define("gazebo.fly.Contribution",
             top: 0,
             left: '0',
             width: '100%',
-            customElements: linkContainer
+            textColor: '#ffffff',
+            backgroundColor: '#333333',
+            customElements: this.statusWidgets,
+            onMouseOver: onMouseOver,
+            onMouseOut: onMouseOut,
+            customElementPadding: [8, 12, 10, 12],
+            customElementMargin: [0, 4, 0, 4]
           },
           {
             /* Make permanent.
@@ -251,7 +286,8 @@ qx.Class.define("gazebo.fly.Contribution",
             }
              */
           },
-          {});
+          {
+          });
       }
 
       this.generateStockListUI(inquirer);
