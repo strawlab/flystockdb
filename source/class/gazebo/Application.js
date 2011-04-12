@@ -172,9 +172,15 @@ qx.Class.define("gazebo.Application",
       var customElements = parameters['customElements'];
       var separator;
 
+      var textColor = parameters['textColor'];
+      var backgroundColor = parameters['backgroundColor'];
+
       var vertical = parameters['vertical'];
 
-      this.statusWindow = new qx.ui.container.Composite();
+      this.statusWindow = new qx.ui.container.Composite().set({
+        textColor: textColor,
+        backgroundColor: backgroundColor
+      });
 
       if (vertical) {
         separator = " - ";
@@ -206,9 +212,36 @@ qx.Class.define("gazebo.Application",
 
       // Placement of additional elements
       if (customElements) {
-        this.statusWindow.add(customElements);
+        var customContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+
+        for (var i = 0; i < customElements.length; i++) {
+          if (parameters['onMouseOver']) {
+            customElements[i].addListener('mouseover', parameters['onMouseOver'], customElements[i]);
+          }
+          if (parameters['onMouseOut']) {
+            customElements[i].addListener('mouseout', parameters['onMouseOut'], customElements[i]);
+          }
+          if (parameters['customElementPadding']) {
+            var a = parameters['customElementPadding'][0];
+            var b = parameters['customElementPadding'][1];
+            var c = parameters['customElementPadding'][2];
+            var d = parameters['customElementPadding'][3];
+
+            customElements[i].setPadding(a, b, c, d);
+          }
+          if (parameters['customElementMargin']) {
+            a = parameters['customElementMargin'][0];
+            b = parameters['customElementMargin'][1];
+            c = parameters['customElementMargin'][2];
+            d = parameters['customElementMargin'][3];
+
+            customElements[i].setMargin(a, b, c, d);
+          }
+          customContainer.add(customElements[i]);
+        }
+        this.statusWindow.add(customContainer);
         this.statusWindow.add(new qx.ui.basic.Label().set({
-          value: " | ",
+          value: separator,
           rich: true
         }));
       }
