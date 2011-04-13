@@ -35,8 +35,9 @@ qx.Class.define("gazebo.ui.BasketContainer",
     this.draggableItems = parameters['draggableItems'];
     this.dragAndDropFlavour = parameters['dragAndDropFlavour'] ? parameters['dragAndDropFlavour'] : 'item';
 
-    this.basketItemSpacing = 5;
+    this.basketItemSpacing = 0;
     this.basketItemDNDSpacing = 0;
+    this.itemTopMargin = 4;
 
     // Install overrides (needed when populating baskets):
     if (overrides['makeEmptyBasketLabel']) {
@@ -225,6 +226,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
             var originalContents = itemContainer.theOriginalContents;
             itemContainer.removeAll();
             for (i = 0; i < originalContents.length; i++) {
+              originalContents[i].setMarginTop(that.itemTopMargin);
               itemContainer.add(originalContents[i])
             }
             itemContainer.theOriginalContents = null;
@@ -238,7 +240,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
               that.removeBasketItem(location, item.getLayoutParent());
 
               if (itemContainer.myDropHint) {
-                itemContainer.myPreviewItem.getChildren()[0].setDecorator('button-disabled');
+                itemContainer.myPreviewItem.getChildren()[0].setDecorator('button-box');
                 that.addBasketItemBefore(thisBasket, item, itemContainer.myDropHint);
               } else {
                 that.addBasketItem(thisBasket, item, null);
@@ -253,7 +255,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
               e.preventDefault();
             } else {
               itemContainer.myDropHint = null;
-              itemContainer.setDecorator('button-hovered');
+              itemContainer.setDecorator('button-box-hovered');
               itemContainer.getLayout().setSpacing(that.basketItemDNDSpacing);
 
               var contents = itemContainer.getChildren();
@@ -263,7 +265,10 @@ qx.Class.define("gazebo.ui.BasketContainer",
                 separatorItem.setDecorator('separator-vertical');
                 separatorItem.setHeight(1);
                 separatorItem.setAllowStretchX(true, true);
-                separatorItem.setDecorator('button-disabled');
+                separatorItem.setDecorator('button-box');
+
+                separatorItem.setPadding(1, 0, 1, 0);
+                separatorItem.setMargin(0, 0, 0, 0);
 
                 var previewItem = new qx.ui.container.Composite();
                 previewItem.setLayout(new qx.ui.layout.VBox(0));
@@ -282,14 +287,14 @@ qx.Class.define("gazebo.ui.BasketContainer",
                         break;
                       }
                     }
-                    this.getChildren()[0].setDecorator('button-hovered');
+                    this.getChildren()[0].setDecorator('button-box-hovered');
                   },
                   previewItem
                 );
                 previewItem.addListener("mouseout",
                   function(e) {
                     thisItemContainer.myDropHint = null;
-                    this.getChildren()[0].setDecorator('button-disabled');
+                    this.getChildren()[0].setDecorator('button-box');
                   },
                   previewItem
                 );
@@ -311,6 +316,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
               itemContainer.theOriginalContents = originalContents;
 
               for (i = 0; i < originalContents.length; i++) {
+                originalContents[i].setMarginTop(0);
                 itemContainer.addBefore(itemContainer.myPreviewItems[i], originalContents[i]);
               }
 
@@ -326,6 +332,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
             var originalContents = itemContainer.theOriginalContents;
             itemContainer.removeAll();
             for (i = 0; i < originalContents.length; i++) {
+              originalContents[i].setMarginTop(that.itemTopMargin);
               itemContainer.add(originalContents[i])
             }
             itemContainer.theOriginalContents = null;
@@ -441,6 +448,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
       itemComposite.itemFlavor = flavor;
       itemComposite.itemReference = item;
       itemComposite.setLayout(new qx.ui.layout.HBox(5));
+
+      itemComposite.setMarginTop(this.itemTopMargin);
 
       var that = this;
       if (flavor != gazebo.ui.BasketContainer.EMPTY_BASKET_ITEM && !this.draggableItems) {
