@@ -221,7 +221,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
           function(e) {
             var item = e.getData(that.dragAndDropFlavour);
 
-            itemContainer.setDecorator(null);
+            //itemContainer.setDecorator(null);
+            itemContainer.setBackgroundColor(null);
 
             var originalContents = itemContainer.theOriginalContents;
             itemContainer.removeAll();
@@ -255,7 +256,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
               e.preventDefault();
             } else {
               itemContainer.myDropHint = null;
-              itemContainer.setDecorator('button-box-hovered');
+              //itemContainer.setDecorator('button-box-hovered');
+              itemContainer.setBackgroundColor('#6694E3');
               itemContainer.getLayout().setSpacing(that.basketItemDNDSpacing);
 
               var contents = itemContainer.getChildren();
@@ -327,7 +329,8 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
         itemContainer.addListener("dragleave",
           function(e) {
-            itemContainer.setDecorator(null);
+            //itemContainer.setDecorator(null);
+            itemContainer.setBackgroundColor(null);
             itemContainer.getLayout().setSpacing(that.basketItemSpacing);
             var originalContents = itemContainer.theOriginalContents;
             itemContainer.removeAll();
