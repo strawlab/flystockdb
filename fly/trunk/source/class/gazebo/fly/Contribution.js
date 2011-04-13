@@ -141,7 +141,14 @@ qx.Class.define("gazebo.fly.Contribution",
 
     highlightMenu : function()
     {
-      // TODO
+      for (var i = 0; i < this.statusWidgets.length; i++)
+        if (this.statusWidgets[i] == this.selectedScreen) {
+          this.statusWidgets[i].setTextColor('#333333');
+          this.statusWidgets[i].setBackgroundColor('#ffffff');
+        } else {
+          this.statusWidgets[i].setTextColor('#ffffff');
+          this.statusWidgets[i].setBackgroundColor(null);
+        }
     },
 
     generateDashboardUI : function(inquirer) {
@@ -173,8 +180,14 @@ qx.Class.define("gazebo.fly.Contribution",
           // prepareFileSuggestion: this.prepareSuggestion
         });
 
-      var linkContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+      this.generateStockListUI(inquirer);
 
+      if (this.statusOpen)
+        return;
+
+      this.statusOpen = true;
+
+      var linkContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
       var that = this;
 
       this.homeLink = new qx.ui.basic.Atom().set({
@@ -259,38 +272,32 @@ qx.Class.define("gazebo.fly.Contribution",
 
       this.highlightMenu();
 
-      if (!this.statusOpen) {
-        this.statusOpen = true;
-
-        inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
-          {
-            title: ' ',
-            top: 0,
-            left: '0',
-            width: '100%',
-            textColor: '#ffffff',
-            backgroundColor: '#333333',
-            customElements: this.statusWidgets,
-            onMouseOver: onMouseOver,
-            onMouseOut: onMouseOut,
-            customElementPadding: [8, 12, 10, 12],
-            customElementMargin: [0, 4, 0, 4]
-          },
-          {
-            /* Make permanent.
-            // TODO Remove on log-out
-            onTransitionCloseScreen: {
-              call: inquirer.disposeStatusDisplay,
-              context: inquirer,
-              parameters: {}
-            }
-             */
-          },
-          {
-          });
-      }
-
-      this.generateStockListUI(inquirer);
+      inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
+        {
+          title: ' ',
+          top: 0,
+          left: '0',
+          width: '100%',
+          textColor: '#ffffff',
+          backgroundColor: '#333333',
+          customElements: this.statusWidgets,
+          onMouseOver: onMouseOver,
+          onMouseOut: onMouseOut,
+          customElementPadding: [8, 12, 10, 12],
+          customElementMargin: [0, 4, 0, 4]
+        },
+        {
+          /* Make permanent.
+          // TODO Remove on log-out
+          onTransitionCloseScreen: {
+            call: inquirer.disposeStatusDisplay,
+            context: inquirer,
+            parameters: {}
+          }
+           */
+        },
+        {
+        });
     },
 
     generateGenotypeInputUI : function(inquirer, stockData) {
@@ -1410,14 +1417,18 @@ qx.Class.define("gazebo.fly.Contribution",
           label.plainModel = displayText;
         }
 
-        label.setDraggable(true);
-        label.addListener("dragstart",
+        var dndHandle = new qx.ui.basic.Label('X');
+
+        dndHandle.setDraggable(true);
+        dndHandle.addListener("dragstart",
           function(e) {
             e.addType('genomic feature');
             e.addAction('move');
             e.addData('genomic feature', container);
           }
         );
+
+        container.add(dndHandle);
 
         label.setToolTipText(userInput);
 
