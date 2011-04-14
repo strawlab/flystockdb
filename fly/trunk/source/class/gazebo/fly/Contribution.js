@@ -198,6 +198,7 @@ qx.Class.define("gazebo.fly.Contribution",
       this.homeLink.addListener('click', function(mouseEvent) {
         that.generateDashboardUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
+        that.selectedScreen = that.homeLink;
       }, this);
 
       this.searchLink = new qx.ui.basic.Atom().set({
@@ -208,6 +209,7 @@ qx.Class.define("gazebo.fly.Contribution",
       this.searchLink.addListener('click', function(mouseEvent) {
         that.generateSearchUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
+        that.selectedScreen = that.searchLink;
       }, this);
 
       this.addLink = new qx.ui.basic.Atom().set({
@@ -226,6 +228,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
         that.generateGenotypeInputUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
+        that.selectedScreen = that.addLink;
       }, this);
 
       this.administrationLink = new qx.ui.basic.Atom().set({
@@ -236,6 +239,7 @@ qx.Class.define("gazebo.fly.Contribution",
       this.administrationLink.addListener('click', function(mouseEvent) {
         that.generateAdministrationUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
+        that.selectedScreen = that.administrationLink;
       }, this);
 
       linkContainer.add(this.homeLink);
@@ -1142,7 +1146,10 @@ qx.Class.define("gazebo.fly.Contribution",
           flybaseId = parameters[5];
 
           // Put balancers on the bottom chromosome -- if entered alone.
-          if (!bottom && !treeItem.annotation && flybaseId.match("^FBba.+")) {
+          if (!bottom &&
+              this.numberOfBaskets == 10 &&
+              !treeItem.annotation &&
+              flybaseId.match("^FBba.+")) {
             bottom = true;
           }
         }
@@ -1236,7 +1243,8 @@ qx.Class.define("gazebo.fly.Contribution",
             // If not partite, then make homozygous:
             this.debug("PARTITE: " + partite);
             var chromosomeBagDuplicate = chromosomeBag.concat();
-            if (!partite) {
+            if (!partite && this.numberOfBaskets == 10) {
+              this.debug("DOUBLE IT");
               chromosomeBag = chromosomeBag.concat([ '/' ].concat(chromosomeBagDuplicate));
             }
 
@@ -1246,6 +1254,9 @@ qx.Class.define("gazebo.fly.Contribution",
               var comma = false;
 
               if (token == '/') {
+                if (this.numberOfBaskets != 10)
+                  continue;
+                
                 bottom = true;
                 position = 0;
                 continue;
