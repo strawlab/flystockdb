@@ -373,7 +373,9 @@ qx.Class.define("gazebo.Application",
     generateSearchDialog : function(parameters, listeners, overrides)
     {
       this.searchDialog = new gazebo.ui.SuggestionTextField(parameters, listeners, overrides);
-      
+
+      var genuineSearchDialog = this.searchDialog;
+
       var title = parameters['title'];
 
       var composite = parameters['composite'];
@@ -408,7 +410,7 @@ qx.Class.define("gazebo.Application",
         listener = listeners['onOpen'];
         this.addListener('openSearchDialogRelay', listener['call'], listener['context']);
       }
-      this.fireDataEvent('openSearchDialogRelay', this.searchDialog);
+      this.fireDataEvent('openSearchDialogRelay', genuineSearchDialog);
     },
 
     disposeSearchDialog : function(parameters)
