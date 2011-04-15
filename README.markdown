@@ -62,3 +62,20 @@ Finally, the web-server has to be configured and started:
     mkdir logs
     httpd -f conf/httpd.conf -d `pwd`
 
+Licences
+--------
+
+<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>
+is licenced under the [Simplified BSD-License](http://www.opensource.org/licenses/bsd-license.php).
+The full licence-text can be found in the [LICENSE](https://github.com/joejimbo/flystockdb/blob/master/LICENSE)
+file.
+
+The PNG-files in
+
+* `fly/trunk/source/resource/fly/black`
+
+are part of the [Iconic](http://somerandomdude.com/projects/iconic/) minimal set of icons by
+P.J. Onori. These icons are licenced under the
+[Attribution-ShareAlike 3.0 United States](http://creativecommons.org/licenses/by-sa/3.0/us/)
+Creative Commons License.
+

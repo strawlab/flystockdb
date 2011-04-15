@@ -16,6 +16,14 @@
 #asset(fly/transgenic.png)
 #asset(fly/transposon.png)
 
+#asset(fly/black/move_8x8.png)
+#asset(fly/gray_light/user_12x16.png)
+#asset(fly/gray_light/home_16x16.png)
+#asset(fly/gray_light/plus_16x16.png)
+#asset(fly/gray_light/eject_16x16.png)
+#asset(fly/gray_light/cog_alt_16x16.png)
+#asset(fly/gray_light/magnifying_glass_16x16)
+
 #asset(qx/icon/Oxygen/16/actions/list-add.png)
 
 ************************************************************************ */
@@ -193,29 +201,31 @@ qx.Class.define("gazebo.fly.Contribution",
       this.homeLink = new qx.ui.basic.Atom().set({
         label: 'Home',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/actions/go-home.png'
+        icon: 'fly/gray_light/home_16x16.png'
       });
       this.homeLink.addListener('click', function(mouseEvent) {
         that.generateDashboardUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
         that.selectedScreen = that.homeLink;
+        that.highlightMenu();
       }, this);
 
       this.searchLink = new qx.ui.basic.Atom().set({
         label: 'Advanced Search',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/actions/edit-find.png'
+        icon: 'fly/gray_light/magnifying_glass_16x16.png'
       });
       this.searchLink.addListener('click', function(mouseEvent) {
         that.generateSearchUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
         that.selectedScreen = that.searchLink;
+        that.highlightMenu();
       }, this);
 
       this.addLink = new qx.ui.basic.Atom().set({
         label: 'Add Fly-Stock',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/actions/list-add.png'
+        icon: 'fly/gray_light/plus_16x16.png'
       });
       this.addLink.addListener('click', function(mouseEvent) {
         this.stockInternalID = null;
@@ -229,17 +239,19 @@ qx.Class.define("gazebo.fly.Contribution",
         that.generateGenotypeInputUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
         that.selectedScreen = that.addLink;
+        that.highlightMenu();
       }, this);
 
       this.administrationLink = new qx.ui.basic.Atom().set({
         label: 'Administration',
         rich: true,
-        icon: 'qx/icon/Oxygen/16/apps/utilities-keyring.png'
+        icon: 'fly/gray_light/cog_alt_16x16.png'
       });
       this.administrationLink.addListener('click', function(mouseEvent) {
         that.generateAdministrationUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
         that.selectedScreen = that.administrationLink;
+        that.highlightMenu();
       }, this);
 
       linkContainer.add(this.homeLink);
@@ -279,6 +291,8 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateStatusDisplay, inquirer,
         {
           title: ' ',
+          userIcon: 'fly/gray_light/user_12x16.png',
+          logoutIcon: 'fly/gray_light/eject_16x16.png',
           top: 0,
           left: '0',
           width: '100%',
@@ -939,6 +953,8 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       this.searchDialog = dataEvent.getData();
 
+      this.debug('SEARCH DIALOG IS ' + this.searchDialog);
+      
       // It is important that the baskets are set-up beforehand!
       if (this.stockData) {
         var genotype = this.stockData[3];
@@ -1428,7 +1444,7 @@ qx.Class.define("gazebo.fly.Contribution",
           label.plainModel = displayText;
         }
 
-        var dndHandle = new qx.ui.basic.Label('X');
+        var dndHandle = new qx.ui.basic.Atom(null, 'fly/black/move_8x8.png');
 
         dndHandle.setDraggable(true);
         dndHandle.addListener("dragstart",
@@ -1504,8 +1520,11 @@ qx.Class.define("gazebo.fly.Contribution",
         this.globules -= 1;
         this.debug('>>> GLOBULES: ' + this.globules);
         this.genotypeBasket.addBasketItem(chromosome, container, weight);
-        
+
+        this.debug('X');
+        this.debug('----> ' + this.searchDialog);
         this.searchDialog.clear();
+        this.debug('Y');
       }
     },
 
