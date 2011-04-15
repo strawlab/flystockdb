@@ -170,6 +170,8 @@ qx.Class.define("gazebo.Application",
     {
       var title = parameters['title'];
       var customElements = parameters['customElements'];
+      var userIcon = parameters['userIcon'];
+      var logoutIcon = parameters['logoutIcon'];
       var separator;
 
       var textColor = parameters['textColor'];
@@ -195,13 +197,15 @@ qx.Class.define("gazebo.Application",
           alignY: 'middle'
         }));
       }
-      this.statusDisplayUsername = new qx.ui.basic.Label().set({
-        value: '-',
-        rich: true
+      this.statusDisplayUsername = new qx.ui.basic.Atom().set({
+        label: '-',
+        rich: true,
+        icon: userIcon
       });
-      this.statusDisplayAuthenticationLink = new qx.ui.basic.Label().set({
-        value: '<u>Logout</u>',
-        rich: true
+      this.statusDisplayAuthenticationLink = new qx.ui.basic.Atom().set({
+        label: 'Logout',
+        rich: true,
+        icon: logoutIcon
       });
 
       that = this;
@@ -270,7 +274,7 @@ qx.Class.define("gazebo.Application",
       var status = dataEvent.getData();
 
       if (status && status['logged_in']) {
-        this.statusDisplayUsername.setValue(status['username']);
+        this.statusDisplayUsername.setLabel(status['username']);
       } else {
         qx.lang.Array.removeAll(this.openingScreens);
         this.contributionInstance.generateLoginUI(this);
