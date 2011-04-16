@@ -73,6 +73,7 @@ file.
 The PNG-files in
 
 * `fly/trunk/source/resource/fly/black`
+* `fly/trunk/source/resource/fly/gray_light`
 
 are part of the [Iconic](http://somerandomdude.com/projects/iconic/) minimal set of icons by
 P.J. Onori. These icons are licenced under the

@@ -132,6 +132,10 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateConnectionDialog, inquirer,
         {
           title: 'Sneak Peek Preview: For Invitees',
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
           passwordRequired: true,
           logo: presentationContainer
         },
