@@ -343,14 +343,21 @@ qx.Class.define("gazebo.Application",
 			this.connectionDialog = new gazebo.ui.ConnectionDialog(parameters, listeners, overrides);
 			this.connectionDialog.addListener("connect", this.establishConnection, this);
 
-      if (logo) {
-        var container = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
+      var container = new qx.ui.container.Composite(new qx.ui.layout.HBox(0).set({
+        alignX: 'center'
+      }));
+      var innerContainer = new qx.ui.container.Composite(new qx.ui.layout.VBox(0).set({
+        alignY: 'middle'
+      }));
 
-        container.add(logo);
-        container.add(this.connectionDialog);
+      if (logo)
+        innerContainer.add(logo);
 
-        this.connectionDialog = container;
-      }
+      this.connectionDialog.setMarginLeft(16);
+
+      innerContainer.add(this.connectionDialog);
+      container.add(innerContainer);
+      this.connectionDialog = container;
 
       this.getRoot().add(this.connectionDialog, this.getLayoutOptions(parameters));
 		},
