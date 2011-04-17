@@ -22,7 +22,10 @@
 #asset(fly/gray_light/plus_16x16.png)
 #asset(fly/gray_light/eject_16x16.png)
 #asset(fly/gray_light/cog_alt_16x16.png)
-#asset(fly/gray_light/magnifying_glass_16x16)
+#asset(fly/gray_light/magnifying_glass_16x16.png)
+
+#asset(fly/blue/plus_16x16.png)
+#asset(fly/blue/magnifying_glass_16x16.png)
 
 #asset(qx/icon/Oxygen/16/actions/list-add.png)
 
@@ -174,7 +177,7 @@ qx.Class.define("gazebo.fly.Contribution",
           textFieldMinimalWidth: 250,
           stripWhitespace: true,
           searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/dialog-ok.png',
+          searchButtonIcon: 'fly/blue/magnifying_glass_16x16.png',
           disableSuggestions: true,
           database: gazebo.fly.Contribution.FLYBASE_DB
         },
@@ -344,7 +347,7 @@ qx.Class.define("gazebo.fly.Contribution",
             stripWhitespace: true,
             keepHistory: true,
             searchButtonTitle: '',
-            searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
+            searchButtonIcon: 'fly/blue/plus_16x16.png',
             database: gazebo.fly.Contribution.FLYBASE_DB
           },
           listeners0: {
@@ -395,15 +398,15 @@ qx.Class.define("gazebo.fly.Contribution",
                         '3, bottom',
                         '4, bottom'
                        ],
-              decorations: [ 'group-dark',
+              decorations: [ 'group',
                         'group',
-                        'group-dark',
                         'group',
-                        'group-dark',
                         'group',
-                        'group-dark',
                         'group',
-                        'group-dark',
+                        'group',
+                        'group',
+                        'group',
+                        'group',
                         'group'
                        ]
             },
@@ -506,12 +509,12 @@ qx.Class.define("gazebo.fly.Contribution",
                     'Y',
                     'U'
                    ],
-          decorations: [ 'group-dark',
+          decorations: [ 'group',
                     'group',
-                    'group-dark',
                     'group',
-                    'group-dark',
-                    'group-blue'
+                    'group',
+                    'group',
+                    'group'
                    ],
           hideProceedButton: true
         },
@@ -543,7 +546,7 @@ qx.Class.define("gazebo.fly.Contribution",
           top: 55,
           stripWhitespace: true,
           searchButtonTitle: '',
-          searchButtonIcon: 'qx/icon/Oxygen/16/actions/list-add.png',
+          searchButtonIcon: 'fly/blue/plus_16x16.png',
           database: gazebo.fly.Contribution.FLYBASE_DB
         },
         {
