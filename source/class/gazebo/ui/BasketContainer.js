@@ -48,7 +48,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     this.basketComposite = new qx.ui.container.Composite();
 
-    this.basketComposite.setLayout(new qx.ui.layout.Flow(5, 5));
+    this.basketComposite.setLayout(new qx.ui.layout.Flow(5, 0));
     this.basketComposite.setAllowStretchX(false, false);
     this.basketComposite.setWidth(width);
 
@@ -56,7 +56,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
     if (populate) {
       for (var i = 0; i < populate; i++) {
-        var basketTitle = titles && titles.length > i ? titles[i] : null;
+        var basketTitle = titles && titles.length > 0 ? titles[i] : null;
 
         var decoration = null;
         if (decorations && i < decorations.length) {
@@ -199,11 +199,43 @@ qx.Class.define("gazebo.ui.BasketContainer",
     {
       var itemContainer = new qx.ui.groupbox.GroupBox();
 
+      if (title == null || title.length == 0)
+        itemContainer = new gazebo.ui.FauxGroupBox();
+
       if (decoration) {
         itemContainer.getChildrenContainer().setDecorator(decoration);
       }
-      
-      if (title) {
+
+      // TODO Bloody hack.. damn it!
+      if (!this.basketNo)
+        this.basketNo = 1;
+      switch(this.basketNo) {
+      case 1:
+      case 7:
+        itemContainer.getChildrenContainer().setBackgroundColor('#ffffbb');
+        break;
+      case 2:
+      case 8:
+        itemContainer.getChildrenContainer().setBackgroundColor('#ddffbb');
+        break;
+      case 3:
+      case 9:
+        itemContainer.getChildrenContainer().setBackgroundColor('#bbffbb');
+        break;
+      case 4:
+      case 10:
+        itemContainer.getChildrenContainer().setBackgroundColor('#bbffdd');
+        break;
+      case 5:
+        itemContainer.getChildrenContainer().setBackgroundColor('#bbffff');
+        break;
+      case 6:
+        itemContainer.getChildrenContainer().setBackgroundColor('#bbddff');
+        break;
+      }
+      this.basketNo++;
+
+      if (title && title.length > 0) {
         itemContainer.setLegend(title);
       }
 
@@ -221,7 +253,6 @@ qx.Class.define("gazebo.ui.BasketContainer",
           function(e) {
             var item = e.getData(that.dragAndDropFlavour);
 
-            //itemContainer.setDecorator(null);
             itemContainer.setBackgroundColor(null);
 
             var originalContents = itemContainer.theOriginalContents;
@@ -241,7 +272,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
               that.removeBasketItem(location, item.getLayoutParent());
 
               if (itemContainer.myDropHint) {
-                itemContainer.myPreviewItem.getChildren()[0].setDecorator('button-box');
+                itemContainer.myPreviewItem.getChildren()[0].setDecorator('drop-box');
                 that.addBasketItemBefore(thisBasket, item, itemContainer.myDropHint);
               } else {
                 that.addBasketItem(thisBasket, item, null);
@@ -264,10 +295,9 @@ qx.Class.define("gazebo.ui.BasketContainer",
 
               for (i = 0; i < contents.length + 1; i++) {
                 var separatorItem = new qx.ui.menu.Separator();
-                separatorItem.setDecorator('separator-vertical');
                 separatorItem.setHeight(1);
                 separatorItem.setAllowStretchX(true, true);
-                separatorItem.setDecorator('button-box');
+                separatorItem.setDecorator('drop-box');
 
                 separatorItem.setPadding(1, 0, 1, 0);
                 separatorItem.setMargin(0, 0, 0, 0);
@@ -289,14 +319,14 @@ qx.Class.define("gazebo.ui.BasketContainer",
                         break;
                       }
                     }
-                    this.getChildren()[0].setDecorator('button-box-hovered');
+                    this.getChildren()[0].setDecorator('drop-box-hovered');
                   },
                   previewItem
                 );
                 previewItem.addListener("mouseout",
                   function(e) {
                     thisItemContainer.myDropHint = null;
-                    this.getChildren()[0].setDecorator('button-box');
+                    this.getChildren()[0].setDecorator('drop-box');
                   },
                   previewItem
                 );

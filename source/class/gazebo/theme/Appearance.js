@@ -58,6 +58,37 @@ qx.Theme.define("gazebo.theme.Appearance",
           marginRight : 12
         };
       }
+    },
+
+
+    "fauxgroupbox" : {},
+
+    "fauxgroupbox/legend" :
+    {
+      alias : "atom",
+
+      style : function(states)
+      {
+        return {
+          textColor : states.invalid ? "invalid" : undefined,
+          padding : 0,
+          margin : 0,
+          font: "bold"
+        };
+      }
+    },
+
+    "fauxgroupbox/frame" :
+    {
+      style : function(states)
+      {
+        return {
+          backgroundColor : "background",
+          padding : [6, 9],
+          margin: [2, 2, 2, 2],
+          decorator  : "white-box"
+        };
+      }
     }
 
   }

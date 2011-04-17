@@ -71,12 +71,27 @@ qx.Theme.define("gazebo.theme.Decoration",
       }
     },
 
-    "group" :
+    "groupX" :
     {
       decorator : qx.ui.decoration.Grid,
 
       style : {
         baseImage : "gazebo/decoration/groupbox/groupbox.png"
+      }
+    },
+
+    "group" :
+    {
+      decorator : [
+        qx.ui.decoration.MSingleBorder,
+        qx.ui.decoration.MBackgroundColor
+      ],
+
+      style :
+      {
+        width : 1,
+        color : "button-border",
+        backgroundColor : "button-border"
       }
     },
 
@@ -97,7 +112,65 @@ qx.Theme.define("gazebo.theme.Decoration",
         baseImage : "gazebo/decoration/groupbox/groupbox-blue.png"
       }
     },
-/* Was used with "Modern" theme, now obsolete? */
+
+    "button-box" :
+    {
+      decorator : [
+        //qx.ui.decoration.MLinearBackgroundGradient,
+        qx.ui.decoration.MBorderRadius,
+        qx.ui.decoration.MSingleBorder,
+        qx.ui.decoration.MBackgroundColor
+      ],
+
+      style :
+      {
+        radius : 15,
+        width : 3,
+        color : "button-border",
+        backgroundColor : "#eeeeee"
+      }
+    },
+
+    "button-box-pressed" :
+    {
+      include: "button-box",
+
+      style :
+      {
+        radius : 0,
+        width : 3,
+        color : "button-border"
+      }
+    },
+
+    "drop-box" :
+    {
+      decorator : [
+        qx.ui.decoration.MSingleBorder,
+        qx.ui.decoration.MBackgroundColor
+      ],
+
+      style :
+      {
+        //radius : 1,
+        width : 1,
+        color : "button-border",
+        backgroundColor : "#eeeeee"
+      }
+    },
+
+    "drop-box-hovered" :
+    {
+      include: "drop-box",
+
+      style :
+      {
+        color : "button-border-hovered",
+        backgroundColor : "button-border-hovered"
+      }
+    },
+
+    /* Below: were used with "Modern" theme, now obsolete? */
     "scrollbar-slider-horizontal" :
     {
       decorator : qx.ui.decoration.Beveled,
