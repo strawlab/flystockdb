@@ -29,6 +29,13 @@ qx.Theme.define("gazebo.theme.Font",
         (qx.bom.client.System.WINVISTA || qx.bom.client.System.WIN7) ?
         [ "Verdana" ] :
         [ "Geneva", "Verdana", "Arial", "sans-serif" ]
+    },
+
+    "italic" :
+    {
+      size : 13,
+      family : ["arial", "sans-serif"],
+      italic : true
     }
   }
 });

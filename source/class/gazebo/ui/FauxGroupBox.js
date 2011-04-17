@@ -12,16 +12,8 @@ qx.Class.define("gazebo.ui.FauxGroupBox",
 {
   extend : qx.ui.groupbox.GroupBox,
 
-
-
-  /*
-  *****************************************************************************
-     PROPERTIES
-  *****************************************************************************
-  */
   properties :
   {
-    // overridden
     appearance :
     {
       refine : true,
@@ -29,9 +21,6 @@ qx.Class.define("gazebo.ui.FauxGroupBox",
     },
 
 
-    /**
-     * Property for setting the position of the legend.
-     */
     legendPosition :
     {
       check     : ["top", "middle"],

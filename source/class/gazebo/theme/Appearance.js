@@ -60,6 +60,20 @@ qx.Theme.define("gazebo.theme.Appearance",
       }
     },
 
+    "selectbox-empty" : "selectbox",
+    "selectbox-empty/atom" :
+    {
+      style : function(states)
+      {
+        return {
+          textColor : 'text-gray',
+          font: 'italic'
+        };
+      }
+    },
+    "selectbox-empty/popup" : "selectbox/popup",
+    "selectbox-empty/list" : "selectbox/list",
+    "selectbox-empty/arrow" : "selectbox/arrow",
 
     "fauxgroupbox" : {},
 

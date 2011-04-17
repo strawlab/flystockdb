@@ -32,6 +32,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.disableSuggestions = parameters['disableSuggestions'];
     this.database = parameters['database'];
 
+    var containerRight = parameters['containerRight'];
+
     this.rpcRunning = null;
     this.openAll = false;
 
@@ -40,31 +42,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.layout = layout;
 
     if (parameters['keepHistory']) {
-      this.makeHistoryTree();
+      this.makeHistory();
 
       // Set fixed height or widget will jump when decorator is added/removed.
+      /*
       this.showHistoryAtom = new qx.ui.basic.Atom('Show History', 'qx/decoration/Modern/arrows/right.png').set({
         appearance: 'annotation',
         height: 20
       });
-
-      this.showHistoryAtom.addListener('mouseover', function(mouseEvent) {
-        this.setDecorator('button-hovered');
-      }, this.showHistoryAtom);
-
-      this.showHistoryAtom.addListener('mouseout', function(mouseEvent) {
-        this.setDecorator(null);
-      }, this.showHistoryAtom);
-
-      this.showHistoryAtom.addListener('click', function(mouseEvent) {
-        this.showHistoryAtom.setDecorator(null);
-        this.remove(this.showHistoryAtom);
-
-        this.add(this.historyTree, { row: 1, column: 0 });
-        this.historyTree.focus();
-      }, this);
-
-      this.add(this.showHistoryAtom, { row: 1, column: 0 });
+       */
+      this.add(this.historySelectBox, { row: 1, column: 0 });
     }
 
     this.textField = new qx.ui.form.TextField();
@@ -90,21 +77,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           }
           this.suggestionTree.focus();
           this.suggestionTree.activate();
-          if (this.history && this.indexOf(this.showHistoryAtom) >= 0) {
-            this.remove(this.showHistoryAtom);
-          }
           this.suggestionTree.show();
         } else if (keyEvent.getKeyIdentifier() == 'Escape') {
           this.suggestionTree.hide();
-          if (this.history) {
-            this.add(this.showHistoryAtom, { row: 1, column: 0 });
-          }
         } else if (keyEvent.getKeyIdentifier() == 'Enter') {
           var input = this.textField.getValue();
+          this.addHistoryItem(input);
           this.searchForItem(input);
-          if (this.history) {
-            this.addHistoryItem(input);
-          }
         }
     }, this);
 
@@ -115,10 +94,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
     this.searchButton.addListener('execute', function() {
       var input = this.textField.getValue();
+      this.addHistoryItem(input);
       this.searchForItem(input);
-      if (this.history) {
-        this.addHistoryItem(input);
-      }
     }, this);
 
     layout.setRowAlign(0, "center", "middle");
@@ -141,6 +118,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
     this.add(helpAtom, { row: 0, column: 1 });
     this.add(this.searchButton, { row: 0, column: 3 });
+
+    if (parameters['container0']) {
+      var containerX = parameters['container0'];
+      var positionX = parameters['position0'];
+
+      this.add(containerX, positionX);
+    }
 
     // Install custom listeners:
     var listener;
@@ -167,16 +151,21 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
   {
     addHistoryItem : function(inputText)
     {
-      var currentHistory = this.history.getChildren();
+      if (this.historySelectBox.indexOf(this.emptyHistoryItem) != -1) {
+        this.historySelectBox.remove(this.emptyHistoryItem);
+        this.historySelectBox.setAppearance('selectbox');
+      }
+
+      var currentHistory = this.historySelectBox.getSelectables();
 
       // If an item exists in the history already, do not record it again.
       for (var i = 0; i < currentHistory.length; i++) {
-        if (currentHistory[i].model_workaround == inputText) {
+        if (currentHistory[i].getLabel() == inputText) {
           return;
         }
       }
 
-      var historyItem = new qx.ui.tree.TreeFile(inputText);
+      var historyItem = new qx.ui.form.ListItem(inputText);
       // Leaves a gap at the beginning of the layout. Looks unpleasant.
       //historyItem.addWidget(new qx.ui.basic.Atom(null, 'qx/decoration/Modern/menu/radiobutton-invert.gif'));
       //historyItem.addWidget(
@@ -185,13 +174,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       //  ).set({ appearance: "annotation", rich: true })
       //);
 
-      historyItem.model_workaround = inputText;
-
-      this.history.addAtBegin(historyItem);
+      this.historySelectBox.add(historyItem);
     },
 
     getHistory : function()
     {
+      if (this.historySelectBox.indexOf(this.emptyHistoryItem) != -1)
+        return [];
+
+      return this.historySelectBox.getSelectables();
+      /*
       var history = this.history.getChildren();
       var historyArray = new Array();
 
@@ -200,19 +192,24 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
 
       return historyArray;
+      */
     },
 
-    // A history tree is only created once and then filled with elements
+    // A history is only created once and then filled with elements
     // as we go along..
-    makeHistoryTree : function()
+    makeHistory : function()
     {
-      this.historyTree = new qx.ui.tree.Tree();
-      this.historyTree.setHideRoot(true);
+      this.historySelectBox = new qx.ui.form.SelectBox().set({
+        appearance: 'selectbox-empty'
+      });
+      
+      this.emptyHistoryItem = new qx.ui.form.ListItem().set({
+        rich: true,
+        label: '<i>empty history</i>'
+      });
 
-      this.history = new qx.ui.tree.TreeFolder("Root");
-      this.history.setOpen(true);
-      this.historyTree.setRoot(this.history);
-
+      this.historySelectBox.add(this.emptyHistoryItem);
+      /*
       this.historyTree.addListener('dblclick', function() {
         var selection = this.historyTree.getSelection();
 
@@ -238,6 +235,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           this.remove(this.historyTree);
         }
       }, this);
+ */
     },
 
     makeSuggestionTree : function() {
@@ -261,10 +259,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       this.suggestionTreePopup.setSelection = function(a) {
         return that.suggestionTree.setSelection(a);
       };
-
-      if (this.history && this.indexOf(this.showHistoryAtom) >= 0) {
-        this.add(this.showHistoryAtom, { row: 1, column: 0 });
-      }
 
       // Fading in works in principle, but shows some nasty flickering
       // when reappearing after being hidden. Disable for now to make
@@ -334,7 +328,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       if (selection && selection.length == 1) {
         var input = selection[0].getLabel();
         this.searchForItem(input);
-        if (this.history) {
+        if (this.historySelectBox) {
           this.addHistoryItem(input);
         }
       }
@@ -414,10 +408,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         if (this.suggestionTree) {
           this.suggestionTree.destroy();
           this.suggestionTree = null;
-        }
-
-        if (this.history) {
-          this.add(this.showHistoryAtom, { row: 1, column: 0 });
         }
 
         //this.treeRoot.removeAll();
@@ -514,10 +504,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               that.makeSuggestionTree();
             }
 
-            if (that.history && that.indexOf(that.showHistoryAtom) >= 0) {
-              that.remove(that.showHistoryAtom);
-            }
-
             that.suggestionTree.setMinHeight(303);
             that.suggestionTree.show();
             
@@ -598,10 +584,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                   childFile = that.prepareFileSuggestion(childParameters);
                   folder.add(childFile);
                 }
-              }
-
-              if (that.history) {
-                that.add(that.showHistoryAtom, { row: 1, column: 0 });
               }
 
               that.suggestionTree.show();
