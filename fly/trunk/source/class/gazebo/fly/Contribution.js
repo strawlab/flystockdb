@@ -26,6 +26,9 @@
 
 #asset(fly/blue/plus_16x16.png)
 #asset(fly/blue/magnifying_glass_16x16.png)
+#asset(fly/blue/arrow_right_16x16.png)
+
+#asset(fly/orange/x_alt_16x16.png)
 
 #asset(qx/icon/Oxygen/16/actions/list-add.png)
 
@@ -330,10 +333,26 @@ qx.Class.define("gazebo.fly.Contribution",
       this.stockData = stockData;
       this.numberOfBaskets = 10;
 
+      var buttonContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(10).set({
+        alignX: 'right'
+      }));
+
+      buttonContainer.add(new qx.ui.form.Button().set({
+        label: 'Start Over',
+        icon: 'fly/orange/x_alt_16x16.png'
+      }));
+
+      buttonContainer.add(new qx.ui.form.Button().set({
+        label: '<b>Proceed with Metadata Entry</b>',
+        icon: 'fly/blue/arrow_right_16x16.png',
+        rich: true
+      }));
+
       inquirer.openScreen(inquirer.generateTabbedInterface, inquirer,
         {
           top: 55,
-          left: inquirer.LEFT_SO_THAT_CENTERED,
+          left: 0,
+          width: '100%',
           createNewPageOn: [ 2 ],
           title: 'Add Fly-Stock',
           title0: 'Stock Entry',
@@ -348,7 +367,9 @@ qx.Class.define("gazebo.fly.Contribution",
             keepHistory: true,
             searchButtonTitle: '',
             searchButtonIcon: 'fly/blue/plus_16x16.png',
-            database: gazebo.fly.Contribution.FLYBASE_DB
+            database: gazebo.fly.Contribution.FLYBASE_DB,
+            container0: buttonContainer,
+            position0: { row: 0, column: 4, flex: true }
           },
           listeners0: {
             onOpen: { call: this.searchDialogOpenListener, context: this },
@@ -376,6 +397,7 @@ qx.Class.define("gazebo.fly.Contribution",
               populate: this.numberOfBaskets,
               draggableItems: true,
               dragAndDropFlavour: 'genomic feature',
+              hideProceedButton: true,
               titles: [ 'Chromosome X',
                         'Chromosome 2',
                         'Chromosome 3',
@@ -413,7 +435,7 @@ qx.Class.define("gazebo.fly.Contribution",
           listeners1:
             {
               onOpen: { call: this.inputBasketOpenListener, context: this },
-              onProceed: { call: this.proceedListener, context: this },
+              //onProceed: { call: this.proceedListener, context: this },
               onBasketChange: { call: this.basketChangeListener, context: this },
               onTransitionCloseScreen: {
                 call: inquirer.disposeBasket,
@@ -1501,13 +1523,13 @@ qx.Class.define("gazebo.fly.Contribution",
         }, commaSwitch);
 
         commaSwitch.addListener('mouseover', function(mouseEvent) {
-          this.setDecorator('button-hovered');
+          this.setDecorator('button-box-hovered');
         }, commaSwitch);
         commaSwitch.addListener('mousedown', function(mouseEvent) {
-          this.setDecorator('button-pressed');
+          this.setDecorator('button-box-pressed');
         }, commaSwitch);
         commaSwitch.addListener('mouseup', function(mouseEvent) {
-          this.setDecorator('button-hovered');
+          this.setDecorator('button-box-hovered');
         }, commaSwitch);
         commaSwitch.addListener('mouseout', function(mouseEvent) {
           this.setDecorator(null);
