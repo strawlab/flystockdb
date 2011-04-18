@@ -877,18 +877,34 @@ qx.Class.define("gazebo.fly.Contribution",
     },
 
     globulesDissolved : function() {
-      alert('this ' + this + ' - ' + this.bulkGenotypes + ' - ' + this.getChromosomes(10));
+      //alert('this ' + this + ' - ' + this.bulkGenotypes + ' - ' + this.getChromosomes(10));
       if (this.bulkGenotypes > 0) {
-        alert('> ' + new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)));
+        //alert('> ' + new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)));
 
         this.bulkGenotypes -= 1;
+        this.progressBar.setValue(this.bulkGenotypes);
+
+        if (this.bulkGenotypes > 0)
+          this.fireDataEvent('proceedRelay', 'eve ena', null);
       }
     },
 
     stockImportListener : function(dataEvent) {
-      var genotype = dataEvent.getData();
+      if (this.progressBar == null) {
+        this.addListener("proceedRelay", this.stockImportListener, this);
 
-      this.bulkGenotypes = 1;
+        var max = 1000;
+        this.progressBar = new qx.ui.indicator.ProgressBar(max, max);
+
+        var window = new qx.ui.window.Window().set({
+          layout: new qx.ui.layout.VBox(10)
+        });
+        window.add(this.progressBar);
+        window.open();
+
+        this.bulkGenotypes = max;
+      }
+      var genotype = dataEvent.getData();
 
       this.searchDialog.searchForItem(genotype);
     },
