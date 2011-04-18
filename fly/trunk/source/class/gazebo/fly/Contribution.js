@@ -342,11 +342,15 @@ qx.Class.define("gazebo.fly.Contribution",
         icon: 'fly/orange/x_alt_16x16.png'
       }));
 
-      buttonContainer.add(new qx.ui.form.Button().set({
+      var proceedButton = new qx.ui.form.Button().set({
         label: '<b>Proceed with Metadata Entry</b>',
         icon: 'fly/blue/arrow_right_16x16.png',
         rich: true
-      }));
+      });
+
+      proceedButton.addListener('click', this.proceedListener, this);
+
+      buttonContainer.add(proceedButton);
 
       inquirer.openScreen(inquirer.generateTabbedInterface, inquirer,
         {
@@ -369,7 +373,7 @@ qx.Class.define("gazebo.fly.Contribution",
             searchButtonIcon: 'fly/blue/plus_16x16.png',
             database: gazebo.fly.Contribution.FLYBASE_DB,
             container0: buttonContainer,
-            position0: { row: 0, column: 4, flex: true }
+            position0: { row: 0, column: 4 }
           },
           listeners0: {
             onOpen: { call: this.searchDialogOpenListener, context: this },
@@ -872,6 +876,23 @@ qx.Class.define("gazebo.fly.Contribution",
       this.inquirer.suggestScreenTransition();
     },
 
+    globulesDissolved : function() {
+      alert('this ' + this + ' - ' + this.bulkGenotypes + ' - ' + this.getChromosomes(10));
+      if (this.bulkGenotypes > 0) {
+        alert('> ' + new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)));
+
+        this.bulkGenotypes -= 1;
+      }
+    },
+
+    stockImportListener : function(dataEvent) {
+      var genotype = dataEvent.getData();
+
+      this.bulkGenotypes = 1;
+
+      this.searchDialog.searchForItem(genotype);
+    },
+
     genotypeViewerOpenListener : function(dataEvent) {
       var chromosomes = new Array();
 
@@ -1029,7 +1050,10 @@ qx.Class.define("gazebo.fly.Contribution",
         for (var y = 0; y < items.length; y++) {
           var labels = items[y].getChildren();
 
-          bag.push(labels[0]);
+          for (var z = 0; z < labels.length; z++) {
+            if (labels[z].plainModel)
+              bag.push(labels[z]);
+          }
         }
 
         if (x < 6) {
@@ -1128,6 +1152,8 @@ qx.Class.define("gazebo.fly.Contribution",
         if (this.globules) {
           this.globules -= 1;
           this.debug('!!! GLOBULES: ' + this.globules);
+          if (this.globules <= 0)
+            this.globulesDissolved();
         }
         return;
       }
@@ -1243,6 +1269,8 @@ qx.Class.define("gazebo.fly.Contribution",
               if (this.globules) {
                 this.globules -= 1;
                 this.debug(']]] GLOBULES: ' + this.globules);
+                if (this.globules <= 0)
+                  this.globulesDissolved();
               }
               return;
             }
@@ -1548,6 +1576,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
         this.globules -= 1;
         this.debug('>>> GLOBULES: ' + this.globules);
+        if (this.globules <= 0)
+          this.globulesDissolved();
         this.genotypeBasket.addBasketItem(chromosome, container, weight);
 
         this.debug('X');

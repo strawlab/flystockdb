@@ -55,14 +55,23 @@ qx.Class.define("gazebo.fly.StockImport",
     buttonContainer.add(new qx.ui.basic.Label(''));
 
     var proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
-    proceedButton.setHeight(575);
+
+    proceedButton.addListener('click', this.onProceedListener, this);
+
     buttonContainer.add(proceedButton);
 
     this.add(buttonContainer);
+
+    if (listeners['onProceed']) {
+      listener = listeners['onProceed'];
+      this.addListener("proceedRelay", listener['call'], listener['context']);
+    }
   },
 
   members:
   {
-    
+    onProceedListener : function(event) {
+      this.fireDataEvent("proceedRelay", "eve ena", null);
+    }
   }
 });
