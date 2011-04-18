@@ -32,12 +32,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.disableSuggestions = parameters['disableSuggestions'];
     this.database = parameters['database'];
 
-    var containerRight = parameters['containerRight'];
-
     this.rpcRunning = null;
     this.openAll = false;
 
-    var layout = new qx.ui.layout.Grid(5,0);
+    var layout = new qx.ui.layout.Grid(5,5);
     this.setLayout(layout);
     this.layout = layout;
 
@@ -122,6 +120,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     if (parameters['container0']) {
       var containerX = parameters['container0'];
       var positionX = parameters['position0'];
+
+      layout.setColumnFlex(positionX['column'], 1);
 
       this.add(containerX, positionX);
     }
@@ -653,6 +653,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                         // Setting the model in Qooxdoo 1.0 does not work. Bug.
                         treeItem.model_workaround = result;
                         treeItem.annotation = annotation;
+
                         that.fireDataEvent("searchRelay", [treeItem, label, true], previous_result);
                       } else {
                         that.fireDataEvent("searchRelay", [null, label, true], previous_result);
@@ -681,6 +682,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             // Setting the model in Qooxdoo 1.0 does not work. Bug.
             treeItem.model_workaround = result;
             treeItem.annotation = annotation;
+
             that.fireDataEvent("searchRelay", [treeItem, result[0][0], false]);
           }
         },
