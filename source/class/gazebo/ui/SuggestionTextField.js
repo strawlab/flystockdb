@@ -199,14 +199,18 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     // as we go along..
     makeHistory : function()
     {
-      this.historySelectBox = new qx.ui.form.SelectBox().set({
-        appearance: 'selectbox-empty'
-      });
-      
-      this.emptyHistoryItem = new qx.ui.form.ListItem().set({
-        rich: true,
-        label: '<i>empty history</i>'
-      });
+      if (this.historySelectBox) {
+        this.historySelectBox.removeAll();
+      } else {
+        this.historySelectBox = new qx.ui.form.SelectBox().set({
+          appearance: 'selectbox-empty'
+        });
+
+        this.emptyHistoryItem = new qx.ui.form.ListItem().set({
+          rich: true,
+          label: '<i>empty history</i>'
+        });
+      }
 
       this.historySelectBox.add(this.emptyHistoryItem);
       /*
