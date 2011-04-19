@@ -430,7 +430,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
       }
 
       for (var i = 0; i < contents.length; i++) {
-        this.debug("ITEM: " + i + " " + contents[i] + " - " + contents[i].itemReference);
+        //this.debug("ITEM: " + i + " " + contents[i] + " - " + contents[i].itemReference);
         items.push(contents[i].itemReference);
       }
 
