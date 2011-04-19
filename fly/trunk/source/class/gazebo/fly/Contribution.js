@@ -879,8 +879,11 @@ qx.Class.define("gazebo.fly.Contribution",
     globulesDissolved : function() {
       //alert('this ' + this + ' - ' + this.bulkGenotypes + ' - ' + this.getChromosomes(10));
       if (this.bulkGenotypes > 0) {
-        //alert('> ' + new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)));
+        this.debug('GLOBULES DISSOLVED');
+        this.debug('GENOTYPE: ' + new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)));
 
+        this.genotypeBasket.removeAllBasketItems();
+        
         this.bulkGenotypes -= 1;
         this.progressBar.setValue(this.bulkGenotypes);
 
@@ -893,7 +896,7 @@ qx.Class.define("gazebo.fly.Contribution",
       if (this.progressBar == null) {
         this.addListener("proceedRelay", this.stockImportListener, this);
 
-        var max = 1000;
+        var max = 10;
         this.progressBar = new qx.ui.indicator.ProgressBar(max, max);
 
         var window = new qx.ui.window.Window().set({
@@ -1590,16 +1593,17 @@ qx.Class.define("gazebo.fly.Contribution",
         // the 'Unknown' chromosome without any particular ordering.
         var weight = treeItem && treeItem.annotation ? treeItem.annotation[2] : null;
 
-        this.globules -= 1;
-        this.debug('>>> GLOBULES: ' + this.globules);
-        if (this.globules <= 0)
-          this.globulesDissolved();
         this.genotypeBasket.addBasketItem(chromosome, container, weight);
 
         this.debug('X');
         this.debug('----> ' + this.searchDialog);
         this.searchDialog.clear();
         this.debug('Y');
+
+        this.globules -= 1;
+        this.debug('>>> GLOBULES: ' + this.globules);
+        if (this.globules <= 0)
+          this.globulesDissolved();
       }
     },
 
