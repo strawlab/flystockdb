@@ -337,10 +337,18 @@ qx.Class.define("gazebo.fly.Contribution",
         alignX: 'right'
       }));
 
-      buttonContainer.add(new qx.ui.form.Button().set({
+      var startOverButton = new qx.ui.form.Button().set({
         label: 'Start Over',
         icon: 'fly/orange/x_alt_16x16.png'
-      }));
+      });
+
+      startOverButton.addListener('click', function(e) {
+        this.genotypeBasket.removeAllBasketItems();
+        this.searchDialog.clear();
+        this.searchDialog.makeHistory();
+      }, this);
+
+      buttonContainer.add(startOverButton);
 
       var proceedButton = new qx.ui.form.Button().set({
         label: '<b>Proceed with Metadata Entry</b>',
