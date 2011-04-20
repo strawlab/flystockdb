@@ -253,7 +253,7 @@ qx.Class.define("gazebo.fly.Contribution",
       }, this);
 
       this.administrationLink = new qx.ui.basic.Atom().set({
-        label: 'Administration',
+        label: 'Groups & Users',
         rich: true,
         icon: 'fly/gray_light/cog_alt_16x16.png'
       });
