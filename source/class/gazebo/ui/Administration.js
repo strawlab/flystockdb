@@ -27,11 +27,46 @@ qx.Class.define("gazebo.ui.Administration",
 
 		this.setLayout(new qx.ui.layout.HBox(5));
 
-    var container = new qx.ui.tabview.TabView(); // new qx.ui.container.Composite().set();
-    //container.setLayout(new qx.ui.layout.VBox(10));
+    var container = new qx.ui.tabview.TabView();
 
-    var userContainer = new qx.ui.tabview.Page('User Administration'); // new qx.ui.container.Composite();
-    userContainer.setLayout(new qx.ui.layout.HBox(20));
+    var userContainer = new qx.ui.tabview.Page('Users');
+    userContainer.setLayout(new qx.ui.layout.VBox(20));
+
+    var groupContainer = new qx.ui.tabview.Page('Groups and Subscriptions');
+    groupContainer.setLayout(new qx.ui.layout.VBox(20));
+
+    var userNonButtonContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(20));
+    var groupNonButtonContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(20));
+
+    // Control Buttons:
+
+    this.userSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
+    this.userAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
+    this.userDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
+
+    var userAddDeleteSubmitContainer = new qx.ui.container.Composite();
+    userAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10));
+
+    userAddDeleteSubmitContainer.add(this.userAddButton, { flex: 1 });
+    userAddDeleteSubmitContainer.add(this.userDeleteButton, { flex: 1 });
+    userAddDeleteSubmitContainer.add(this.userSubmitButton, { flex: 1 });
+
+    userContainer.add(userAddDeleteSubmitContainer);
+
+    this.groupSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
+    this.groupAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
+    this.groupDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
+
+    var groupAddDeleteSubmitContainer = new qx.ui.container.Composite();
+    groupAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10));
+
+    groupAddDeleteSubmitContainer.add(this.groupAddButton, { flex: 1 });
+    groupAddDeleteSubmitContainer.add(this.groupDeleteButton, { flex: 1 });
+    groupAddDeleteSubmitContainer.add(this.groupSubmitButton, { flex: 1 });
+
+    groupContainer.add(groupAddDeleteSubmitContainer);
+
+    // Lists, Textfields, Other Buttons:
 
     var userContainer1 = new qx.ui.container.Composite();
     userContainer1.setLayout(new qx.ui.layout.VBox(10));
@@ -267,23 +302,20 @@ qx.Class.define("gazebo.ui.Administration",
     }));
     userContainer3.add(this.userOverview, { flex: 1 });
 
-    userContainer.add(userContainer1);
+    userNonButtonContainer.add(userContainer1);
 
     var userSeparator1 = new qx.ui.menu.Separator();
     userSeparator1.setDecorator('separator-horizontal');
     userSeparator1.setWidth(3);
-    userContainer.add(userSeparator1);
+    userNonButtonContainer.add(userSeparator1);
 
-    userContainer.add(userContainer2);
+    userNonButtonContainer.add(userContainer2);
 
-    userContainer.add(new qx.ui.core.Spacer(3, 10));
+    userNonButtonContainer.add(new qx.ui.core.Spacer(3, 10));
 
-    userContainer.add(userContainer3);
+    userNonButtonContainer.add(userContainer3);
 
-    container.add(userContainer);
-
-    var groupContainer = new qx.ui.tabview.Page('Group Administration'); // new qx.ui.container.Composite();
-    groupContainer.setLayout(new qx.ui.layout.HBox(20));
+    userContainer.add(userNonButtonContainer);
 
     var groupContainer1 = new qx.ui.container.Composite();
     groupContainer1.setLayout(new qx.ui.layout.VBox(10));
@@ -441,20 +473,24 @@ qx.Class.define("gazebo.ui.Administration",
     }));
     groupContainer3.add(this.groupAdminAndSubscriptions, { flex: 1 });
 
-    groupContainer.add(groupContainer1);
+    groupNonButtonContainer.add(groupContainer1);
 
     var groupSeparator1 = new qx.ui.menu.Separator();
     groupSeparator1.setDecorator('separator-horizontal');
     groupSeparator1.setWidth(3);
-    groupContainer.add(groupSeparator1);
+    groupNonButtonContainer.add(groupSeparator1);
 
-    groupContainer.add(groupContainer2);
+    groupNonButtonContainer.add(groupContainer2);
 
-    groupContainer.add(new qx.ui.core.Spacer(3, 10));
+    groupNonButtonContainer.add(new qx.ui.core.Spacer(3, 10));
 
-    groupContainer.add(groupContainer3);
+    groupNonButtonContainer.add(groupContainer3);
 
+    groupContainer.add(groupNonButtonContainer);
+    
+    // Tabs:
     container.add(groupContainer);
+    container.add(userContainer);
 
     this.add(container);
 
@@ -548,43 +584,15 @@ qx.Class.define("gazebo.ui.Administration",
     this.groupContact.add(new qx.ui.form.ListItem(''));
     this.populateList(this.groupContact, 'get_userlist', 'username');
 
-    var userSeparator2 = new qx.ui.menu.Separator();
-    userSeparator2.setDecorator('separator-horizontal');
-    userSeparator2.setWidth(3);
-    userContainer.add(userSeparator2);
+    //var userSeparator2 = new qx.ui.menu.Separator();
+    //userSeparator2.setDecorator('separator-horizontal');
+    //userSeparator2.setWidth(3);
+    //userContainer.add(userSeparator2);
 
-    this.userSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
-    this.userAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
-    this.userDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
-
-    var userAddDeleteSubmitContainer = new qx.ui.container.Composite();
-    userAddDeleteSubmitContainer.setLayout(new qx.ui.layout.VBox(10));
-
-    userAddDeleteSubmitContainer.add(this.userAddButton, { flex: 1 });
-    userAddDeleteSubmitContainer.add(this.userDeleteButton, { flex: 1 });
-    userAddDeleteSubmitContainer.add(this.userSubmitButton, { flex: 1 });
-
-    userContainer.add(userAddDeleteSubmitContainer);
-    //userContainer.add(this.userSubmitButton);
-
-    var groupSeparator2 = new qx.ui.menu.Separator();
-    groupSeparator2.setDecorator('separator-horizontal');
-    groupSeparator2.setWidth(3);
-    groupContainer.add(groupSeparator2);
-
-    this.groupSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
-    this.groupAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
-    this.groupDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
-
-    var groupAddDeleteSubmitContainer = new qx.ui.container.Composite();
-    groupAddDeleteSubmitContainer.setLayout(new qx.ui.layout.VBox(10));
-
-    groupAddDeleteSubmitContainer.add(this.groupAddButton, { flex: 1 });
-    groupAddDeleteSubmitContainer.add(this.groupDeleteButton, { flex: 1 });
-    groupAddDeleteSubmitContainer.add(this.groupSubmitButton, { flex: 1 });
-
-    groupContainer.add(groupAddDeleteSubmitContainer);
-    //groupContainer.add(this.groupSubmitButton);
+    //var groupSeparator2 = new qx.ui.menu.Separator();
+    //groupSeparator2.setDecorator('separator-horizontal');
+    //groupSeparator2.setWidth(3);
+    //groupContainer.add(groupSeparator2);
 
     this.username.addListener('changeValue', this.setUserButtons, this);
     this.groupName.addListener('changeValue', this.setGroupButtons, this);
