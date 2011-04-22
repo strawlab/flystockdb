@@ -76,6 +76,7 @@ The PNG-files in
 * `fly/trunk/source/resource/fly/gray_light`
 * `fly/trunk/source/resource/fly/blue`
 * `fly/trunk/source/resource/fly/orange`
+* `fly/trunk/source/resource/fly/green`
 
 are part of the [Iconic](http://somerandomdude.com/projects/iconic/) minimal set of icons by
 P.J. Onori. These icons are licenced under the

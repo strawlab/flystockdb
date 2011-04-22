@@ -785,7 +785,7 @@ qx.Class.define("gazebo.fly.Contribution",
           top: 55,
           contents: new gazebo.fly.GenotypeViewer(
             {
-              height: 106,
+              height: 116,
               footer: gazebo.fly.Contribution.FOOTER_PREAMBLE + this.getFlyBaseNotation()
             },
             {},

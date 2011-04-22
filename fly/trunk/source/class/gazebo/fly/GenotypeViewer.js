@@ -50,8 +50,27 @@ qx.Class.define("gazebo.fly.GenotypeViewer",
 
       chromosome.setLayout(new qx.ui.layout.VBox(2).set({ alignX: "center" }));
       chromosome.setMinWidth(85);
-      if (i % 2 == 0) {
-        chromosome.getChildrenContainer().setDecorator('group-dark');
+      chromosome.getChildrenContainer().setDecorator('group');
+
+      switch(i) {
+      case 0:
+        chromosome.getChildrenContainer().setBackgroundColor('#ffffbb');
+        break;
+      case 1:
+        chromosome.getChildrenContainer().setBackgroundColor('#ddffbb');
+        break;
+      case 2:
+        chromosome.getChildrenContainer().setBackgroundColor('#bbffbb');
+        break;
+      case 3:
+        chromosome.getChildrenContainer().setBackgroundColor('#bbffdd');
+        break;
+      case 4:
+        chromosome.getChildrenContainer().setBackgroundColor('#bbffff');
+        break;
+      case 5:
+        chromosome.getChildrenContainer().setBackgroundColor('#bbddff');
+        break;
       }
 
       var topContainer = new qx.ui.container.Composite();

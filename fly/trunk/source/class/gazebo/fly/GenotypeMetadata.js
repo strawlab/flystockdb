@@ -7,6 +7,12 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+
+#asset(fly/blue/check_alt_16x16.png)
+
+************************************************************************ */
+
 /**
  * A class for editing the metadata of genotypes.
  */
@@ -265,7 +271,7 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     mainSeparator.setWidth(3);
     this.add(mainSeparator);
 
-    var submitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
+    var submitButton = new qx.ui.form.Button('Save', 'fly/blue/check_alt_16x16.png');
     this.add(submitButton);
 
     if (this.search) {
