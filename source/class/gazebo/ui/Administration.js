@@ -7,6 +7,10 @@
 
 /* ************************************************************************
 
+#asset(fly/green/plus_16x16.png)
+#asset(fly/orange/bolt_16x16.png)
+#asset(fly/blue/check_alt_16x16.png)
+
 #asset(gazebo/*)
 
 ************************************************************************ */
@@ -40,9 +44,21 @@ qx.Class.define("gazebo.ui.Administration",
 
     // Control Buttons:
 
-    this.userSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
-    this.userAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
-    this.userDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
+    this.userSubmitButton = new qx.ui.form.Button('<b>Save Changes</b>', 'fly/blue/check_alt_16x16.png').set({
+      rich: true,
+      gap: 8,
+      paddingTop: 3
+    });
+    this.userAddButton = new qx.ui.form.Button('<b>Add New User</b>', 'fly/green/plus_16x16.png').set({
+      rich: true,
+      gap: 8,
+      paddingTop: 3
+    });
+    this.userDeleteButton = new qx.ui.form.Button('<b>Delete User</b>', 'fly/orange/bolt_16x16.png').set({
+      rich: true,
+      gap: 8,
+      paddingTop: 3
+    });
 
     var userAddDeleteSubmitContainer = new qx.ui.container.Composite();
     userAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10));
@@ -53,9 +69,21 @@ qx.Class.define("gazebo.ui.Administration",
 
     userContainer.add(userAddDeleteSubmitContainer);
 
-    this.groupSubmitButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/dialog-ok.png');
-    this.groupAddButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-add.png');
-    this.groupDeleteButton = new qx.ui.form.Button(null, 'qx/icon/Oxygen/64/actions/list-remove.png');
+    this.groupSubmitButton = new qx.ui.form.Button('<b>Save Changes</b>', 'fly/blue/check_alt_16x16.png').set({
+      rich: true,
+      gap: 8,
+      paddingTop: 3
+    });
+    this.groupAddButton = new qx.ui.form.Button('<b>Add New Group</b>', 'fly/green/plus_16x16.png').set({
+      rich: true,
+      gap: 8,
+      paddingTop: 3
+    });
+    this.groupDeleteButton = new qx.ui.form.Button('<b>Delete Group</b>', 'fly/orange/bolt_16x16.png').set({
+      rich: true,
+      gap: 8,
+      paddingTop: 3
+    });
 
     var groupAddDeleteSubmitContainer = new qx.ui.container.Composite();
     groupAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10));
@@ -359,7 +387,9 @@ qx.Class.define("gazebo.ui.Administration",
       appearance: 'annotation'
     }));
     groupContainer2.add(new qx.ui.basic.Label().set({
-      value: 'Group Name',
+      value: 'Group Name' +
+        '<br /><i style="color: #ee2a24;">1. To enter a new group, start typing its name.</i>' +
+        '<br /><i style="color: #ee2a24;">2. Group names cannot be changed later on.</i>',
       rich: true,
       appearance: 'annotation'
     }));

@@ -33,8 +33,17 @@ qx.Theme.define("gazebo.theme.Font",
 
     "italic" :
     {
-      size : 13,
-      family : ["arial", "sans-serif"],
+      size : (qx.core.Environment.get("os.name") == "win" &&
+        (qx.core.Environment.get("os.version") == "7" ||
+        qx.core.Environment.get("os.version") == "vista")) ? 12 : 11,
+      lineHeight : 1.4,
+      family : qx.core.Environment.get("os.name") == "osx" ?
+        [ "Lucida Grande" ] :
+        ((qx.core.Environment.get("os.name") == "win" &&
+          (qx.core.Environment.get("os.version") == "7" ||
+          qx.core.Environment.get("os.version") == "vista"))) ?
+        [ "Segoe UI", "Candara" ] :
+        [ "Tahoma", "Liberation Sans", "Arial", "sans-serif" ],
       italic : true
     }
   }
