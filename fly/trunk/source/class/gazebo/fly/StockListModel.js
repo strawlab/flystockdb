@@ -59,7 +59,7 @@ qx.Class.define("gazebo.fly.StockListModel",
     generateQuery : function()
     {
       if (this.searchTerm) {
-        return 's.id == ? OR s.xref ~ ? OR s.genotype ~ ? OR s.description ~ ? OR s.wildtype ~ ?';
+        return 's.id = ? OR s.xref ~ ? OR s.genotype ~ ? OR s.description ~ ? OR s.wildtype ~ ?';
       }
 
       // TODO HACK
@@ -134,7 +134,6 @@ qx.Class.define("gazebo.fly.StockListModel",
           searchTerm += ')'
         }
 
-alert('Searching for: ' + searchTerm);
         return searchTerm;
       }
 
@@ -181,7 +180,7 @@ alert('Searching for: ' + searchTerm);
             var resultList = new Array();
             for (i = 0; i < result.length; i++) {
               var rowHash = {};
-              rowHash['0'] = 'qx/icon/Oxygen/16/actions/zoom-in.png';
+              rowHash['0'] = 'fly/blue/magnifying_glass_12x12.png';
               for (j = 0; j < result[i].length; j++) {
                 rowHash[j + 1 + ''] = result[i][j];
               }

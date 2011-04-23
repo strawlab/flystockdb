@@ -25,6 +25,7 @@
 #asset(fly/gray_light/magnifying_glass_16x16.png)
 
 #asset(fly/blue/plus_16x16.png)
+#asset(fly/blue/magnifying_glass_12x12.png)
 #asset(fly/blue/magnifying_glass_16x16.png)
 #asset(fly/blue/arrow_right_16x16.png)
 
@@ -1018,7 +1019,7 @@ qx.Class.define("gazebo.fly.Contribution",
         gazebo.fly.Contribution.FLYBASE_DB,
         [ '*' ],
         [ "x_stocks s" ],
-        's.id == ?',
+        's.id = ?',
         [ stockID ]
       );
     },
@@ -1031,8 +1032,13 @@ qx.Class.define("gazebo.fly.Contribution",
       this.searchDialog = dataEvent.getData();
 
       this.debug('SEARCH DIALOG IS ' + this.searchDialog);
-      
-      // It is important that the baskets are set-up beforehand!
+    },
+
+    inputBasketOpenListener : function(dataEvent)
+    {
+      this.genotypeBasket = dataEvent.getData();
+      this.showCommas = true;
+
       if (this.stockData) {
         var genotype = this.stockData[3];
 
@@ -1048,12 +1054,6 @@ qx.Class.define("gazebo.fly.Contribution",
         this.stockData = null;
         this.searchListener(new qx.event.type.Data().init([null, genotype, null]));
       }
-    },
-
-    inputBasketOpenListener : function(dataEvent)
-    {
-      this.genotypeBasket = dataEvent.getData();
-      this.showCommas = true;
     },
 
     searchBasketOpenListener : function(dataEvent)
@@ -1434,7 +1434,7 @@ qx.Class.define("gazebo.fly.Contribution",
           // Else-path: We are seeing an atom here.
 
           // Find annotations in flystockdb-notation:
-          var hint = userInput.match(/^@[^@]+@/);
+          var hint = userInput.match(/^@[^@]+@$/);
 
           this.debug('HINT: ' + hint + ' on ' + userInput);
           if (hint) {
