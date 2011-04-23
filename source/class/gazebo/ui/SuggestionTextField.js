@@ -617,7 +617,18 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
       // Remove whitespace?
       label = this.stripWhitespace ? label.replace(/^\s+|\s+$/g, "") : label;
-      
+
+      if (label.match(/^@[^@]+@$/)) {
+        var treeItem = new qx.ui.tree.TreeFile();
+        // Setting the model in Qooxdoo 1.0 does not work. Bug.
+        treeItem.model_workaround = [];
+        treeItem.annotation = annotation;
+
+        this.fireDataEvent("searchRelay", [treeItem, label, true], null);
+
+        return;
+      }
+
       var that = this;
       this.rpcRunning = rpc.callAsync(
         function(result, ex, id)
@@ -650,6 +661,12 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                   function(result, ex, id)
                   {
                     that.debug('Re-query (' + label + ') Result: ' + result);
+
+                    that.debug('ID            : ' + id);
+                    that.debug('Exception is  : ' + ex);
+                    that.debug('Result is null: ' + (result == null));
+                    that.debug('Result is zero: ' + (result == 0));
+                    that.debug('Result is []  : ' + (result == []));
 
                     if (that.rpcRunning) { // TODO ...check id....
                       if (result) {

@@ -85,14 +85,6 @@ qx.Class.define("gazebo.Application",
     // characters.
     marshallString : function(string)
     {
-      /*
-      string = string.replace(/@/g, "@@")
-      string = string.replace(/;/g, "@S")
-      string = string.replace(/\+/g, "@P")
-
-      return string;
-       */
-
       // Marshalling seems to be alright since qooxdoo 1.4 and Ruby 1.9.
       return string;
     }

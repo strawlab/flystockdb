@@ -54,6 +54,7 @@ qx.Class.define("gazebo.ui.Administration",
       gap: 8,
       paddingTop: 3
     });
+
     this.userDeleteButton = new qx.ui.form.Button('<b>Delete User</b>', 'fly/orange/bolt_16x16.png').set({
       rich: true,
       gap: 8,
@@ -61,11 +62,13 @@ qx.Class.define("gazebo.ui.Administration",
     });
 
     var userAddDeleteSubmitContainer = new qx.ui.container.Composite();
-    userAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10));
+    userAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10).set({
+      alignX: 'right'
+    }));
 
-    userAddDeleteSubmitContainer.add(this.userAddButton, { flex: 1 });
-    userAddDeleteSubmitContainer.add(this.userDeleteButton, { flex: 1 });
-    userAddDeleteSubmitContainer.add(this.userSubmitButton, { flex: 1 });
+    userAddDeleteSubmitContainer.add(this.userAddButton, { flex: 0 });
+    userAddDeleteSubmitContainer.add(this.userDeleteButton, { flex: 0 });
+    userAddDeleteSubmitContainer.add(this.userSubmitButton, { flex: 0 });
 
     userContainer.add(userAddDeleteSubmitContainer);
 
@@ -86,11 +89,13 @@ qx.Class.define("gazebo.ui.Administration",
     });
 
     var groupAddDeleteSubmitContainer = new qx.ui.container.Composite();
-    groupAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10));
+    groupAddDeleteSubmitContainer.setLayout(new qx.ui.layout.HBox(10).set({
+      alignX: 'right'
+    }));
 
-    groupAddDeleteSubmitContainer.add(this.groupAddButton, { flex: 1 });
-    groupAddDeleteSubmitContainer.add(this.groupDeleteButton, { flex: 1 });
-    groupAddDeleteSubmitContainer.add(this.groupSubmitButton, { flex: 1 });
+    groupAddDeleteSubmitContainer.add(this.groupAddButton, { flex: 0 });
+    groupAddDeleteSubmitContainer.add(this.groupDeleteButton, { flex: 0 });
+    groupAddDeleteSubmitContainer.add(this.groupSubmitButton, { flex: 0 });
 
     groupContainer.add(groupAddDeleteSubmitContainer);
 
@@ -149,7 +154,8 @@ qx.Class.define("gazebo.ui.Administration",
       appearance: 'annotation'
     }));
     userContainer2.add(new qx.ui.basic.Label().set({
-      value: 'Username',
+      value: 'Username' +
+        '<br /><i style="color: #ee2a24;">Choose wisely. You cannot change it later.</i>',
       rich: true,
       appearance: 'annotation'
     }));
@@ -387,9 +393,7 @@ qx.Class.define("gazebo.ui.Administration",
       appearance: 'annotation'
     }));
     groupContainer2.add(new qx.ui.basic.Label().set({
-      value: 'Group Name' +
-        '<br /><i style="color: #ee2a24;">1. To enter a new group, start typing its name.</i>' +
-        '<br /><i style="color: #ee2a24;">2. Group names cannot be changed later on.</i>',
+      value: 'Group Name',
       rich: true,
       appearance: 'annotation'
     }));
@@ -628,156 +632,218 @@ qx.Class.define("gazebo.ui.Administration",
     this.groupName.addListener('changeValue', this.setGroupButtons, this);
 
     this.userSubmitButton.addListener('execute',
-      function() {
-        // TODO Check validity of user input
-
-        var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(gazebo.Application.timeout);
-        rpc.setUrl(gazebo.Application.getServerURL());
-        rpc.setServiceName("gazebo.cgi");
-
-        rpc.callAsync(
-          function(result, ex, id)
-          {
-
-          },
-          'update_user',
-          {},
-          this.username.getValue(),
-          [
-            this.detailFirstName.getValue(),
-            this.detailLastName.getValue(),
-            this.detailEMail.getValue().replace("@", "@@"), // Workaround
-            this.detailDeactivated.getValue(),
-            this.userCreateUser.getValue(),
-            this.userCreateGroup.getValue(),
-            this.selectionPosition(this.userPermissions)
-          ]
-        );
-      },
+      this.updateUser,
       this
     );
 
     this.userAddButton.addListener('execute',
-      function() {
-        // TODO Check validity of user input
+      this.addUser,
+      this
+    );
 
-        var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(gazebo.Application.delayedTimeout);
-        rpc.setUrl(gazebo.Application.getServerURL());
-        rpc.setServiceName("gazebo.cgi");
-
-        var that = this;
-
-        rpc.callAsync(
-          function(result, ex, id)
-          {
-            that.populateList(that.userList, 'get_userlist', 'username');
-          },
-          'create_user',
-          {
-            generate_password: true
-            //email_to: this.detailEMail.getValue()
-          },
-          [
-            this.username.getValue(),
-            this.detailFirstName.getValue(),
-            this.detailLastName.getValue(),
-            this.detailEMail.getValue().replace("@", "@@"), // Workaround
-            this.detailDeactivated.getValue(),
-            this.userCreateUser.getValue(),
-            this.userCreateGroup.getValue(),
-            this.selectionPosition(this.userPermissions)
-          ]
-        );          
-      },
+    this.userDeleteButton.addListener('execute',
+      this.deleteUser,
       this
     );
 
     this.groupSubmitButton.addListener('execute',
-      function() {
-        // TODO Check validity of user input
-
-        var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(gazebo.Application.timeout);
-        rpc.setUrl(gazebo.Application.getServerURL());
-        rpc.setServiceName("gazebo.cgi");
-
-        rpc.callAsync(
-          function(result, ex, id)
-          {
-
-          },
-          'update_group',
-          {},
-          this.groupName.getValue(),
-          [
-            this.groupContact.getSelection()[0].getLabel(), // TODO Always there?
-            this.groupDescription.getValue(),
-            this.selectionPosition(this.groupContribute),
-            this.selectionPosition(this.groupVisible),
-            this.selectionPosition(this.groupEditDelete)
-          ]
-        );
-
-        var assignments = []
-        var list = this.groupAASRoot.getChildren();
-
-        // Skip header.. so, start with 1!
-        for (var i = 1; i < list.length; i++) {
-          assignments.push(list[i].model_workaround_call());
-        }
-
-        rpc.callAsync(
-          function(result, ex, id)
-          {
-
-          },
-          'update_subscriptions',
-          {},
-          this.groupName.getValue(),
-          assignments
-        );
-      },
+      this.updateGroup,
       this
     );
 
     this.groupAddButton.addListener('execute',
-      function() {
-        // TODO Check validity of user input
-
-        var rpc = new qx.io.remote.Rpc();
-        rpc.setTimeout(gazebo.Application.delayedTimeout);
-        rpc.setUrl(gazebo.Application.getServerURL());
-        rpc.setServiceName("gazebo.cgi");
-
-        var that = this;
-
-        rpc.callAsync(
-          function(result, ex, id)
-          {
-            that.populateList(that.groupList, 'get_grouplist', 'name');
-          },
-          'create_group',
-          {
-          },
-          [
-            this.groupName.getValue(),
-            this.groupContact.getSelection()[0].getLabel(), // TODO Always there?
-            this.groupDescription.getValue(),
-            this.selectionPosition(this.groupContribute),
-            this.selectionPosition(this.groupVisible),
-            this.selectionPosition(this.groupEditDelete)
-          ]
-        );
-      },
+      this.addGroup,
       this
     );
 
+    this.groupDeleteButton.addListener('execute',
+      this.deleteGroup,
+      this
+    );
   },
 
   members :
   {
+    addUser : function() {
+      // TODO Check validity of user input
+
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.delayedTimeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          that.populateList(that.userList, 'get_userlist', 'username');
+        },
+        'create_user',
+        {
+          generate_password: true
+          //email_to: this.detailEMail.getValue()
+        },
+        [
+          this.username.getValue(),
+          this.detailFirstName.getValue(),
+          this.detailLastName.getValue(),
+          this.detailEMail.getValue(),
+          this.detailDeactivated.getValue(),
+          this.userCreateUser.getValue(),
+          this.userCreateGroup.getValue(),
+          this.selectionPosition(this.userPermissions)
+        ]
+      );
+    },
+
+    deleteUser : function() {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.timeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+
+        },
+        'delete_user',
+        {},
+        this.username.getValue(),
+        [
+          '',       // first name
+          '',       // last name
+          '',       // email
+          true,     // deactivated
+          false,    // create user
+          false,    // create group
+          0         // permission
+        ]
+      );
+    },
+
+    updateUser : function() {
+      // TODO Check validity of user input
+
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.timeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+
+        },
+        'update_user',
+        {},
+        this.username.getValue(),
+        [
+          this.detailFirstName.getValue(),
+          this.detailLastName.getValue(),
+          this.detailEMail.getValue(),
+          this.detailDeactivated.getValue(),
+          this.userCreateUser.getValue(),
+          this.userCreateGroup.getValue(),
+          this.selectionPosition(this.userPermissions)
+        ]
+      );
+    },
+
+    addGroup : function() {
+      // TODO Check validity of user input
+
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.delayedTimeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      var that = this;
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          that.populateList(that.groupList, 'get_grouplist', 'name');
+        },
+        'create_group',
+        {
+        },
+        [
+          this.groupName.getValue(),
+          this.groupContact.getSelection()[0].getLabel(), // TODO Always there?
+          this.groupDescription.getValue(),
+          this.selectionPosition(this.groupContribute),
+          this.selectionPosition(this.groupVisible),
+          this.selectionPosition(this.groupEditDelete)
+        ]
+      );
+    },
+
+    deleteGroup : function() {
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.timeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+          this.debug('DELETE RESULT: ' + result);
+          this.debug('DELETE EX:     ' + ex);
+        },
+        'delete_group',
+        {},
+        this.groupName.getValue(),
+        []
+      );
+    },
+
+    updateGroup : function() {
+      // TODO Check validity of user input
+
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.timeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+
+        },
+        'update_group',
+        {},
+        this.groupName.getValue(),
+        [
+          this.groupContact.getSelection()[0].getLabel(), // TODO Always there?
+          this.groupDescription.getValue(),
+          this.selectionPosition(this.groupContribute),
+          this.selectionPosition(this.groupVisible),
+          this.selectionPosition(this.groupEditDelete)
+        ]
+      );
+
+      var assignments = []
+      var list = this.groupAASRoot.getChildren();
+
+      // Skip header.. so, start with 1!
+      for (var i = 1; i < list.length; i++) {
+        assignments.push(list[i].model_workaround_call());
+      }
+
+      rpc.callAsync(
+        function(result, ex, id)
+        {
+
+        },
+        'update_subscriptions',
+        {},
+        this.groupName.getValue(),
+        assignments
+      );
+    },
+
     selectionPosition : function(selectBox)
     {
       var selectables = selectBox.getSelectables();
