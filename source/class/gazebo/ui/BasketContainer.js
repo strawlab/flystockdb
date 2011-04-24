@@ -125,42 +125,6 @@ qx.Class.define("gazebo.ui.BasketContainer",
       alignY: 'middle'
     }));
 
-    var clearAll = new qx.ui.basic.Atom(null, 'qx/icon/Oxygen/16/actions/edit-delete.png').set({
-      width: 21,
-      height: 24,
-      paddingLeft: gazebo.Application.NULL_BUTTON_DECORATOR_OFFSET
-    });
-
-    clearAll.addListener('mouseover',
-      function(mouseEvent) {
-        this.setDecorator('button-hovered');
-        this.setPaddingLeft(0);
-      },
-      clearAll
-    );
-    clearAll.addListener('mouseout',
-      function(mouseEvent) {
-        this.setDecorator(null);
-        this.setPaddingLeft(gazebo.Application.NULL_BUTTON_DECORATOR_OFFSET);
-      },
-      clearAll
-    );
-    clearAll.addListener('click',
-      function(mouseEvent) {
-        that.removeAllBasketItems();
-      },
-      clearAll
-    );
-
-    if (compact) {
-      var clearContainer = new qx.ui.container.Composite();
-      clearContainer.setLayout(new qx.ui.layout.HBox(10));
-      clearContainer.add(clearAll);
-      this.basketComposite.add(clearContainer);
-    } else {
-      footerContainer.add(clearAll);
-    }
-
     if (parameters['footer']) {
       this.footer = new qx.ui.basic.Label().set({
         value: parameters['footer'],
@@ -168,14 +132,6 @@ qx.Class.define("gazebo.ui.BasketContainer",
         rich: true,
         appearance: 'annotation'
       });
-
-      if (!compact) {
-        var separator = new qx.ui.menu.Separator();
-        separator.setDecorator('separator-horizontal');
-        separator.setWidth(3);
-        separator.setHeight(16);
-        footerContainer.add(separator);
-      }
 
       footerContainer.add(this.footer);
     }

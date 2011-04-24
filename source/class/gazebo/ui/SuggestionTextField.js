@@ -598,7 +598,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           this.database,
           [ "*" ],
           [ "x_fast_transitions" ],
-          "abstraction == ? ORDER BY concretisation ASC",
+          "abstraction = ? ORDER BY concretisation ASC",
           [ gazebo.Application.marshallString(textValue) ]
         );
       }
