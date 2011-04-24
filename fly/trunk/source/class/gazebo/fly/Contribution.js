@@ -30,6 +30,7 @@
 #asset(fly/blue/arrow_right_16x16.png)
 
 #asset(fly/orange/x_alt_16x16.png)
+#asset(fly/orange/bolt_16x16.png)
 
 #asset(qx/icon/Oxygen/16/actions/list-add.png)
 
@@ -239,6 +240,8 @@ qx.Class.define("gazebo.fly.Contribution",
         icon: 'fly/gray_light/plus_16x16.png'
       });
       this.addLink.addListener('click', function(mouseEvent) {
+        this.editingStock = false;
+
         this.stockInternalID = null;
         this.stockExternalID = null;
         this.stockSource = null;
@@ -338,21 +341,55 @@ qx.Class.define("gazebo.fly.Contribution",
         alignX: 'right'
       }));
 
-      var startOverButton = new qx.ui.form.Button().set({
-        label: 'Start Over',
-        icon: 'fly/orange/x_alt_16x16.png'
-      });
+      if (this.editingStock) {
+        var deleteButton = new qx.ui.form.Button().set({
+          label: 'Delete Stock',
+          icon: 'fly/orange/bolt_16x16.png'
+        });
 
-      startOverButton.addListener('click', function(e) {
-        this.genotypeBasket.removeAllBasketItems();
-        this.searchDialog.clear();
-        this.searchDialog.makeHistory();
-      }, this);
+        deleteButton.addListener('click', function(e) {
+          var rpc = new qx.io.remote.Rpc();
+          rpc.setTimeout(gazebo.Application.timeout);
+          rpc.setUrl(gazebo.Application.getServerURL());
+          rpc.setServiceName("gazebo.cgi");
 
-      buttonContainer.add(startOverButton);
+          rpc.callAsync(
+            function(result, ex, id)
+            {
+
+            },
+            'delete_data',
+            {},
+            stockData[0], // internal stock ID
+            [
+            ]
+          );
+        }, this);
+
+        buttonContainer.add(deleteButton);
+      } else {
+        var startOverButton = new qx.ui.form.Button().set({
+          label: 'Start Over',
+          icon: 'fly/orange/x_alt_16x16.png'
+        });
+
+        startOverButton.addListener('click', function(e) {
+          this.genotypeBasket.removeAllBasketItems();
+          this.searchDialog.clear();
+          this.searchDialog.makeHistory();
+        }, this);
+
+        buttonContainer.add(startOverButton);
+      }
+
+      var proceedButtonLabel;
+      if (this.editingStock)
+        proceedButtonLabel = '<b>Continue to Metadata</b>';
+      else
+        proceedButtonLabel = '<b>Continue with Metadata Entry</b>';
 
       var proceedButton = new qx.ui.form.Button().set({
-        label: '<b>Proceed with Metadata Entry</b>',
+        label: proceedButtonLabel,
         icon: 'fly/blue/arrow_right_16x16.png',
         rich: true
       });
@@ -997,6 +1034,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
     onStockSelectListener : function(dataEvent) {
       var stockID = dataEvent.getData();
+
+      this.editingStock = true;
 
       //alert('ID: ' + stockID);
 

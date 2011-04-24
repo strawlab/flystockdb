@@ -81,6 +81,18 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
     var idContainer8 = new qx.ui.container.Composite();
     idContainer8.setLayout(new qx.ui.layout.VBox(10));
 
+    var buttonText;
+    if (this.search) {
+      buttonText = 'Search';
+    } else {
+      buttonText = 'Save';
+    }
+    var submitButton = new qx.ui.form.Button(buttonText, 'fly/blue/check_alt_16x16.png').set({
+      allowStretchX: false,
+      alignX: 'right'
+    });
+    this.container.add(submitButton);
+
     idContainer1.add(new qx.ui.basic.Label().set({
       value: 'Internal Stock-ID',
       rich: true,
@@ -266,13 +278,10 @@ qx.Class.define("gazebo.fly.GenotypeMetadata",
 
     this.add(this.container);
 
-    var mainSeparator = new qx.ui.menu.Separator();
-    mainSeparator.setDecorator('separator-horizontal');
-    mainSeparator.setWidth(3);
-    this.add(mainSeparator);
-
-    var submitButton = new qx.ui.form.Button('Save', 'fly/blue/check_alt_16x16.png');
-    this.add(submitButton);
+    // var mainSeparator = new qx.ui.menu.Separator();
+    // mainSeparator.setDecorator('separator-horizontal');
+    // mainSeparator.setWidth(3);
+    // this.add(mainSeparator);
 
     if (this.search) {
       this.updateContacts();
