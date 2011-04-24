@@ -1,0 +1,34 @@
+{
+  "info" : 
+  {
+    "name" : "Gazebo",
+
+    "summary" : "A web-interface for everyone.",
+    "description" : "",
+    
+    "homepage" : "http://github.com/joejimbo/Gazebo",
+
+    "license" : "Simplified BSD license (a.k.a. 2-clause BSD license)",
+    "authors" : 
+    [
+      {
+        "name" : "Joachim Baran",
+        "email" : "joachim.baran@DELETETHIS.gmail.com"
+      }
+    ],
+
+    "version" : "master",
+    "qooxdoo-versions": ["1.0"]
+  },
+  
+  "provides" : 
+  {
+    "namespace"   : "gazebo",
+    "encoding"    : "utf-8",
+    "class"       : "source/class",
+    "resource"    : "source/resource",
+    "translation" : "source/translation",
+    "type"        : "application"
+  }
+}
+

@@ -1,0 +1,89 @@
+{
+  "name"    : "Gazebo",
+
+  "include" :
+  [
+    {
+      "path" : "${QOOXDOO_PATH}/tool/data/config/application.json"
+    }
+  ],
+
+  "export" :
+  [
+    "api",
+    "build",
+    "clean",
+    "distclean",
+    "fix",
+    "info",
+    "inspector",
+    "lint",
+    "migration",
+    "pretty",
+    "profiling",
+    "source",
+    "source-all",
+    "test",
+    "test-source",
+    "translation"
+  ],
+
+  "let" :
+  {
+    "APPLICATION"  : "gazebo",
+    "QOOXDOO_PATH" : "../support/qooxdoo",
+    "QXTHEME"      : "gazebo.theme.Theme",
+    "API_EXCLUDE"  : ["qx.test.*", "${APPLICATION}.theme.*", "${APPLICATION}.test.*"],
+    "LOCALES"      : [ "en" ],
+    "CACHE"        : "${TMPDIR}/cache",
+    "ROOT"         : "."
+  },
+
+  "jobs" :
+  {
+    /*
+    "libraries" :
+    {
+      "library" :
+      [
+        {
+          // Manifest file of the main contribution to the Gazebo framework.
+          // For example:
+          // "manifest" : "../../Fly/fly/trunk/Manifest.json"
+        }
+      ]
+    },
+     */
+
+    "build-script" :
+    {
+      "settings" :
+      {
+        // Introduces the name of the main contribution class to the
+        // Gazebo framework. This class needs to implement gazebo.IDelegator.
+        "gazebo.contributions" : [ "gazebo.interface.Administration" ],
+        // For example:
+        // "gazebo.contributions" : [ "gazebo.fly.Contribution" ],
+
+        // Address of the web-server.
+	"gazebo.server.protocol" : [ "http" ],
+        "gazebo.server.hostname" : [ "localhost" ],
+        "gazebo.server.port" : [ 8080 ],
+	"gazebo.server.interface" : [ "fcgi" ],
+
+        // Overwrite the default hostname and port for the database.
+        "gazebo.database.hostname" : [ "localhost" ],
+        "gazebo.database.port" : [ 5432 ]
+      },
+      "require" :
+      {
+        // Introduces the name of the main contribution class to the
+        // Qooxdoo framework. Qooxdoo's building process needs to know
+        // that this class should be included in the deployed code.
+        "gazebo.Application" : [ "gazebo.interface.Administration" ]
+        // For example:
+        // "gazebo.Application" : [ "gazebo.fly.Contribution" ]
+      }
+    }
+  }
+}
