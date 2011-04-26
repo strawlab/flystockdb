@@ -1,5 +1,5 @@
 {
-  "name"    : "Gazebo",
+  "name"    : "gazebo",
 
   "include" :
   [
@@ -31,7 +31,7 @@
   "let" :
   {
     "APPLICATION"  : "gazebo",
-    "QOOXDOO_PATH" : "../support/qooxdoo",
+    "QOOXDOO_PATH" : "./support/qooxdoo",
     "QXTHEME"      : "gazebo.theme.Theme",
     "API_EXCLUDE"  : ["qx.test.*", "${APPLICATION}.theme.*", "${APPLICATION}.test.*"],
     "LOCALES"      : [ "en" ],
@@ -41,29 +41,24 @@
 
   "jobs" :
   {
-    /*
     "libraries" :
     {
       "library" :
       [
         {
-          // Manifest file of the main contribution to the Gazebo framework.
-          // For example:
-          // "manifest" : "../../Fly/fly/trunk/Manifest.json"
+          // Manifest file of the main contribution to the framework.
+          "manifest" : "./fly/trunk/Manifest.json"
         }
       ]
     },
-     */
 
     "build-script" :
     {
       "settings" :
       {
         // Introduces the name of the main contribution class to the
-        // Gazebo framework. This class needs to implement gazebo.IDelegator.
-        "gazebo.contributions" : [ "gazebo.interface.Administration" ],
-        // For example:
-        // "gazebo.contributions" : [ "gazebo.fly.Contribution" ],
+        // framework. This class needs to implement gazebo.IDelegator.
+        "gazebo.contributions" : [ "gazebo.fly.Contribution" ],
 
         // Address of the web-server.
 	"gazebo.server.protocol" : [ "http" ],
@@ -78,11 +73,8 @@
       "require" :
       {
         // Introduces the name of the main contribution class to the
-        // Qooxdoo framework. Qooxdoo's building process needs to know
-        // that this class should be included in the deployed code.
-        "gazebo.Application" : [ "gazebo.interface.Administration" ]
-        // For example:
-        // "gazebo.Application" : [ "gazebo.fly.Contribution" ]
+        // framework.
+        "gazebo.Application" : [ "gazebo.fly.Contribution" ]
       }
     }
   }

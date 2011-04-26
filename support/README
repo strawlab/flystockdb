@@ -1,0 +1,14 @@
+Additionally required software packages should be put in here.
+
+qooxdoo
+-------
+
+svn checkout https://qooxdoo.svn.sourceforge.net/svnroot/qooxdoo/branches/branch_1_4_x/qooxdoo qooxdoo
+
+smtp-tls
+--------
+
+git clone http://github.com/ambethia/smtp-tls.git
+cd smtp-tls
+git checkout v1.1.2
+
