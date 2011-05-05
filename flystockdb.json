@@ -1,24 +1,24 @@
 {
   "info" : 
   {
-    "name" : "fly",
+    "name" : "flystockdb",
 
-    "summary" : "fly Contribution",
-    "description" : "This is a skeleton for a qooxdoo contribution.",
+    "summary" : "flystockdb",
+    "description" : "A Drosophila melanogaster stock-database.",
     
-    "homepage" : "http://contrib.qooxdoo.org/project/fly",
+    "homepage" : "https://github.com/joejimbo/flystockdb",
 
     "license" : "Simplified BSD License (a.k.a. 2-clause BSD License)",
     "authors" : 
     [
       {
         "name" : "Joachim Baran",
-        "email" : "joachim.baran@manchester.ac.uk"
+        "email" : "joachim.baran@gmail.com"
       }
     ],
 
-    "version" : "trunk",
-    "qooxdoo-versions": ["1.0.2"]
+    "version" : "0.9",
+    "qooxdoo-versions": ["1.4"]
   },
   
   "provides" : 

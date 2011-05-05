@@ -47,7 +47,7 @@
       [
         {
           // Manifest file of the main contribution to the framework.
-          "manifest" : "./fly/trunk/Manifest.json"
+          "manifest" : "flystockdb.json"
         }
       ]
     },
