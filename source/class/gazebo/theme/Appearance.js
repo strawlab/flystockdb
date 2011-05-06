@@ -103,6 +103,75 @@ qx.Theme.define("gazebo.theme.Appearance",
           decorator  : "white-box"
         };
       }
+    },
+
+    "trial-frame" :
+    {
+      alias : "atom",
+
+      style : function(states)
+      {
+        var decorator = "trial-box";
+
+        if (states.hovered && !states.pressed && !states.checked) {
+          decorator = "trial-box-hovered";
+        } else if (states.hovered && (states.pressed || states.checked)) {
+          decorator = "trial-box-pressed-hovered";
+        } else if (states.pressed || states.checked) {
+          decorator = "trial-box-pressed";
+        }
+
+        if (states.invalid && !states.disabled) {
+          decorator += "-invalid";
+        } else if (states.focused) {
+          decorator += "-focused";
+        }
+
+        return {
+          decorator : decorator,
+          padding : [3, 8],
+          cursor: states.disabled ? undefined : "pointer",
+          minWidth: 5,
+          minHeight: 5
+        };
+      }
+    },
+
+    "trial-frame/label" : {
+      alias : "atom/label",
+
+      style : function(states)
+      {
+        return {
+          textColor : states.disabled ? "text-disabled" : undefined
+        };
+      }
+    },
+
+    "trial" :
+    {
+      alias : "trial-frame",
+      include : "trial-frame",
+
+      style : function(states)
+      {
+        return {
+          center : true
+        };
+      }
+    },
+
+    "hover-trial" :
+    {
+      alias : "trial",
+      include : "trial",
+
+      style : function(states)
+      {
+        return {
+          decorator : states.hovered ? "trial-hover" : undefined
+        }
+      }
     }
 
   }

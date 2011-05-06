@@ -118,6 +118,11 @@ qx.Class.define("gazebo.fly.Contribution",
         rich: true,
         appearance: 'software/title'
       }));
+      logoContainer.add(new qx.ui.form.Button().set({
+        label: '<b style="color: #ffffff; font-size: 140%;">TRY IT</b>',
+        rich: true,
+        appearance: 'trial'
+      }));
       logoContainer.add(new qx.ui.core.Spacer(10,10));
 
       presentationContainer.add(new qx.ui.core.Spacer(5, 5));
@@ -128,11 +133,17 @@ qx.Class.define("gazebo.fly.Contribution",
           '<a style="color: #0099cc;">fly</a><a style="color: #009966;">stock</a><a style="color: #333333;">db</a>' +
           ' is the first <b>free</b> web-based database for<br />managing and sharing Drosophila melanogaster stocks.' +
           '<br />&nbsp;<br />' +
-          'Its source-code is available under the Simplified BSD<br />License at: <a href="https://github.com/joejimbo/flystockdb">https://github.com/joejimbo/flystockdb</a>' +
+          '<a style="color: #0099cc;">fly</a><a style="color: #009966;">stock</a><a style="color: #333333;">db</a>' +
+          ' is an open-source project released under the<br />' +
+          'Simplified BSD License at:<br />' +
+          '<div style="margin-right: 20px; float: right;"><a href="https://github.com/joejimbo/flystockdb">https://github.com/joejimbo/flystockdb</a></div>' +
+          '<br />' +
           '<br />Contributors, collaborators and competitors are welcome<br />' +
-          'to contribute, to collaborate, and to compete as they please.' +
-          '<br />&nbsp;<br /><div style="text-align: right;">Joachim<br />' +
-          '<span style="color: #777777;">joachim.baran [ <i>at</i> ] gmail.com</span></div>',
+          'to contribute, to collaborate, and to compete as they please.<sup style="font-size: 80%;">1</sup>' +
+          '<br />&nbsp;<br /><div style="text-align: right;">Joachim&nbsp;&nbsp;<br />' +
+          '<span style="color: #777777;">joachim.baran [ <i>at</i> ] gmail.com</span>&nbsp;&nbsp;</div>' +
+          '<br />' +
+          '<div style="font-size: 80%;"><sup>1</sup> GitHub: Sending pull requests, http://help.github.com/pull-requests/</div>',
         rich: true,
         appearance: 'annotation'
       }));

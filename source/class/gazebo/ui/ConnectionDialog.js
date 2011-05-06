@@ -74,7 +74,7 @@ qx.Class.define("gazebo.ui.ConnectionDialog",
     });
     this.password.setInvalidMessage("Please enter your password.");
 				
-		var connectButton = new qx.ui.form.Button("Connect");
+		var connectButton = new qx.ui.form.Button("Login");
 		connectButton.addListener("execute", function() {
 			if (form.validate()) {
 				var rpc = new qx.io.remote.Rpc();

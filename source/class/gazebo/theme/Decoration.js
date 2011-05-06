@@ -116,7 +116,6 @@ qx.Theme.define("gazebo.theme.Decoration",
     "button-box" :
     {
       decorator : [
-        //qx.ui.decoration.MLinearBackgroundGradient,
         qx.ui.decoration.MBorderRadius,
         qx.ui.decoration.MSingleBorder,
         qx.ui.decoration.MBackgroundColor
@@ -140,6 +139,53 @@ qx.Theme.define("gazebo.theme.Decoration",
         radius : 0,
         width : 3,
         color : "button-border"
+      }
+    },
+
+    "trial-box" :
+    {
+      decorator : [
+        qx.ui.decoration.MBorderRadius,
+        qx.ui.decoration.MSingleBorder,
+        qx.ui.decoration.MBackgroundColor
+      ],
+
+      style :
+      {
+        radius : 15,
+        width : 3,
+        color : "#0066aa",
+        backgroundColor : "#0099cc"
+      }
+    },
+
+    "trial-box-pressed" :
+    {
+      include : "button-box",
+
+      style :
+      {
+        backgroundColor : "button-box-bright-pressed"
+      }
+    },
+
+    "trial-box-pressed-hovered" :
+    {
+      include : "trial-box-pressed",
+
+      style :
+      {
+        color : "button-border-hovered"
+      }
+    },
+
+    "trial-box-hovered" :
+    {
+      include : "trial-box",
+
+      style :
+      {
+        color : "button-border-hovered"
       }
     },
 
