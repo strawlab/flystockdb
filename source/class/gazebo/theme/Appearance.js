@@ -172,6 +172,75 @@ qx.Theme.define("gazebo.theme.Appearance",
           decorator : states.hovered ? "trial-hover" : undefined
         }
       }
+    },
+
+    "signup-frame" :
+    {
+      alias : "atom",
+
+      style : function(states)
+      {
+        var decorator = "signup-box";
+
+        if (states.hovered && !states.pressed && !states.checked) {
+          decorator = "signup-box-hovered";
+        } else if (states.hovered && (states.pressed || states.checked)) {
+          decorator = "signup-box-pressed-hovered";
+        } else if (states.pressed || states.checked) {
+          decorator = "signup-box-pressed";
+        }
+
+        if (states.invalid && !states.disabled) {
+          decorator += "-invalid";
+        } else if (states.focused) {
+          decorator += "-focused";
+        }
+
+        return {
+          decorator : decorator,
+          padding : [3, 8],
+          cursor: states.disabled ? undefined : "pointer",
+          minWidth: 5,
+          minHeight: 5
+        };
+      }
+    },
+
+    "signup-frame/label" : {
+      alias : "atom/label",
+
+      style : function(states)
+      {
+        return {
+          textColor : states.disabled ? "text-disabled" : undefined
+        };
+      }
+    },
+
+    "signup" :
+    {
+      alias : "signup-frame",
+      include : "signup-frame",
+
+      style : function(states)
+      {
+        return {
+          center : true
+        };
+      }
+    },
+
+    "hover-signup" :
+    {
+      alias : "signup",
+      include : "signup",
+
+      style : function(states)
+      {
+        return {
+          decorator : states.hovered ? "signup-hover" : undefined
+        }
+      }
     }
 
   }

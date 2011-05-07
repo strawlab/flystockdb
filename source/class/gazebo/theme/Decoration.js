@@ -161,10 +161,13 @@ qx.Theme.define("gazebo.theme.Decoration",
 
     "trial-box-pressed" :
     {
-      include : "button-box",
+      include : "trial-box",
 
       style :
       {
+        radius : 0,
+        width : 3,
+        color : "button-border",
         backgroundColor : "button-box-bright-pressed"
       }
     },
@@ -188,6 +191,104 @@ qx.Theme.define("gazebo.theme.Decoration",
         color : "button-border-hovered"
       }
     },
+
+    "trial-box-focused" :
+    {
+      include : "trial-box",
+
+      style :
+      {
+        color : "background-selected"
+      }
+    },
+
+    "trial-box-pressed-focused" :
+    {
+      include : "trial-box-pressed",
+
+      style :
+      {
+        color : "background-selected"
+      }
+    },
+
+    "trial-box-hovered-focused" : {include: "trial-box-focused"},
+
+    "trial-box-pressed-hovered-focused" : {include: "trial-box-pressed-focused"},
+
+    "signup-box" :
+    {
+      decorator : [
+        qx.ui.decoration.MBorderRadius,
+        qx.ui.decoration.MSingleBorder,
+        qx.ui.decoration.MBackgroundColor
+      ],
+
+      style :
+      {
+        radius : 15,
+        width : 3,
+        color : "#006633",
+        backgroundColor : "#009966"
+      }
+    },
+
+    "signup-box-pressed" :
+    {
+      include : "signup-box",
+
+      style :
+      {
+        radius : 0,
+        width : 3,
+        color : "button-border",
+        backgroundColor : "button-box-bright-pressed"
+      }
+    },
+
+    "signup-box-pressed-hovered" :
+    {
+      include : "signup-box-pressed",
+
+      style :
+      {
+        color : "button-border-hovered"
+      }
+    },
+
+    "signup-box-hovered" :
+    {
+      include : "signup-box",
+
+      style :
+      {
+        color : "button-border-hovered"
+      }
+    },
+
+    "signup-box-focused" :
+    {
+      include : "signup-box",
+
+      style :
+      {
+        color : "background-selected"
+      }
+    },
+
+    "signup-box-pressed-focused" :
+    {
+      include : "signup-box-pressed",
+
+      style :
+      {
+        color : "background-selected"
+      }
+    },
+
+    "signup-box-hovered-focused" : {include: "signup-box-focused"},
+
+    "signup-box-pressed-hovered-focused" : {include: "signup-box-pressed-focused"},
 
     "drop-box" :
     {

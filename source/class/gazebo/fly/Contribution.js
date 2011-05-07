@@ -123,6 +123,11 @@ qx.Class.define("gazebo.fly.Contribution",
         rich: true,
         appearance: 'trial'
       }));
+      logoContainer.add(new qx.ui.form.Button().set({
+        label: '<b style="color: #ffffff; font-size: 140%;">SIGN UP</b>',
+        rich: true,
+        appearance: 'signup'
+      }));
       logoContainer.add(new qx.ui.core.Spacer(10,10));
 
       presentationContainer.add(new qx.ui.core.Spacer(5, 5));
