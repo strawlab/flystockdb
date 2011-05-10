@@ -182,7 +182,13 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       if (this.historySelectBox.indexOf(this.emptyHistoryItem) != -1)
         return [];
 
-      return this.historySelectBox.getSelectables();
+      var selectables = this.historySelectBox.getSelectables();
+      var history = new Array();
+
+      for (var i = 0; i < selectables.length; i++)
+        history.push(selectables[i].getLabel());
+
+      return history;
       /*
       var history = this.history.getChildren();
       var historyArray = new Array();
