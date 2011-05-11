@@ -1,10 +1,12 @@
 <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>
 ==========
 
-[<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>](http://www.flystockdb.org) is a free web-database for keeping Drosophila melanogaster stocks. A short screencast-preview about the project can be found here: [Preview of the Dmel-stock-keeping database "<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>"](http://bergmanlab.smith.man.ac.uk/?p=704). Occasionally I [blog](http://joachimbaran.wordpress.com/tag/flystockdb/) about <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span> news and developments.
+[<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>](http://www.flystockdb.org) is a free web-database for keeping and sharing Drosophila melanogaster stocks. I occasionally [blog](http://joachimbaran.wordpress.com/tag/flystockdb/) about <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>'s developments.
 
 Documentation
 -------------
+
+*CONTRIBUTORS WANTED*
 
 Documentation is been prepared and can be found on-line as a [wiki](https://github.com/joejimbo/flystockdb/wiki), or it can be downloaded in markdown format:
 
@@ -13,54 +15,25 @@ Documentation is been prepared and can be found on-line as a [wiki](https://gith
 Quick Installation Guide
 ------------------------
 
-PostgreSQL needs to be installed and running; FlyBase needs to be loaded as a database, where I assume that the database is named FBYYYY_MM in the following. As in the instructions given by FlyBase, YYYY and MM will correspond to the year and month of the FlyBase release. For example, your database might be called FB2010_09. There needs to be a PostgreSQL user 'gazebo' with password 'gazebo' set-up, who has the permission to create databases.
+<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span> is currently being massively restructured. This section will be populated again once its development stablises.
 
-Get the web-application framework Gazebo and the flystockdb implementation from GitHub:
+Acknowledgements
+----------------
 
-    git clone git://github.com/joejimbo/Gazebo.git
-    git clone git://github.com/joejimbo/flystockdb.git
+Contributors in alphabetical order:
 
-First, we need to generate and extract some positional and feature-type
-information from FlyBase, which will be used when entering genotypes:
+* Anna-Maria Knorn. *Usability Testing & Drosophila Consulting.*
+* Casey Bergman. *Conceptualisation.*
+* Miyuki Fukuma. *Web-Design Consulting.*
+* Tasleem Thawar. *Editorial Consulting.*
 
-    cd flystockdb/support/scripts
-    ./create_stocks.rb FBYYYY_MM gazebo gazebo
-    ./doall.sh FBYYYY_MM gazebo gazebo
-    cd ../../..
+<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>'s initial development started within the Bergman Lab at the University of Manchester funded by the grant (Feb. 2010 -- Nov. 2010):
 
-Gazebo is dependend on supporting software, which has to installed as well:
-
-    cd Gazebo/support
-    (follow the instructions in README)
-    cd ../..
-
-flystockdb is a contribution to the Gazebo framework, so we need to introduce it to Gazebo:
-
-    cd Gazebo/client
-    git update-index --assume-unchanged config.json
-    vi config.json
-    cd ../..
-
-It is necessary to compile flystockdb before it can be accessed through the web:
-
-    cd Gazebo
-    rake
-    cd ..
-
-Icons are not copied automatically, which has to be carried out manually:
-
-    cd Gazebo/client/build/resource
-    cp -R ../../../../flystockdb/fly/trunk/source/resource/fly .
-    cd ../../../..
-    cp flystockdb/favicon.ico Gazebo/sites/Gazebo/htdocs
-
-Finally, the web-server has to be configured and started:
-
-    cd Gazebo/sites/Gazebo
-    git update-index --assume-unchanged conf/httpd.conf
-    vi conf/httpd.conf
-    mkdir logs
-    httpd -f conf/httpd.conf -d `pwd`
+**Establishment of a Drosophila Core facility**  
+[Biomedical resources grant; 087742/Z/08/Z; 2009-12](http://www.wellcome.ac.uk/stellent/groups/corporatesite/@msh_publishing_group/documents/web_document/WTX058508.pdf), [Wellcome Trust](http://www.wellcome.ac.uk/)  
+[Dr R. Baines](http://www.ls.manchester.ac.uk/people/profile/?personid=174)+, [Dr C. Bergman](http://www.ls.manchester.ac.uk/people/profile/?personid=235), [Dr H.L. Ashe](http://www.ls.manchester.ac.uk/people/profile/?personid=144), [Dr M. Ronshaugen](http://www.ls.manchester.ac.uk/people/profile/?personid=1416), [Dr A. Prokop](http://www.ls.manchester.ac.uk/people/profile/?personid=1346).  
+[Faculty of Life Sciences, The University of Manchester](http://www.ls.manchester.ac.uk/).  
++ *Grant applicant.*
 
 Licences
 --------
