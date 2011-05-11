@@ -952,6 +952,8 @@ qx.Class.define("gazebo.fly.Contribution",
         if (this.bulkGenotypes > 0)
           this.fireDataEvent('proceedRelay', 'eve ena', null);
       }
+
+      this.disposeProgressBar();
     },
 
     stockImportListener : function(dataEvent) {
@@ -1220,6 +1222,46 @@ qx.Class.define("gazebo.fly.Contribution",
       this.inquirer.suggestScreenTransition();
     },
 
+    createProgressBar : function()
+    {
+      this.progressBar = new qx.ui.indicator.ProgressBar(1,1);
+
+      this.busyBeeWindow = new qx.ui.window.Window().set({
+        showMinimize: false,
+        showMaximize: false,
+        showStatusbar: false,
+        showClose: false,
+        modal: true,
+        resizable: false,
+        movable: false,
+        backgroundColor: 'rgba(200,200,200,0.5)'
+      });
+
+      this.busyBeeWindow.setLayout(new qx.ui.layout.HBox(10));
+      this.busyBeeWindow.add(this.progressBar);
+      this.busyBeeWindow.addListener("resize", this.busyBeeWindow.center);
+      this.inquirer.getRoot().add(this.busyBeeWindow);
+      this.busyBeeWindow.open();
+    },
+
+    disposeProgressBar : function()
+    {
+      this.busyBeeWindow.close();
+      this.busyBeeWindow.dispose();
+    },
+
+    updateProgressBar : function()
+    {
+      var globules = this.globules;
+      var max = this.progressBar.getMaximum();
+
+      if (globules > max) {
+        this.progressBar.setMaximum(globules);
+      }
+
+      this.progressBar.setValue(globules);
+    },
+
     inputListener : function(dataEvent)
     {
       var compound = dataEvent.getData();
@@ -1233,6 +1275,7 @@ qx.Class.define("gazebo.fly.Contribution",
       if (userInput == '+') {
         if (this.globules) {
           this.globules -= 1;
+          this.updateProgressBar();
           this.debug('!!! GLOBULES: ' + this.globules);
           if (this.globules <= 0)
             this.globulesDissolved();
@@ -1350,6 +1393,7 @@ qx.Class.define("gazebo.fly.Contribution",
             if (thisChromosome[j].plainModel == userInput) {
               if (this.globules) {
                 this.globules -= 1;
+                this.updateProgressBar();
                 this.debug(']]] GLOBULES: ' + this.globules);
                 if (this.globules <= 0)
                   this.globulesDissolved();
@@ -1377,6 +1421,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
           this.busyBee = true;
           this.globules = 0;
+
+          this.createProgressBar();
 
           while (chromosomes.length > 0) {
             var chromosomeBag = chromosomes.shift();
@@ -1476,6 +1522,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
                 this.debug('TOKEN ADDED:   ' + token + " (" + possibleBalancer + ") [" + position + "]");
                 this.globules += 1;
+                this.updateProgressBar();
                 this.searchDialog.searchForItem(token, [bottom, comma, position], aides, 3);
                 position++;
               } else {
@@ -1664,6 +1711,7 @@ qx.Class.define("gazebo.fly.Contribution",
         this.debug('Y');
 
         this.globules -= 1;
+        this.updateProgressBar();
         this.debug('>>> GLOBULES: ' + this.globules);
         if (this.globules <= 0)
           this.globulesDissolved();
