@@ -947,27 +947,24 @@ qx.Class.define("gazebo.fly.Contribution",
         this.genotypeBasket.removeAllBasketItems();
         
         this.bulkGenotypes -= 1;
-        this.progressBar.setValue(this.bulkGenotypes);
+        this.updateProgressBar();
 
-        if (this.bulkGenotypes > 0)
+        if (this.bulkGenotypes > 0) {
           this.fireDataEvent('proceedRelay', 'eve ena', null);
+
+          return;
+        }
       }
 
       this.disposeProgressBar();
     },
 
     stockImportListener : function(dataEvent) {
-      if (this.progressBar == null) {
+      if (this.busyBeeWindow == null) {
         this.addListener("proceedRelay", this.stockImportListener, this);
 
         var max = 10;
-        this.progressBar = new qx.ui.indicator.ProgressBar(max, max);
-
-        var window = new qx.ui.window.Window().set({
-          layout: new qx.ui.layout.VBox(10)
-        });
-        window.add(this.progressBar);
-        window.open();
+        this.createProgressBar(max);
 
         this.bulkGenotypes = max;
       }
@@ -1222,8 +1219,12 @@ qx.Class.define("gazebo.fly.Contribution",
       this.inquirer.suggestScreenTransition();
     },
 
-    createProgressBar : function()
+    createProgressBar : function(bulkStocks)
     {
+      if (this.busyBeeWindow) {
+        return; // We are hopefully adding bulk-stocks.. or this would be a bug.
+      }
+
       this.progressBar = new qx.ui.indicator.ProgressBar(1,1);
 
       this.busyBeeWindow = new qx.ui.window.Window().set({
@@ -1237,8 +1238,15 @@ qx.Class.define("gazebo.fly.Contribution",
         backgroundColor: 'rgba(200,200,200,0.5)'
       });
 
-      this.busyBeeWindow.setLayout(new qx.ui.layout.HBox(10));
+      this.busyBeeWindow.setLayout(new qx.ui.layout.VBox(10));
+
+      if (bulkStocks) {
+        this.bulkProgressBar = new qx.ui.indicator.ProgressBar(bulkStocks, bulkStocks);
+        this.busyBeeWindow.add(this.bulkProgressBar);
+      }
+
       this.busyBeeWindow.add(this.progressBar);
+
       this.busyBeeWindow.addListener("resize", this.busyBeeWindow.center);
       this.inquirer.getRoot().add(this.busyBeeWindow);
       this.busyBeeWindow.open();
@@ -1248,6 +1256,7 @@ qx.Class.define("gazebo.fly.Contribution",
     {
       this.busyBeeWindow.close();
       this.busyBeeWindow.dispose();
+      this.busyBeeWindow = null;
     },
 
     updateProgressBar : function()
@@ -1260,6 +1269,10 @@ qx.Class.define("gazebo.fly.Contribution",
       }
 
       this.progressBar.setValue(globules);
+
+      if (this.bulkGenotypes) {
+        this.bulkProgressBar.setValue(this.bulkGenotypes);
+      }
     },
 
     inputListener : function(dataEvent)
