@@ -400,6 +400,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
      */
     generateSuggestions : function(dataEvent)
     {
+      if (this.rpcSuggestions) {
+        return;
+      }
+
       if (this.disableSuggestions) {
         return;
       }
@@ -439,12 +443,21 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       }
 
       var that = this;
-      this.rpcRunning = rpc.callAsync(
+      this.rpcSuggestions = rpc.callAsync(
         function(result, ex, id)
         {
-          if (that.rpcRunning && that.rpcRunning.getSequenceNumber() == id) {
-            that.debug("This: " + this + " That: " + that + " RPC: " + that.rpcRunning +
-               " Seq: " + that.rpcRunning.getSequenceNumber() + " Id: " + id);
+          var currentTextValue = that.textField.getValue();
+
+          if (that.rpcSuggestions && currentTextValue != textValue) {
+            that.debug("REDO: " + currentTextValue + " vs " + textValue);
+            that.rpcSuggestions = null;
+            that.generateSuggestions(new qx.event.type.Data().init(currentTextValue));
+            return;
+          }
+
+          if (that.rpcSuggestions && that.rpcSuggestions.getSequenceNumber() == id) {
+            that.debug("This: " + this + " That: " + that + " RPC: " + that.rpcSuggestions +
+               " Seq: " + that.rpcSuggestions.getSequenceNumber() + " Id: " + id);
             that.openAll = false; // Always default back to a short list of suggestions.
             that.treeRoot.removeAll();
 
@@ -460,6 +473,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
               // Event relaying on failure:
               that.fireDataEvent("inputRelay", null, textValue);
+              that.rpcSuggestions = null;
               return;
             }
 
@@ -522,6 +536,8 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
 
             that.fireDataEvent("inputRelay", treeItem, textValue);
           }
+
+          that.rpcSuggestions = null;
         },
         "query",
         options,
