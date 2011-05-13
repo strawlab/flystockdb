@@ -7,6 +7,12 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+
+#asset(fly/blue/check_alt_16x16.png)
+
+************************************************************************ */
+
 /**
  * A class for bulk stock-imports.
  */
@@ -32,6 +38,23 @@ qx.Class.define("gazebo.fly.StockImport",
     var mainContainer = new qx.ui.container.Composite();
     mainContainer.setLayout(new qx.ui.layout.VBox(10));
 
+    var buttonContainer = new qx.ui.container.Composite();
+    buttonContainer.setLayout(new qx.ui.layout.VBox(10));
+
+    buttonContainer.add(new qx.ui.basic.Label(''));
+
+    var proceedButton = new qx.ui.form.Button().set({
+        label: '<b>Import Stocks</b>',
+        icon: 'fly/blue/check_alt_16x16.png',
+        rich: true
+      });
+
+    proceedButton.addListener('click', this.onProceedListener, this);
+
+    buttonContainer.add(proceedButton);
+
+    mainContainer.add(buttonContainer);
+
     mainContainer.add(new qx.ui.basic.Label().set({
       value: 'Stocks to Import',
       rich: true,
@@ -46,21 +69,6 @@ qx.Class.define("gazebo.fly.StockImport",
     mainContainer.add(this.stockTextArea);
 
     this.add(mainContainer);
-
-    this.add(new qx.ui.toolbar.Separator());
-
-    var buttonContainer = new qx.ui.container.Composite();
-    buttonContainer.setLayout(new qx.ui.layout.VBox(10));
-
-    buttonContainer.add(new qx.ui.basic.Label(''));
-
-    var proceedButton = new qx.ui.form.Button(null, "icon/64/actions/dialog-ok.png");
-
-    proceedButton.addListener('click', this.onProceedListener, this);
-
-    buttonContainer.add(proceedButton);
-
-    this.add(buttonContainer);
 
     if (listeners['onProceed']) {
       listener = listeners['onProceed'];
