@@ -74,8 +74,8 @@ qx.Class.define("gazebo.fly.StockImport",
 
     this.stockTextArea = new qx.ui.form.TextArea().set({
       maxLength: 1500000, // 1.5M. Remark: 65k is approx. enough for 100 stocks.
-      height: 575,
-      width: 900
+      height: 545,
+      width: 870
     });
     this.clearStockTextArea();
     mainContainer.add(this.stockTextArea);

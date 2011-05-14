@@ -839,7 +839,8 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
           title: 'Genotype',
-          left : inquirer.LEFT_SO_THAT_CENTERED,
+          left : 0,
+          width: '100%',
           top: 55,
           contents: new gazebo.fly.GenotypeViewer(
             {
@@ -864,7 +865,8 @@ qx.Class.define("gazebo.fly.Contribution",
       inquirer.openScreen(inquirer.generateCustomInterface, inquirer,
         {
           title: 'Metadata',
-          left: inquirer.LEFT_SO_THAT_CENTERED,
+          left: 0,
+          width: '100%',
           top: 225,
           contents: new gazebo.fly.GenotypeMetadata(
             {
@@ -1265,6 +1267,10 @@ qx.Class.define("gazebo.fly.Contribution",
 
     updateProgressBar : function()
     {
+      if (!this.progressBar) {
+        //return;
+      }
+
       var globules = this.globules;
       var max = this.progressBar.getMaximum();
 
