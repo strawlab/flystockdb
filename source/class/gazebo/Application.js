@@ -458,8 +458,14 @@ qx.Class.define("gazebo.Application",
           this.basketWindow.add(proceedButton);
         }
         */
+        composite = new qx.ui.container.Composite();
 
-        this.getRoot().add(this.basketContainer, this.getLayoutOptions(parameters));
+        composite.setLayout(new qx.ui.layout.HBox(10).set({
+          alignX: 'center'
+        }));
+
+        composite.add(this.basketContainer);
+        this.getRoot().add(composite, this.getLayoutOptions(parameters));
       }
 
       if (listeners['onProceed']) {
@@ -506,7 +512,9 @@ qx.Class.define("gazebo.Application",
       // TODO Introduce uid to all generate* calls where relays are used.
       var uid = '' + window.toHashCode();
 
-      window.setLayout(new qx.ui.layout.HBox(5));
+      window.setLayout(new qx.ui.layout.HBox(5).set({
+        alignX: 'center'
+      }));
 
       if (parameters['maxHeight']) {
         window.setMaxHeight(parameters['maxHeight']);
@@ -585,7 +593,14 @@ qx.Class.define("gazebo.Application",
         //scroll.setHeight(500);
         //scroll.add(desktop);
         //this.getRoot().add(scroll);
-        this.getRoot().add(customContainer, this.getLayoutOptions(parameters));
+        composite = new qx.ui.container.Composite();
+
+        composite.setLayout(new qx.ui.layout.HBox(10).set({
+          alignX: 'center'
+        }));
+
+        composite.add(customContainer);
+        this.getRoot().add(composite, this.getLayoutOptions(parameters));
       }
 
       if (listeners['onOpen']) {
@@ -612,42 +627,6 @@ qx.Class.define("gazebo.Application",
 
       windowHandle.destroy();
     },
-
-		generateDatabaseInterface : function()
-		{
-			this.dbComposite = new qx.ui.container.Composite();
-			this.dbComposite.setLayout(new qx.ui.layout.Canvas());
-			this.dbComposite.setPadding(5, 5, 5, 5);
-			
-			this.wfComposite = new qx.ui.container.Composite();
-			this.wfComposite.setLayout(new qx.ui.layout.Canvas());
-			this.wfComposite.setPadding(5, 5, 5, 5);
-			
-			this.databaseWindow = new qx.ui.window.Window("Databases");
-			this.databaseWindow.setLayout(new qx.ui.layout.HBox(10));
-			this.databaseWindow.setResizable(false, false, false, false);
-			this.databaseWindow.setMovable(false);
-			this.databaseWindow.setShowClose(false);
-			this.databaseWindow.setShowMaximize(false);
-			this.databaseWindow.setShowMinimize(false);
-
-			this.databaseWindow.add(new qx.ui.tree.Tree(), { width: "100%" });
-
-			this.workflowWindow = new qx.ui.window.Window("Workflow");
-			this.workflowWindow.setLayout(new qx.ui.layout.HBox(10));
-			this.workflowWindow.setResizable(false, false, false, false);
-			this.workflowWindow.setMovable(false);
-			this.workflowWindow.setShowClose(false);
-			this.workflowWindow.setShowMaximize(false);
-			this.workflowWindow.setShowMinimize(false);
-
-			this.dbComposite.add(this.databaseWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
-			this.wfComposite.add(this.workflowWindow, { left: "0%", top: "0%", right: "0%", bottom: "0%" });
-			this.getRoot().add(this.dbComposite, { left: "0%", top: "0%", right: "75%", bottom: "0%" });
-			this.getRoot().add(this.wfComposite, { left: "80%", top: "0%", right: "0%", bottom: "0%" });
-			this.databaseWindow.open();
-			this.workflowWindow.open();
-		},
 
 		establishConnection : function(dataEvent)
 		{

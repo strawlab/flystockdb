@@ -38,10 +38,21 @@ qx.Class.define("gazebo.fly.StockImport",
     var mainContainer = new qx.ui.container.Composite();
     mainContainer.setLayout(new qx.ui.layout.VBox(10));
 
-    var buttonContainer = new qx.ui.container.Composite();
-    buttonContainer.setLayout(new qx.ui.layout.VBox(10));
+    var buttonContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(10).set({
+      alignX: 'right'
+    }));
 
-    buttonContainer.add(new qx.ui.basic.Label(''));
+    var startOverButton = new qx.ui.form.Button().set({
+      label: 'Start Over',
+      icon: 'fly/orange/x_alt_16x16.png'
+    });
+
+    startOverButton.addListener('click', function(e) {
+      // TODO
+    }, this);
+
+    buttonContainer.add(startOverButton);
+
 
     var proceedButton = new qx.ui.form.Button().set({
         label: '<b>Import Stocks</b>',
@@ -66,6 +77,7 @@ qx.Class.define("gazebo.fly.StockImport",
       height: 575,
       width: 900
     });
+    this.clearStockTextArea();
     mainContainer.add(this.stockTextArea);
 
     this.add(mainContainer);
@@ -78,6 +90,13 @@ qx.Class.define("gazebo.fly.StockImport",
 
   members:
   {
+    clearStockTextArea : function() {
+      this.stockTextArea.setValue(
+        "w ; ena eve / CyO\tWhite eyes.\n" +
+        "w[1118] ; eve / CyO\tWhite eyes. Allele 1118.\n"
+      );
+    },
+
     onProceedListener : function(event) {
       this.fireDataEvent("proceedRelay", "eve ena", null);
     }

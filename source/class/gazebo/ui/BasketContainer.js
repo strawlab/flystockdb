@@ -26,7 +26,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
     var populate = parameters['populate'];
     var titles = parameters['titles'];
     var decorations = parameters['decorations'];
-    var width = parameters['width'] ? parameters['width'] : 866;
+    var width = parameters['basketContainerWidth'] ? parameters['basketContainerWidth'] : 866;
     var compact = parameters['compact'];
 
     this.labels = parameters['labels'];
