@@ -1268,7 +1268,7 @@ qx.Class.define("gazebo.fly.Contribution",
     updateProgressBar : function()
     {
       if (!this.progressBar) {
-        //return;
+        return;
       }
 
       var globules = this.globules;
@@ -1288,10 +1288,21 @@ qx.Class.define("gazebo.fly.Contribution",
     inputListener : function(dataEvent)
     {
       var compound = dataEvent.getData();
-      var treeItem = compound[0];
-      var userInput = compound[1];
-      var reQuery = compound[2];
-      var initialParameters = dataEvent.getOldData();
+
+      var treeItem = null;
+      var userInput = null;
+      var reQuery = null;
+      var initialParameters = null;
+
+      if (compound) {
+        treeItem = compound[0];
+        userInput = compound[1];
+        reQuery = compound[2];
+        initialParameters = dataEvent.getOldData();
+      } else {
+        userInput = dataEvent.getOldData();
+      }
+
 
       // '+' should be ignored. It is only there to denote
       // an unambiguous genotype:
@@ -1306,7 +1317,7 @@ qx.Class.define("gazebo.fly.Contribution",
         return;
       }
 
-      var suggestedAides = compound.length > 2 ? compound[2] : null;
+      var suggestedAides = compound && compound.length > 2 ? compound[2] : null;
 
       var chromosome = 5 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
@@ -1433,10 +1444,18 @@ qx.Class.define("gazebo.fly.Contribution",
         // Eliminate leading and trailing white space:
         userInput = userInput.replace(/^\s+|\s+$/g, "");
 
-        // Allels may require re-querying, so fake a genotype:
-        if (!this.busyBee && userInput.match(/^\w+\[\w+|\*\]$/)) {
-          userInput = userInput + ' / ';
+        if (!this.busyBee) {
+
+          if (userInput.match(/^\w+\[\w+|\*\]$/)) {
+            // Allels may require re-querying, so fake a genotype:
+            userInput = userInput + ' / ';
+          } else if (userInput.match(/^[^ \/;]+$/)) {
+            //
+            userInput = userInput + ' / ' + userInput;
+          }
+          
         }
+
 
         // Simple test to see whether a complete genotype might have been entered:
         if (!this.reader.isAtom(userInput)) {

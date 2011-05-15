@@ -458,6 +458,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
           if (that.rpcSuggestions && that.rpcSuggestions.getSequenceNumber() == id) {
             that.debug("This: " + this + " That: " + that + " RPC: " + that.rpcSuggestions +
                " Seq: " + that.rpcSuggestions.getSequenceNumber() + " Id: " + id);
+
             that.openAll = false; // Always default back to a short list of suggestions.
             that.treeRoot.removeAll();
 
@@ -534,7 +535,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             // Event relaying on success:
             var treeItem = that.searchForTreeItem(textValue, that.suggestionTree.getRoot());
 
-            that.fireDataEvent("inputRelay", treeItem, textValue);
+            that.fireDataEvent("inputRelay", null, textValue);
           }
 
           that.rpcSuggestions = null;
