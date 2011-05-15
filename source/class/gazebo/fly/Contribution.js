@@ -1260,9 +1260,11 @@ qx.Class.define("gazebo.fly.Contribution",
 
     disposeProgressBar : function()
     {
-      this.busyBeeWindow.close();
-      this.busyBeeWindow.destroy();
-      this.busyBeeWindow = null;
+      if (this.busyBeeWindow) {
+        this.busyBeeWindow.close();
+        this.busyBeeWindow.destroy();
+        this.busyBeeWindow = null;
+      }
     },
 
     updateProgressBar : function()
