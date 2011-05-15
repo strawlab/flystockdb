@@ -945,8 +945,8 @@ qx.Class.define("gazebo.fly.Contribution",
     },
 
     globulesDissolved : function() {
-      //alert('this ' + this + ' - ' + this.bulkGenotypes + ' - ' + this.getChromosomes(10));
-      if (this.bulkGenotypes > 0) {
+      this.debug('this ' + this + ' - ' + this.bulkGenotypes + ' - ' + this.getChromosomes(10));
+      if (this.bulkGenotypes && this.bulkGenotypes > 0) {
         this.debug('GLOBULES DISSOLVED');
         this.debug('GENOTYPE: ' + new gazebo.fly.GenotypeWriter().stringNotation(this.getChromosomes(10)));
 
@@ -1261,7 +1261,7 @@ qx.Class.define("gazebo.fly.Contribution",
     disposeProgressBar : function()
     {
       this.busyBeeWindow.close();
-      this.busyBeeWindow.dispose();
+      this.busyBeeWindow.destroy();
       this.busyBeeWindow = null;
     },
 
