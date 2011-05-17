@@ -1638,17 +1638,14 @@ qx.Class.define("gazebo.fly.Contribution",
         }
 
         if (flybaseId) {
+          chromosomeMatchingValue = '<u>' + displayText + '</u>';
+          chromosomeNonMatchingValue = displayText;
+
           label = new qx.ui.basic.Label().set({
-            value: '<u>' + displayText + '</u>',
+            value: chromosomeMatchingValue,
             rich: true
           });
 
-          label.addListener('click', function(mouseEvent) {
-            qx.bom.Window.open('http://www.flybase.org/reports/' + flybaseId + '.html',
-              'FlyBase Report',
-              {},
-              false);
-          }, this);
           label.setDroppable(true);
           label.addListener('drop', function(e) {
             e.stopPropagation();
@@ -1669,6 +1666,16 @@ qx.Class.define("gazebo.fly.Contribution",
           label.addListener('mouseout', function(mouseEvent) {
             this.setValue(this.graphicalModel);
           }, label);
+
+          label.addListener('click', function(mouseEvent) {
+            if (label.misplacedModel) {
+              return;
+            }
+            qx.bom.Window.open('http://www.flybase.org/reports/' + flybaseId + '.html',
+              'FlyBase Report',
+              {},
+              false);
+          }, this);
         } else {
           label = new qx.ui.basic.Label().set({
             value: displayText,
@@ -1692,7 +1699,15 @@ qx.Class.define("gazebo.fly.Contribution",
         dndHandle.addListener("dragend",
           function(e) {
             // TODO
-            alert('Container: ' + container.basketModel);
+            if (flybaseId) {
+              if (container.basketModel == chromosome) {
+                label.setValue(chromosomeMatchingValue);
+                label.misplacedModel = false;
+              } else {
+                label.setValue(chromosomeNonMatchingValue);
+                label.misplacedModel = true;
+              }
+            }
           }
         );
 
