@@ -1629,7 +1629,8 @@ qx.Class.define("gazebo.fly.Contribution",
         var label;
 
         var displayText = userInput;
-        while (qx.bom.Label.getTextSize(displayText).width > 58) {
+        // TODO Use a dynamic fixed width.
+        while (qx.bom.Label.getTextSize(displayText).width > 100) {
           displayText = displayText.substring(0, displayText.length - 2);
         }
         if (displayText != userInput) {
@@ -1656,6 +1657,7 @@ qx.Class.define("gazebo.fly.Contribution",
             e.preventDefault();
           });
 
+          label.chromosomeModel = chromosome;
           label.flybaseModel = flybaseId;
           label.plainModel = displayText;
           label.graphicalModel = label.getValue();
@@ -1684,6 +1686,13 @@ qx.Class.define("gazebo.fly.Contribution",
             e.addType('genomic feature');
             e.addAction('move');
             e.addData('genomic feature', container);
+          }
+        );
+
+        dndHandle.addListener("dragend",
+          function(e) {
+            // TODO
+            alert('Container: ' + container.basketModel);
           }
         );
 

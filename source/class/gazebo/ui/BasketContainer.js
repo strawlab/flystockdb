@@ -231,6 +231,7 @@ qx.Class.define("gazebo.ui.BasketContainer",
                 itemContainer.myPreviewItem.getChildren()[0].setDecorator('drop-box');
                 that.addBasketItemBefore(thisBasket, item, itemContainer.myDropHint);
               } else {
+                item.basketModel = thisBasket;
                 that.addBasketItem(thisBasket, item, null);
               }
             }
