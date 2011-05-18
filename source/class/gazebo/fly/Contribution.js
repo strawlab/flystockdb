@@ -1700,7 +1700,7 @@ qx.Class.define("gazebo.fly.Contribution",
           function(e) {
             // TODO
             if (flybaseId) {
-              if (container.basketModel == chromosome) {
+              if (container.basketModel%6 == chromosome%6) {
                 label.setValue(chromosomeMatchingValue);
                 label.misplacedModel = false;
               } else {
