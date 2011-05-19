@@ -3,6 +3,8 @@
 
 [<span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>](http://www.flystockdb.org) is a free web-database for keeping and sharing Drosophila melanogaster stocks. I occasionally [blog](http://joachimbaran.wordpress.com/tag/flystockdb/) about <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>'s developments.
 
+![flystockdb logo](https://github.com/joejimbo/flystockdb/raw/master/source/resource/fly/flystockdb160.png)
+
 Documentation
 -------------
 
