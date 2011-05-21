@@ -1660,25 +1660,29 @@ qx.Class.define("gazebo.fly.Contribution",
           label.chromosomeModel = chromosome;
           label.flybaseModel = flybaseId;
           label.plainModel = displayText;
-          label.graphicalModel = label.getValue();
 
           label.addListener('mouseover', function(mouseEvent) {
-            this.setValue("<span style='color: #5070bf;'>" + this.graphicalModel + "</span>");
+            if (!this.misplacedModel) {
+              this.setValue("<span style='color: #5070bf;'>" + this.chromosomeMatchingValue + "</span>");
+            }
           }, label);
           
           label.addListener('mouseout', function(mouseEvent) {
-            this.setValue(this.graphicalModel);
+            if (!this.misplacedModel) {
+              this.setValue(this.chromosomeMatchingValue);
+            } else {
+              this.setValue(this.chromosomeNonMatchingValue);
+            }
           }, label);
 
           label.addListener('click', function(mouseEvent) {
-            if (label.misplacedModel) {
-              return;
+            if (!this.misplacedModel) {
+              qx.bom.Window.open('http://www.flybase.org/reports/' + this.flybaseModel + '.html',
+                'FlyBase Report',
+                {},
+                false);
             }
-            qx.bom.Window.open('http://www.flybase.org/reports/' + flybaseId + '.html',
-              'FlyBase Report',
-              {},
-              false);
-          }, this);
+          }, label);
         } else {
           label = new qx.ui.basic.Label().set({
             value: displayText,
