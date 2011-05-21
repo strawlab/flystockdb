@@ -1646,6 +1646,9 @@ qx.Class.define("gazebo.fly.Contribution",
             rich: true
           });
 
+          label.chromosomeMatchingValue = chromosomeMatchingValue;
+          label.chromosomeNonMatchingValue = chromosomeNonMatchingValue;
+
           label.setDroppable(true);
           label.addListener('drop', function(e) {
             e.stopPropagation();
@@ -1701,14 +1704,15 @@ qx.Class.define("gazebo.fly.Contribution",
             // TODO
             if (flybaseId) {
               if (container.basketModel%6 == chromosome%6) {
-                label.setValue(chromosomeMatchingValue);
-                label.misplacedModel = false;
+                this.setValue(this.chromosomeMatchingValue);
+                this.misplacedModel = false;
               } else {
-                label.setValue(chromosomeNonMatchingValue);
-                label.misplacedModel = true;
+                this.setValue(this.chromosomeNonMatchingValue);
+                this.misplacedModel = true;
               }
             }
-          }
+          },
+          label
         );
 
         container.add(dndHandle);
