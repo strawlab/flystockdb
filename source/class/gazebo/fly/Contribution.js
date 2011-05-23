@@ -1307,7 +1307,6 @@ qx.Class.define("gazebo.fly.Contribution",
         userInput = dataEvent.getOldData();
       }
 
-
       // '+' should be ignored. It is only there to denote
       // an unambiguous genotype:
       if (userInput == '+') {
@@ -1321,7 +1320,7 @@ qx.Class.define("gazebo.fly.Contribution",
         return;
       }
 
-      var suggestedAides = compound && compound.length > 2 ? compound[2] : null;
+      var suggestedAides = null; // compound && compound.length > 2 ? compound[2] : null;
 
       var chromosome = 5 // Default placement: chromosome 'Unknown'
       var chromosomeName = 'Unknown'
@@ -1448,18 +1447,19 @@ qx.Class.define("gazebo.fly.Contribution",
         // Eliminate leading and trailing white space:
         userInput = userInput.replace(/^\s+|\s+$/g, "");
 
+        var misplaced;
+
         if (!this.busyBee) {
 
           if (userInput.match(/^\w+\[\w+|\*\]$/)) {
             // Allels may require re-querying, so fake a genotype:
             userInput = userInput + ' / ';
-          } else if (userInput.match(/^[^ \/;]+$/)) {
+          } else if (userInput.match(/^[^ \/;]+$/) && !userInput.match(/^@.+@$/)) {
             //
             userInput = userInput + ' / ' + userInput;
           }
           
         }
-
 
         // Simple test to see whether a complete genotype might have been entered:
         if (!this.reader.isAtom(userInput)) {
@@ -1554,6 +1554,14 @@ qx.Class.define("gazebo.fly.Contribution",
 
                     aides = aides.concat([ geneSymbol ]);
                   }
+
+                  if (aides[i].match(/^@[^@]+@$/)) {
+                    alert('Busy Bee ' + this.busyBee + ' userInput ' + userInput +
+                      ' token ' + token +
+                      ' partite ' + partite +
+                      ' aides ' + aides);
+                    aides[i] = 'w';
+                  }
                 }
 
                 // Remove the token itself from the aides.
@@ -1587,7 +1595,7 @@ qx.Class.define("gazebo.fly.Contribution",
           this.debug('HINT: ' + hint + ' on ' + userInput);
           if (hint) {
             var flybaseIdHint = userInput.match(/^@\w*:/)[0].match(/\w+/);
-            var chromosomeHint = userInput.match(/\$\d+@$/);
+            var chromosomeHint = userInput.match(/\$\d+\$[01]@$/);
             bottom = treeItem.annotation ? treeItem.annotation[0] : false;
 
             if (flybaseIdHint) {
@@ -1595,20 +1603,22 @@ qx.Class.define("gazebo.fly.Contribution",
             }
 
             if (chromosomeHint) {
-              chromosome = parseInt(chromosomeHint[0].match(/\d+/)[0]);
+              matches = chromosomeHint[0].match(/\d+/);
+              chromosome = parseInt(matches[0]);
+              misplaced = parseInt(matches[1]) == 1;
 
               if (bottom && chromosome < 4) {
                 chromosome += 6;
               }
             }
 
-            userInput = userInput.replace(/^@\w*:/, '').replace(/\$\d+@$/, '');
+            userInput = userInput.replace(/^@\w*:/, '').replace(/\$\d+\$[01]@$/, '');
           }
 
           // In case the feature is put on Unknown:
           // Check for inversions or deficiencies which may
           // contain information about their own location.
-          if (chromosome == 5 && userInput.match(/^(In|Df)\(\d[LR]{0,2}\).*/)) {
+          if (!hint && chromosome == 5 && userInput.match(/^(In|Df)\(\d[LR]{0,2}\).*/)) {
             chromosomeLetter = userInput.match(/\(\d[LR]{0,2}\)/)[0].match(/\d/);
 
             if (chromosomeLetter == '1') {
@@ -1659,7 +1669,8 @@ qx.Class.define("gazebo.fly.Contribution",
 
           label.chromosomeModel = chromosome;
           label.flybaseModel = flybaseId;
-          label.plainModel = displayText;
+          label.plainModel = userInput;
+          label.misplacedModel = misplaced;
 
           label.addListener('mouseover', function(mouseEvent) {
             if (!this.misplacedModel) {
@@ -1689,7 +1700,7 @@ qx.Class.define("gazebo.fly.Contribution",
             rich: true
           });
 
-          label.plainModel = displayText;
+          label.plainModel = userInput;
         }
 
         var dndHandle = new qx.ui.basic.Atom(null, 'fly/black/move_8x8.png');
@@ -1705,7 +1716,6 @@ qx.Class.define("gazebo.fly.Contribution",
 
         dndHandle.addListener("dragend",
           function(e) {
-            // TODO
             if (flybaseId) {
               if (container.basketModel%6 == chromosome%6) {
                 this.setValue(this.chromosomeMatchingValue);
