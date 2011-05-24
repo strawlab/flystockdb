@@ -30,17 +30,13 @@ qx.Class.define("gazebo.fly.GenotypeWriter",
       for (var i = 0; i < chromosome.length; i++) {
         if (chromosome[i].plainModel) {
           if (rich) {
+            var suggestion = context;
             flat += '@';
             if (chromosome[i].flybaseModel) {
               flat += chromosome[i].flybaseModel;
+              suggestion = chromosome[i].chromosomeSuggestionModel;
             }
-            flat += ':' + chromosome[i].plainModel + '$' + context + '$';
-            if (!chromosome[i].misplacedModel) {
-              flat += '0';
-            } else {
-              flat += '1';
-            }
-            flat += '@';
+            flat += ':' + chromosome[i].plainModel + '$' + suggestion + '$' + context + '@';
           } else {
             flat += chromosome[i].plainModel;
           }

@@ -1447,8 +1447,6 @@ qx.Class.define("gazebo.fly.Contribution",
         // Eliminate leading and trailing white space:
         userInput = userInput.replace(/^\s+|\s+$/g, "");
 
-        var misplaced;
-
         if (!this.busyBee) {
 
           if (userInput.match(/^\w+\[\w+|\*\]$/)) {
@@ -1555,11 +1553,9 @@ qx.Class.define("gazebo.fly.Contribution",
                     aides = aides.concat([ geneSymbol ]);
                   }
 
+                  // If this is a feature in flystockdb notation, then
+                  // aide the placement depending on the chromosome it is on.
                   if (aides[i].match(/^@[^@]+@$/)) {
-                    alert('Busy Bee ' + this.busyBee + ' userInput ' + userInput +
-                      ' token ' + token +
-                      ' partite ' + partite +
-                      ' aides ' + aides);
                     aides[i] = 'w';
                   }
                 }
@@ -1595,7 +1591,7 @@ qx.Class.define("gazebo.fly.Contribution",
           this.debug('HINT: ' + hint + ' on ' + userInput);
           if (hint) {
             var flybaseIdHint = userInput.match(/^@\w*:/)[0].match(/\w+/);
-            var chromosomeHint = userInput.match(/\$\d+\$[01]@$/);
+            var chromosomeHint = userInput.match(/\$(\d+)\$(\d+)@$/);
             bottom = treeItem.annotation ? treeItem.annotation[0] : false;
 
             if (flybaseIdHint) {
@@ -1603,16 +1599,15 @@ qx.Class.define("gazebo.fly.Contribution",
             }
 
             if (chromosomeHint) {
-              matches = chromosomeHint[0].match(/\d+/);
-              chromosome = parseInt(matches[0]);
-              misplaced = parseInt(matches[1]) == 1;
+              chromosomeSuggestion = parseInt(chromosomeHint[1]);
+              chromosome = parseInt(chromosomeHint[2]);
 
               if (bottom && chromosome < 4) {
                 chromosome += 6;
               }
             }
 
-            userInput = userInput.replace(/^@\w*:/, '').replace(/\$\d+\$[01]@$/, '');
+            userInput = userInput.replace(/^@\w*:/, '').replace(/\$\d+\$\d+@$/, '');
           }
 
           // In case the feature is put on Unknown:
@@ -1670,16 +1665,16 @@ qx.Class.define("gazebo.fly.Contribution",
           label.chromosomeModel = chromosome;
           label.flybaseModel = flybaseId;
           label.plainModel = userInput;
-          label.misplacedModel = misplaced;
+          label.chromosomeSuggestionModel = chromosome%6;
 
           label.addListener('mouseover', function(mouseEvent) {
-            if (!this.misplacedModel) {
+            if (this.chromosomeModel%6 == this.chromosomeSuggestionModel) {
               this.setValue("<span style='color: #5070bf;'>" + this.chromosomeMatchingValue + "</span>");
             }
           }, label);
           
           label.addListener('mouseout', function(mouseEvent) {
-            if (!this.misplacedModel) {
+            if (this.chromosomeModel%6 == this.chromosomeSuggestionModel) {
               this.setValue(this.chromosomeMatchingValue);
             } else {
               this.setValue(this.chromosomeNonMatchingValue);
@@ -1687,7 +1682,7 @@ qx.Class.define("gazebo.fly.Contribution",
           }, label);
 
           label.addListener('click', function(mouseEvent) {
-            if (!this.misplacedModel) {
+            if (this.chromosomeModel%6 == this.chromosomeSuggestionModel) {
               qx.bom.Window.open('http://www.flybase.org/reports/' + this.flybaseModel + '.html',
                 'FlyBase Report',
                 {},
@@ -1716,13 +1711,12 @@ qx.Class.define("gazebo.fly.Contribution",
 
         dndHandle.addListener("dragend",
           function(e) {
-            if (flybaseId) {
-              if (container.basketModel%6 == chromosome%6) {
+            if (this.flybaseModel) {
+              this.chromosomeModel = container.basketModel;
+              if (this.chromosomeModel%6 == this.chromosomeSuggestionModel) {
                 this.setValue(this.chromosomeMatchingValue);
-                this.misplacedModel = false;
               } else {
                 this.setValue(this.chromosomeNonMatchingValue);
-                this.misplacedModel = true;
               }
             }
           },
