@@ -1555,8 +1555,19 @@ qx.Class.define("gazebo.fly.Contribution",
 
                   // If this is a feature in flystockdb notation, then
                   // aide the placement depending on the chromosome it is on.
-                  if (aides[i].match(/^@[^@]+@$/)) {
-                    aides[i] = 'w';
+                  var stockNotation = aides[i].match(/^@[^@]+\$(\d+)\$(\d+)@$/);
+                  if (stockNotation) {
+                    if (stockNotation[2] == '0') {
+                      aides[i] = 'w';
+                    } else if (stockNotation[2] == '1') {
+                      aides[i] = 'b';
+                    } else if (stockNotation[2] == '2') {
+                      aides[i] = 'e';
+                    } else if (stockNotation[2] == '3') {
+                      aides[i] = 'ci';
+                    } else if (stockNotation[2] == '4') {
+                      // There is really nothing on Y?
+                    } // This should be it.
                   }
                 }
 
