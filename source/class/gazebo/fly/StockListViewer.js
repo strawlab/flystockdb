@@ -73,6 +73,7 @@ qx.Class.define("gazebo.fly.StockListViewer",
       this.addListener('onStockSelectRelay', listener['call'], listener['context']);
       this.addListener('cellClick', function(cellEvent) {
             if (cellEvent.getColumn() == 0) {
+              // Stock select listener gets the stock number.
               this.fireDataEvent('onStockSelectRelay', that.getTableModel().getValue(1, cellEvent.getRow()));
             }
           },

@@ -18,6 +18,9 @@ qx.Class.define("gazebo.fly.StockListModel",
   {
     this.base(arguments);
 
+    this.reader = new gazebo.fly.GenotypeReader();
+    this.writer = new gazebo.fly.GenotypeWriter();
+
     this.setColumns([
         "",
         "Internal Stock-ID",
@@ -182,7 +185,18 @@ qx.Class.define("gazebo.fly.StockListModel",
               var rowHash = {};
               rowHash['0'] = 'fly/blue/magnifying_glass_12x12.png';
               for (j = 0; j < result[i].length; j++) {
-                rowHash[j + 1 + ''] = result[i][j];
+                var viewValue = result[i][j];
+
+                switch(j) {
+                case 3:
+                  var chromosomes = that.reader.decomposeFeatureView(viewValue);
+                  viewValue = that.writer.flybaseNotation(chromosomes);
+                  break;
+                default:
+                  break;
+                }
+
+                rowHash[j + 1 + ''] = viewValue;
               }
               // TODO Temporary hack for now..
               rowHash[result[i].length + 1 + ''] = 'Public'
