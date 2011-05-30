@@ -78,16 +78,13 @@ qx.Class.define("gazebo.fly.GenotypeReader",
       for (var i = 0; i < chromosomes.length; i++) {
         var chromosomeContainer = new Array();
         var chromosome = new Array();
-        var featureContainer = new Array();
 
         for (var j = 0; j < chromosomes[i].length; j++) {
           var token = chromosomes[i][j];
 
           if (token == '/') {
-            //chromosome.push(featureContainer);
             chromosomeContainer.push(chromosome);
             chromosome = new Array();
-            featureContainer = new Array();
           } else {
             var notationMatch = token.match(/^@\w+:([^\$]+)\$\d+\$\d+@$/);
 
@@ -97,11 +94,9 @@ qx.Class.define("gazebo.fly.GenotypeReader",
             x = new Object();
             x.plainModel = token;
 
-            featureContainer.push(x);
             chromosome.push(x);
           }
         }
-        //chromosome.push(featureContainer);
         chromosomeContainer.push(chromosome);
         genotypeContainer.push(chromosomeContainer);
       }
