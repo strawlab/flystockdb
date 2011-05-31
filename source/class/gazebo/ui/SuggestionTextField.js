@@ -193,16 +193,6 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         history.push(selectables[i].getLabel());
 
       return history;
-      /*
-      var history = this.history.getChildren();
-      var historyArray = new Array();
-
-      for (var i = 0; i < history.length; i++) {
-        historyArray.push(history[i].model_workaround);
-      }
-
-      return historyArray;
-      */
     },
 
     // A history is only created once and then filled with elements
