@@ -56,6 +56,7 @@ qx.Class.define("gazebo.fly.Contribution",
     this.inquirer = null;
     this.requestTransition = false;
     this.searchDialog = null;
+    this.noSuggestionsForRegExp = /^.*((\S[ ]\S)|\/|;).*$/;
 
     this.statusOpen = false;
 
@@ -430,6 +431,7 @@ qx.Class.define("gazebo.fly.Contribution",
             left: inquirer.LEFT_SO_THAT_CENTERED,
             top: 55,
             stripWhitespace: true,
+            noSuggestionsFor: this.noSuggestionsForRegExp,
             keepHistory: true,
             searchButtonTitle: '',
             searchButtonIcon: 'fly/blue/plus_16x16.png',
@@ -635,6 +637,7 @@ qx.Class.define("gazebo.fly.Contribution",
           width: '100%',
           top: 55,
           stripWhitespace: true,
+          noSuggestionsFor: this.noSuggestionsForRegExp,
           searchButtonTitle: '',
           searchButtonIcon: 'fly/blue/plus_16x16.png',
           database: gazebo.fly.Contribution.FLYBASE_DB

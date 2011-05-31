@@ -30,6 +30,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     var minWidth = parameters['textFieldMinimalWidth'] ? parameters['textFieldMinimalWidth'] : 300;
 
     this.disableSuggestions = parameters['disableSuggestions'];
+    this.noSuggestionsFor = parameters['noSuggestionsFor'];
     this.database = parameters['database'];
 
     this.rpcRunning = null;
@@ -63,7 +64,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     this.textField.addListener("keypress", function(keyEvent) {
         if (keyEvent.getKeyIdentifier() == 'Down' ||
             keyEvent.getKeyIdentifier() == 'PageDown') {
-          if (!this.suggestionTree) { return; }
+          if (!this.suggestionTreePopup) { return; }
 
           if (this.suggestionTree.isSelectionEmpty()) {
             var rootNode = this.suggestionTree.getRoot();
@@ -73,11 +74,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               this.suggestionTree.setSelection([ treeItems[0] ]);
             }
           }
+          this.suggestionTreePopup.show();
           this.suggestionTree.focus();
           this.suggestionTree.activate();
-          this.suggestionTree.show();
         } else if (keyEvent.getKeyIdentifier() == 'Escape') {
-          this.suggestionTree.hide();
+          this.suggestionTreePopup.hide();
         } else if (keyEvent.getKeyIdentifier() == 'Enter') {
           var input = this.textField.getValue();
           this.addHistoryItem(input);
@@ -85,7 +86,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         }
     }, this);
 
-    this.suggestionTree = null;
+    if (this.suggestionTreePopup) {
+      this.suggestionTreePopup.destroy();
+      this.suggestionTreePopup = null;
+    }
 
     if (searchButtonTitle == null) { searchButtonTitle = 'Search'; }
     this.searchButton = new qx.ui.form.Button(searchButtonTitle.length == 0? null : searchButtonTitle, searchButtonIcon);
@@ -251,9 +255,11 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
     makeSuggestionTree : function() {
       this.suggestionTreePopup = new qx.ui.popup.Popup(new qx.ui.layout.HBox(10));
       this.suggestionTree = new qx.ui.tree.Tree();
-      this.suggestionTree.setHeight(0); // Pretend we do not exist.
       this.suggestionTree.setHideRoot(true);
-      this.suggestionTree.hide();
+      
+      // TODO Why does it need -2?
+      this.suggestionTree.setMinWidth(this.textField.getMinWidth() - 2);
+      this.suggestionTree.setMinHeight(303);
 
       // TODO Hack to show proof-of-principle.
       var that = this;
@@ -317,16 +323,16 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       this.suggestionTreePopup.placeToWidget(this.textField, true);
       this.suggestionTreePopup.add(this.suggestionTree);
       //this.add(this.suggestionTreePopup, { row: 2, column: 0 });
-      this.suggestionTreePopup.show();
+      //this.suggestionTreePopup.show();
     },
 
     clear : function() {
       this.textField.setValue("");
       this.generateSuggestions(new qx.event.type.Data().init(""));
 
-      if (this.suggestionTree) {
-        this.suggestionTree.destroy();
-        this.suggestionTree = null;
+      if (this.suggestionTreePopup) {
+        this.suggestionTreePopup.destroy();
+        this.suggestionTreePopup = null;
       }
 
       this.focus();
@@ -408,27 +414,31 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         return;
       }
 
-      var rpc = new qx.io.remote.Rpc();
-      rpc.setTimeout(gazebo.Application.timeout);
-      rpc.setUrl(gazebo.Application.getServerURL());
-      rpc.setServiceName("gazebo.cgi");
-
       var textValue = dataEvent.getData();
 
       if (!textValue || textValue.length == 0) {
         // Was used for fading out suggestionTree, but did not look nice.
         //this.suggestionTree.hide();
         //this.suggestionTree.setOpacity(0);
-        if (this.suggestionTree) {
-          this.suggestionTree.destroy();
-          this.suggestionTree = null;
+        if (this.suggestionTreePopup) {
+          this.suggestionTreePopup.destroy();
+          this.suggestionTreePopup = null;
         }
 
         //this.treeRoot.removeAll();
         return;
       }
-      
-      if (!this.suggestionTree) {
+
+      if (this.noSuggestionsFor && textValue.match(this.noSuggestionsFor)) {
+        if (this.suggestionTreePopup) {
+          this.suggestionTreePopup.destroy();
+          this.suggestionTreePopup = null;
+        }
+
+        return;
+      }
+
+      if (!this.suggestionTreePopup) {
         this.makeSuggestionTree();
       }
 
@@ -442,11 +452,17 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
         options = { count : true, limit : 14 }; // Some Firefox/Windows add a scrollbar for >13?
       }
 
+      var rpc = new qx.io.remote.Rpc();
+      rpc.setTimeout(gazebo.Application.timeout);
+      rpc.setUrl(gazebo.Application.getServerURL());
+      rpc.setServiceName("gazebo.cgi");
+
       var that = this;
       this.rpcSuggestions = rpc.callAsync(
         function(result, ex, id)
         {
           var currentTextValue = that.textField.getValue();
+          currentTextValue = that.stripWhitespace?currentTextValue.replace(/^\s+|\s+$/g, ""):currentTextValue;
 
           if (that.rpcSuggestions && currentTextValue != textValue) {
             that.debug("REDO: " + currentTextValue + " vs " + textValue);
@@ -465,12 +481,18 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
             var folder, file;
 
             if (!result || result.length == 0) {
+              /*
               file = new qx.ui.tree.TreeFile();
               file.addWidget(
                 new qx.ui.basic.Label(
                   "(no matches)"
                 ).set({ appearance: "annotation", rich: true }));
               that.treeRoot.add(file);
+               */
+              if (that.suggestionTreePopup) {
+                that.suggestionTreePopup.destroy();
+                that.suggestionTreePopup = null;
+              }
 
               // Event relaying on failure:
               that.fireDataEvent("inputRelay", null, textValue);
@@ -525,13 +547,18 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
               that.treeRoot.add(file);
             }
 
-            if (!that.suggestionTree) {
-              that.makeSuggestionTree();
-            }
+            if (result.length > 0) {
+              if (!that.suggestionTreePopup) {
+                that.makeSuggestionTree();
+              }
 
-            that.suggestionTree.setMinHeight(303);
-            that.suggestionTree.show();
-            
+              that.suggestionTreePopup.show();
+            } else {
+              if (that.suggestionTreePopup) {
+                that.suggestionTreePopup.destroy();
+                that.suggestionTreePopup = null;
+              }
+            }
             // Event relaying on success:
             var treeItem = that.searchForTreeItem(textValue, that.suggestionTree.getRoot());
 
@@ -613,7 +640,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
                 }
               }
 
-              that.suggestionTree.show();
+              that.suggestionTreePopup.show();
             }
           },
           "query",
