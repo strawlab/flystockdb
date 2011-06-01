@@ -22,6 +22,7 @@
 #asset(fly/gray_light/plus_16x16.png)
 #asset(fly/gray_light/eject_16x16.png)
 #asset(fly/gray_light/cog_alt_16x16.png)
+#asset(fly/gray_light/pen_alt_fill_16x16.png)
 #asset(fly/gray_light/magnifying_glass_16x16.png)
 
 #asset(fly/blue/plus_16x16.png)
@@ -251,8 +252,20 @@ qx.Class.define("gazebo.fly.Contribution",
         that.highlightMenu();
       }, this);
 
+      this.editLink = new qx.ui.basic.Atom().set({
+        label: 'Edit Stocks',
+        rich: true,
+        icon: 'fly/gray_light/pen_alt_fill_16x16.png'
+      });
+      this.editLink.addListener('click', function(mouseEvent) {
+        that.generateSearchUI(that.inquirer);
+        that.inquirer.suggestScreenTransition();
+        that.selectedScreen = that.searchLink;
+        that.highlightMenu();
+      }, this);
+
       this.addLink = new qx.ui.basic.Atom().set({
-        label: 'Add Fly-Stock',
+        label: 'Add Stocks',
         rich: true,
         icon: 'fly/gray_light/plus_16x16.png'
       });
@@ -287,6 +300,7 @@ qx.Class.define("gazebo.fly.Contribution",
 
       linkContainer.add(this.homeLink);
       linkContainer.add(this.searchLink);
+      linkContainer.add(this.editLink);
       linkContainer.add(this.addLink);
       linkContainer.add(this.administrationLink);
 
@@ -295,6 +309,7 @@ qx.Class.define("gazebo.fly.Contribution",
       this.statusWidgets = [
         this.homeLink,
         this.searchLink,
+        this.editLink,
         this.addLink,
         this.administrationLink
       ];
