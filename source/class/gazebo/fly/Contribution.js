@@ -189,6 +189,11 @@ qx.Class.define("gazebo.fly.Contribution",
         }
     },
 
+    generateEditUI : function(inquirer) {
+      // TODO Needs filtering on stocks that can be edited.
+      this.generateStockListUI(inquirer);
+    },
+
     generateDashboardUI : function(inquirer) {
 
       inquirer.openScreen(inquirer.generateSearchDialog, inquirer,
@@ -258,9 +263,9 @@ qx.Class.define("gazebo.fly.Contribution",
         icon: 'fly/gray_light/pen_alt_fill_16x16.png'
       });
       this.editLink.addListener('click', function(mouseEvent) {
-        that.generateSearchUI(that.inquirer);
+        that.generateEditUI(that.inquirer);
         that.inquirer.suggestScreenTransition();
-        that.selectedScreen = that.searchLink;
+        that.selectedScreen = that.editLink;
         that.highlightMenu();
       }, this);
 
