@@ -49,7 +49,8 @@ qx.Class.define("gazebo.fly.Contribution",
   statics :
   {
     FOOTER_PREAMBLE : 'FlyBase Nomenclature: ',
-    FLYBASE_DB : 'FB2010_09'
+    FLYBASE_DB : 'FB2010_09',
+    HIDDEN_COLUMNS : [ 5, 6, 8, 10 ]
   },
 
   construct : function()
@@ -210,7 +211,7 @@ qx.Class.define("gazebo.fly.Contribution",
               left : inquirer.LEFT_SO_THAT_CENTERED,
               contents: new gazebo.fly.StockListViewer(
                 {
-                  hiddenColumns: [ 5, 6, 8, 10 ]
+                  hiddenColumns: gazebo.fly.Contribution.HIDDEN_COLUMNS
                 },
                 {
                   onStockSelect: {
@@ -808,7 +809,7 @@ qx.Class.define("gazebo.fly.Contribution",
               left : inquirer.LEFT_SO_THAT_CENTERED,
               contents: new gazebo.fly.StockListViewer(
                 {
-                  hiddenColumns: [ 5, 6, 8, 10 ]
+                  hiddenColumns: gazebo.fly.Contribution.HIDDEN_COLUMNS
                 },
                 {
                   onStockSelect: {
@@ -840,7 +841,7 @@ qx.Class.define("gazebo.fly.Contribution",
               left : inquirer.LEFT_SO_THAT_CENTERED,
               contents: new gazebo.fly.StockListViewer(
                 {
-                  hiddenColumns: [ 5, 6, 8, 10 ]
+                  hiddenColumns: gazebo.fly.Contribution.HIDDEN_COLUMNS
                 },
                 {
                   onStockSelect: {
