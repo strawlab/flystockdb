@@ -21,6 +21,10 @@ qx.Class.define("gazebo.fly.StockListViewer",
     this.setMinWidth(1000);
     this.setMaxWidth(1000);
 
+    if (parameters['hiddenColumns']) {
+      this.setInitiallyHiddenColumns(parameters['hiddenColumns']);
+    }
+
     var searchTerm = parameters['searchTerm'];
     var searchChromosomeX = parameters['searchChromosome0'];
     var searchChromosome2 = parameters['searchChromosome1'];

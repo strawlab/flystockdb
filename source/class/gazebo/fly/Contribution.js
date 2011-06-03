@@ -191,7 +191,60 @@ qx.Class.define("gazebo.fly.Contribution",
 
     generateEditUI : function(inquirer) {
       // TODO Needs filtering on stocks that can be edited.
-      this.generateStockListUI(inquirer);
+
+      inquirer.openScreen(inquirer.generateTabbedInterface, inquirer,
+        {
+          top: 155,
+          left: 0,
+          width: '100%',
+          createNewPageOn: [ 1 ],
+
+          title: 'Stocklists',
+          title0: 'Editable Stocks',
+
+          generatorCall0: inquirer.generateCustomInterface,
+          generatorContext0: inquirer,
+          parameters0:
+            {
+              title: 'Editabe Stocks',
+              left : inquirer.LEFT_SO_THAT_CENTERED,
+              contents: new gazebo.fly.StockListViewer(
+                {
+                  hiddenColumns: [ 5, 6, 8, 10 ]
+                },
+                {
+                  onStockSelect: {
+                    call: this.onStockSelectListener,
+                    context: this
+                  }
+                },
+                {}
+              )
+            },
+          listeners0:
+            {
+              onTransitionCloseScreen: {
+                call: inquirer.disposeCustomInterface,
+                context: inquirer,
+                parameters: {}
+              }
+            },
+          overrides0:
+            {
+
+            }
+          },
+
+          {
+            onTransitionCloseScreen: {
+              call: inquirer.disposeTabbedInterface,
+              context: inquirer,
+              parameters: {}
+            }
+          },
+          {}
+      );
+
     },
 
     generateDashboardUI : function(inquirer) {
@@ -753,10 +806,10 @@ qx.Class.define("gazebo.fly.Contribution",
             {
               title: 'My Stocks',
               left : inquirer.LEFT_SO_THAT_CENTERED,
-//              top: 155,
-//              maxHeight: 270,
               contents: new gazebo.fly.StockListViewer(
-                {},
+                {
+                  hiddenColumns: [ 5, 6, 8, 10 ]
+                },
                 {
                   onStockSelect: {
                     call: this.onStockSelectListener,
@@ -785,10 +838,10 @@ qx.Class.define("gazebo.fly.Contribution",
             {
               title: 'All Stocks',
               left : inquirer.LEFT_SO_THAT_CENTERED,
-//              top: 155,
-//              maxHeight: 270,
               contents: new gazebo.fly.StockListViewer(
-                {},
+                {
+                  hiddenColumns: [ 5, 6, 8, 10 ]
+                },
                 {
                   onStockSelect: {
                     call: this.onStockSelectListener,

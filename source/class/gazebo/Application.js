@@ -211,6 +211,9 @@ qx.Class.define("gazebo.Application",
         that.suggestScreenTransition();
       }, this);
 
+      var paddingTop, paddingRight, paddingBottom, paddingLeft;
+      var marginTop, marginRight, marginBottom, marginLeft;
+
       // Placement of additional elements
       if (customElements) {
         var customContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
@@ -223,34 +226,48 @@ qx.Class.define("gazebo.Application",
             customElements[i].addListener('mouseout', parameters['onMouseOut'], customElements[i]);
           }
           if (parameters['customElementPadding']) {
-            var a = parameters['customElementPadding'][0];
-            var b = parameters['customElementPadding'][1];
-            var c = parameters['customElementPadding'][2];
-            var d = parameters['customElementPadding'][3];
+            paddingTop = parameters['customElementPadding'][0];
+            paddingRight = parameters['customElementPadding'][1];
+            paddingBottom = parameters['customElementPadding'][2];
+            paddingLeft = parameters['customElementPadding'][3];
 
-            customElements[i].setPadding(a, b, c, d);
+            customElements[i].setPadding(paddingTop, paddingRight, paddingBottom, paddingLeft);
           }
           if (parameters['customElementMargin']) {
-            a = parameters['customElementMargin'][0];
-            b = parameters['customElementMargin'][1];
-            c = parameters['customElementMargin'][2];
-            d = parameters['customElementMargin'][3];
+            marginTop = parameters['customElementMargin'][0];
+            marginRight = parameters['customElementMargin'][1];
+            marginBottom = parameters['customElementMargin'][2];
+            marginLeft = parameters['customElementMargin'][3];
 
-            customElements[i].setMargin(a, b, c, d);
+            customElements[i].setMargin(marginTop, marginRight, marginBottom, marginLeft);
           }
           customContainer.add(customElements[i]);
         }
         this.statusWindow.add(customContainer);
         this.statusWindow.add(new qx.ui.basic.Label().set({
           value: separator,
-          rich: true
+          rich: true,
+          paddingBottom: 3 // see also separator below
         }));
       }
 
-      this.statusWindow.add(this.statusDisplayUsername);
+
+      var metaContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+      if (parameters['customElementPadding']) {
+        this.statusDisplayUsername.setPadding(paddingTop, paddingRight, paddingBottom, paddingLeft);
+        this.statusDisplayAuthenticationLink.setPadding(paddingTop, paddingRight, paddingBottom, paddingLeft);
+      }
+      if (parameters['customElementMargin']) {
+        this.statusDisplayUsername.setMargin(marginTop, marginRight, marginBottom, marginLeft);
+        this.statusDisplayAuthenticationLink.setMargin(marginTop, marginRight, marginBottom, marginLeft);
+      }
+      metaContainer.add(this.statusDisplayUsername);
+
+      this.statusWindow.add(metaContainer);
       this.statusWindow.add(new qx.ui.basic.Label().set({
         value: separator,
-        rich: true
+        rich: true,
+        paddingBottom: 3 // see also separator above
       }));
       this.statusWindow.add(this.statusDisplayAuthenticationLink);
 
