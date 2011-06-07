@@ -10,8 +10,6 @@
 #asset(fly/green/plus_16x16.png)
 #asset(fly/blue/check_alt_16x16.png)
 
-#asset(gazebo/*)
-
 ************************************************************************ */
 
 /**
