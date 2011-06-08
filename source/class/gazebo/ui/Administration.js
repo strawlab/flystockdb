@@ -306,6 +306,7 @@ qx.Class.define("gazebo.ui.Administration",
 
     this.userDeleteGroup.magicMapping = true;
     this.userPermissions.magicMapping = true;
+    this.detailCreatedOn.dateMapping = true;
 
     userContainer2.add(new qx.ui.basic.Label().set({
       value: '<b>Rights & Permissions</b>',
@@ -462,6 +463,7 @@ qx.Class.define("gazebo.ui.Administration",
     this.groupContribute.magicMapping = true;
     this.groupVisible.magicMapping = true;
     this.groupEditDelete.magicMapping = true;
+    this.groupCreatedOn.dateMapping = true;
 
     this.groupAdminAndSubscriptions = new qx.ui.tree.Tree().set({
       hideRoot: true,
@@ -920,6 +922,8 @@ qx.Class.define("gazebo.ui.Administration",
               } else {
                 // TODO Woops...
               }
+            } else if (fields[i].dateMapping) {
+              fields[i].setValue(gazebo.Application.rewriteDate(result[0][i]));
             } else if (fields[i].setValue) {
               fields[i].setValue(result[0][i]);
             } else if (fields[i].setSelection) {
@@ -955,7 +959,7 @@ qx.Class.define("gazebo.ui.Administration",
               that.userDeleteButton.setEnabled(true);
 
               that.detailCreatedBy.setValue(result[0][1]);
-              that.detailCreatedOn.setValue(result[0][2]);
+              that.detailCreatedOn.setValue(gazebo.Application.rewriteDate(result[0][2]));
 
               that.updateUserOverview(result[0][0]);
             }
@@ -1148,7 +1152,7 @@ qx.Class.define("gazebo.ui.Administration",
               that.groupDeleteButton.setEnabled(true);
 
               that.groupCreatedBy.setValue(result[0][2]);
-              that.groupCreatedOn.setValue(result[0][3]);
+              that.groupCreatedOn.setValue(gazebo.Application.rewriteDate(result[0][3]));
 
               that.updateSubscriptions(result[0][1]);
             }

@@ -87,6 +87,60 @@ qx.Class.define("gazebo.Application",
     {
       // Marshalling seems to be alright since qooxdoo 1.4 and Ruby 1.9.
       return string;
+    },
+
+    // Rewrite date from database to human readable format.
+    // Input:  2011-05-06T22:22:05+00:00
+    // Output: 22:22, 6 May 2011
+    rewriteDate : function(dateString)
+    {
+      var dateChunks = dateString.match(/^(\d{4})-(\d{2})-(\d{2})T(.{5})/);
+
+      var year = dateChunks[1];
+      var month = parseInt(dateChunks[2]);
+      var day = parseInt(dateChunks[3]);
+      var time = dateChunks[4];
+
+      switch(month) {
+      case 1:
+        month = 'Jan';
+        break;
+      case 2:
+        month = 'Feb';
+        break;
+      case 3:
+        month = 'Mar';
+        break;
+      case 4:
+        month = 'Apr';
+        break;
+      case 5:
+        month = 'May';
+        break;
+      case 6:
+        month = 'Jun';
+        break;
+      case 7:
+        month = 'Jul';
+        break;
+      case 8:
+        month = 'Aug';
+        break;
+      case 9:
+        month = 'Sep';
+        break;
+      case 10:
+        month = 'Oct';
+        break;
+      case 11:
+        month = 'Nov';
+        break;
+      case 12:
+        month = 'Dec';
+        break;
+      }
+
+      return time + ', ' + day + ' ' + month + ' ' + year;
     }
 	},
 
