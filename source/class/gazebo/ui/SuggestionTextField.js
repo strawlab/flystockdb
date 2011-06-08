@@ -155,6 +155,10 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
   {
     addHistoryItem : function(inputText)
     {
+      if (!this.historySelectBox) {
+        return;
+      }
+      
       if (this.historySelectBox.indexOf(this.emptyHistoryItem) != -1) {
         this.historySelectBox.remove(this.emptyHistoryItem);
         this.historySelectBox.setAppearance('selectbox');
@@ -334,9 +338,7 @@ qx.Class.define("gazebo.ui.SuggestionTextField",
       if (selection && selection.length == 1) {
         var input = selection[0].getLabel();
         this.searchForItem(input);
-        if (this.historySelectBox) {
-          this.addHistoryItem(input);
-        }
+        this.addHistoryItem(input);
       }
     },
 
