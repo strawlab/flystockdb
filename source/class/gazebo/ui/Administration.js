@@ -659,6 +659,9 @@ qx.Class.define("gazebo.ui.Administration",
       this.deleteGroup,
       this
     );
+
+    this.setUserButtons();
+    this.setGroupButtons();
   },
 
   members :
@@ -1141,8 +1144,11 @@ qx.Class.define("gazebo.ui.Administration",
 
     setGroupButtons : function()
     {
-      var that = this;
+      this.groupSubmitButton.setEnabled(false);
+      this.groupAddButton.setEnabled(false);
+      this.groupDeleteButton.setEnabled(false);
 
+      var that = this;
       this.populateInputFields(
         [
           function(result) {
