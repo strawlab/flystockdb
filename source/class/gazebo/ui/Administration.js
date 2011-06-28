@@ -630,31 +630,38 @@ qx.Class.define("gazebo.ui.Administration",
     this.username.addListener('changeValue', this.setUserButtons, this);
     this.groupName.addListener('changeValue', this.setGroupButtons, this);
 
+    // Submit changes to the server:
+    //  - existing details were changed and should be saved now
+    //  - new details were entered and a new user/group needs to be created
     this.userSubmitButton.addListener('execute',
       this.updateUser,
       this
     );
-
-    this.userAddButton.addListener('execute',
-      this.addUser,
-      this
-    );
-
-    this.userDeleteButton.addListener('execute',
-      this.deleteUser,
-      this
-    );
-
     this.groupSubmitButton.addListener('execute',
       this.updateGroup,
       this
     );
 
-    this.groupAddButton.addListener('execute',
-      this.addGroup,
+    // Prepare UI for entering a new user/group. Clear input fields.
+    this.userAddButton.addListener('execute', function() {
+        // this.addUser
+        this.username.setValue('-- enter new user name --');
+      },
+      this
+    );
+    this.groupAddButton.addListener('execute', function() {
+        // this.addGroup
+        this.groupName.setValue('-- enter new group name --');
+      },
       this
     );
 
+    // Delete an existing user/group. If in due process of entering
+    // a new user's details, then clear out fields again.
+    this.userDeleteButton.addListener('execute',
+      this.deleteUser,
+      this
+    );
     this.groupDeleteButton.addListener('execute',
       this.deleteGroup,
       this
