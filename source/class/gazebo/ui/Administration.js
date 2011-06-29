@@ -645,13 +645,13 @@ qx.Class.define("gazebo.ui.Administration",
     // Prepare UI for entering a new user/group. Clear input fields.
     this.userAddButton.addListener('execute', function() {
         // this.addUser
-        this.username.setValue('-- enter new user name --');
+        this.purgeUserInputFields();
       },
       this
     );
     this.groupAddButton.addListener('execute', function() {
         // this.addGroup
-        this.groupName.setValue('-- enter new group name --');
+        this.purgeGroupInputFields();
       },
       this
     );
@@ -673,6 +673,22 @@ qx.Class.define("gazebo.ui.Administration",
 
   members :
   {
+    purgeUserInputFields : function() {
+      this.username.setValue('-- enter new user name --');
+    },
+
+    purgeGroupInputFields : function() {
+      this.groupName.setValue('-- enter new group name --');
+      this.groupCreatedBy.setValue('');
+      this.groupCreatedOn.setValue('');
+      this.groupContact.resetSelection();
+      this.groupDescription.setValue('');
+      this.groupContribute.resetSelection();
+      this.groupVisible.resetSelection();
+      this.groupEditDelete.resetSelection();
+      this.setGroupButtons();
+    },
+
     addUser : function() {
       // TODO Check validity of user input
 
@@ -965,7 +981,7 @@ qx.Class.define("gazebo.ui.Administration",
           function(result) {
             if (result && result.length > 0 && result[0][0] == that.username.getValue()) {
               that.userSubmitButton.setEnabled(true);
-              that.userAddButton.setEnabled(false);
+              that.userAddButton.setEnabled(true);
               that.userDeleteButton.setEnabled(true);
 
               that.detailCreatedBy.setValue(result[0][1]);
@@ -1161,7 +1177,7 @@ qx.Class.define("gazebo.ui.Administration",
           function(result) {
             if (result && result.length > 0 && result[0][0] == that.groupName.getValue()) {
               that.groupSubmitButton.setEnabled(true);
-              that.groupAddButton.setEnabled(false);
+              that.groupAddButton.setEnabled(true);
               that.groupDeleteButton.setEnabled(true);
 
               that.groupCreatedBy.setValue(result[0][2]);
@@ -1188,7 +1204,9 @@ qx.Class.define("gazebo.ui.Administration",
           that.groupCreatedOn.setValue('');
 
           that.groupAASRoot.removeAll();
-          var note = new qx.ui.tree.TreeFile('Add group first (green button)', null);
+          var note = new qx.ui.tree.TreeFile('Select a group from the group list', null);
+          that.groupAASRoot.add(note);
+          note = new qx.ui.tree.TreeFile('or add group (green button) first.', null);
           that.groupAASRoot.add(note);
         }
       );
