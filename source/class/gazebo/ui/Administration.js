@@ -20,6 +20,12 @@ qx.Class.define("gazebo.ui.Administration",
 {
   extend : qx.ui.container.Composite,
 
+  statics :
+  {
+    defaultNewUserName  : '-- enter new user name --',
+    defaultNewGroupName : '-- enter new group name --'
+  },
+
   construct : function(parameters, listeners, overrides)
   {
     this.base(arguments);
@@ -674,11 +680,11 @@ qx.Class.define("gazebo.ui.Administration",
   members :
   {
     purgeUserInputFields : function() {
-      this.username.setValue('-- enter new user name --');
+      this.username.setValue(gazebo.ui.Administration.defaultNewUserName);
     },
 
     purgeGroupInputFields : function() {
-      this.groupName.setValue('-- enter new group name --');
+      this.groupName.setValue(gazebo.ui.Administration.defaultNewGroupName);
       this.groupCreatedBy.setValue('');
       this.groupCreatedOn.setValue('');
       this.groupContact.resetSelection();
@@ -686,6 +692,7 @@ qx.Class.define("gazebo.ui.Administration",
       this.groupContribute.resetSelection();
       this.groupVisible.resetSelection();
       this.groupEditDelete.resetSelection();
+      this.groupList.resetSelection();
       this.setGroupButtons();
     },
 
