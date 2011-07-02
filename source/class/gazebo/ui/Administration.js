@@ -125,7 +125,8 @@ qx.Class.define("gazebo.ui.Administration",
 
     this.username = new qx.ui.form.TextField().set({
       width: 260,
-      liveUpdate: true
+      liveUpdate: true,
+      readOnly: true
     });
     this.detailCreatedBy = new qx.ui.form.TextField().set({
       width: 130,
@@ -385,7 +386,8 @@ qx.Class.define("gazebo.ui.Administration",
     this.groupContact = new qx.ui.form.SelectBox();
     this.groupName = new qx.ui.form.TextField().set({
       width: 260,
-      liveUpdate: true
+      liveUpdate: true,
+      readOnly: true
     });
     this.groupDescription = new qx.ui.form.TextField().set({
       width: 260
@@ -547,7 +549,9 @@ qx.Class.define("gazebo.ui.Administration",
           if (!firstSelection) {
             return;
           }
-          
+
+          this.username.setReadOnly(true);
+
           username = firstSelection.getLabel();
 
           this.populateInputFields(
@@ -590,6 +594,8 @@ qx.Class.define("gazebo.ui.Administration",
           if (!firstSelection) {
             return;
           }
+
+          this.groupName.setReadOnly(true);
 
           name = firstSelection.getLabel();
 
@@ -650,13 +656,13 @@ qx.Class.define("gazebo.ui.Administration",
 
     // Prepare UI for entering a new user/group. Clear input fields.
     this.userAddButton.addListener('execute', function() {
-        // this.addUser
+        this.username.setReadOnly(false);
         this.purgeUserInputFields();
       },
       this
     );
     this.groupAddButton.addListener('execute', function() {
-        // this.addGroup
+        this.groupName.setReadOnly(false);
         this.purgeGroupInputFields();
       },
       this
@@ -680,11 +686,12 @@ qx.Class.define("gazebo.ui.Administration",
   members :
   {
     purgeUserInputFields : function() {
+      this.groupList.resetSelection();
       this.username.setValue(gazebo.ui.Administration.defaultNewUserName);
     },
 
     purgeGroupInputFields : function() {
-      this.groupName.setValue(gazebo.ui.Administration.defaultNewGroupName);
+      this.groupList.resetSelection();
       this.groupCreatedBy.setValue('');
       this.groupCreatedOn.setValue('');
       this.groupContact.resetSelection();
@@ -692,8 +699,7 @@ qx.Class.define("gazebo.ui.Administration",
       this.groupContribute.resetSelection();
       this.groupVisible.resetSelection();
       this.groupEditDelete.resetSelection();
-      this.groupList.resetSelection();
-      this.setGroupButtons();
+      this.groupName.setValue(gazebo.ui.Administration.defaultNewGroupName);
     },
 
     addUser : function() {
@@ -981,15 +987,27 @@ qx.Class.define("gazebo.ui.Administration",
 
     setUserButtons : function()
     {
+      if (this.username.isReadOnly())
+        this.userAddButton.setEnabled(true);
+      else
+        this.userAddButton.setEnabled(false);
+      if (this.userList.getSelection() && this.userList.getSelection().length > 0)
+        this.userDeleteButton.setEnabled(true);
+      else
+        this.userDeleteButton.setEnabled(false);
+      if (this.username.getValue() && this.username.getValue().length > 0)
+        this.userSubmitButton.setEnabled(true);
+      else
+        this.userSubmitButton.setEnabled(false);
+
       var that = this;
 
       this.populateInputFields(
         [
           function(result) {
             if (result && result.length > 0 && result[0][0] == that.username.getValue()) {
-              that.userSubmitButton.setEnabled(true);
-              that.userAddButton.setEnabled(true);
-              that.userDeleteButton.setEnabled(true);
+              if (!that.username.isReadOnly())
+                that.userSubmitButton.setEnabled(false);
 
               that.detailCreatedBy.setValue(result[0][1]);
               that.detailCreatedOn.setValue(gazebo.Application.rewriteDate(result[0][2]));
@@ -1001,9 +1019,6 @@ qx.Class.define("gazebo.ui.Administration",
         'get_userdetails',
         this.username.getValue(),
         function(result) {
-          that.userSubmitButton.setEnabled(false);
-          that.userAddButton.setEnabled(true);
-          that.userDeleteButton.setEnabled(false);
           that.inquirer.generateAuthenticationDispatcher(
             {},
             {
@@ -1174,19 +1189,27 @@ qx.Class.define("gazebo.ui.Administration",
 
     setGroupButtons : function()
     {
-      this.groupSubmitButton.setEnabled(false);
-      this.groupAddButton.setEnabled(false);
-      this.groupDeleteButton.setEnabled(false);
+      if (this.groupName.isReadOnly())
+        this.groupAddButton.setEnabled(true);
+      else
+        this.groupAddButton.setEnabled(false);
+      if (this.groupList.getSelection() && this.groupList.getSelection().length > 0)
+        this.groupDeleteButton.setEnabled(true);
+      else
+        this.groupDeleteButton.setEnabled(false);
+      if (this.groupName.getValue() && this.groupName.getValue().length > 0)
+        this.groupSubmitButton.setEnabled(true);
+      else
+        this.groupSubmitButton.setEnabled(false);
 
       var that = this;
       this.populateInputFields(
         [
           function(result) {
             if (result && result.length > 0 && result[0][0] == that.groupName.getValue()) {
-              that.groupSubmitButton.setEnabled(true);
-              that.groupAddButton.setEnabled(true);
-              that.groupDeleteButton.setEnabled(true);
-
+              if (!that.groupName.isReadOnly())
+                that.groupSubmitButton.setEnabled(false);
+              
               that.groupCreatedBy.setValue(result[0][2]);
               that.groupCreatedOn.setValue(gazebo.Application.rewriteDate(result[0][3]));
 
@@ -1197,9 +1220,6 @@ qx.Class.define("gazebo.ui.Administration",
         'get_groupdetails',
         this.groupName.getValue(),
         function(result) {
-          that.groupSubmitButton.setEnabled(false);
-          that.groupAddButton.setEnabled(true);
-          that.groupDeleteButton.setEnabled(false);
           that.inquirer.generateAuthenticationDispatcher(
             {},
             {
