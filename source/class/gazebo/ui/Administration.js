@@ -1100,7 +1100,7 @@ qx.Class.define("gazebo.ui.Administration",
         },
         'get_usersubscriptions',
         {},
-        "g.group_id == s.group_id AND s.username = ?", // TODO Why do I need ==?
+        "g.group_id = s.group_id AND s.username = ?",
         [ that.username.getValue() ]
       );
     },
@@ -1126,6 +1126,7 @@ qx.Class.define("gazebo.ui.Administration",
       rpc.callAsync(
         function(result, ex, id)
         {
+          that.debug('RESULT AS I SEE IT: ' + result);
           if (!result || result.length == 0) {
             // TODO Retry and eventually error handling..
             return;
@@ -1148,8 +1149,8 @@ qx.Class.define("gazebo.ui.Administration",
           }
         },
         'get_groupsubscriptions',
-        { comprehensive: true },
-        "u.username == s.username AND s.group_id = ?",
+        {},
+        "u.username = s.username AND s.group_id = ?",
         [ group_id ]
       );
     },
