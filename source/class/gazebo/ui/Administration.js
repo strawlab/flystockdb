@@ -895,7 +895,6 @@ qx.Class.define("gazebo.ui.Administration",
       return -1;
     },
 
-    // TODO Should call removeAll() on destination, but that bails out with an error.
     populateList : function(destination, request, column)
     {
       var rpc = new qx.io.remote.Rpc();
@@ -981,7 +980,8 @@ qx.Class.define("gazebo.ui.Administration",
         },
         request,
         {},
-        argument
+        argument,
+        []
       );
     },
 
@@ -1232,6 +1232,42 @@ qx.Class.define("gazebo.ui.Administration",
           that.groupCreatedOn.setValue('');
 
           that.groupAASRoot.removeAll();
+          if (that.groupName.getValue() == gazebo.ui.Administration.defaultNewGroupName) {
+            that.populateInputFields(
+              [
+                function(result) {
+                  if (!result || result.length == 0) {
+                    // TODO Error handling
+                    return;
+                  }
+
+                  that.groupAASRoot.removeAll();
+
+                  var header = new qx.ui.tree.TreeFile();
+
+                  header.addWidget(new qx.ui.basic.Label(''));
+                  header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+                  header.addWidget(new qx.ui.basic.Label('Adm.'));
+                  header.addWidget(new qx.ui.core.Spacer(15));
+                  header.addWidget(new qx.ui.basic.Label('Subs.'));
+
+                  that.groupAASRoot.add(header);
+
+                  for (var i = 0; i < result.length; i++) {
+                    that.groupAASRoot.add(that.generateSubscriptionItem(result[i][0], false, false));
+                  }
+                }
+              ],
+              'get_userlist',
+              'true',
+              function(result) {
+                // TODO What to do? It is fairly bad if no results are returned.
+              }
+            );
+
+            return;
+          }
+
           var note = new qx.ui.tree.TreeFile('Select a group from the group list', null);
           that.groupAASRoot.add(note);
           note = new qx.ui.tree.TreeFile('or add group (green button) first.', null);
