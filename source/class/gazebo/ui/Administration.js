@@ -1132,21 +1132,7 @@ qx.Class.define("gazebo.ui.Administration",
             return;
           }
 
-          that.groupAASRoot.removeAll();
-          
-          var header = new qx.ui.tree.TreeFile();
-          
-          header.addWidget(new qx.ui.basic.Label(''));
-          header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
-          header.addWidget(new qx.ui.basic.Label('Adm.'));
-          header.addWidget(new qx.ui.core.Spacer(15));
-          header.addWidget(new qx.ui.basic.Label('Subs.'));
-
-          that.groupAASRoot.add(header);
-
-          for (var i = 0; i < result.length; i++) {
-            that.groupAASRoot.add(that.generateSubscriptionItem(result[i][0], result[i][1], result[i][1] != null));
-          }
+          that.populateSubscriptions(that.groupAASRoot, result, false);
         },
         'get_groupsubscriptions',
         {},
@@ -1241,21 +1227,7 @@ qx.Class.define("gazebo.ui.Administration",
                     return;
                   }
 
-                  that.groupAASRoot.removeAll();
-
-                  var header = new qx.ui.tree.TreeFile();
-
-                  header.addWidget(new qx.ui.basic.Label(''));
-                  header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
-                  header.addWidget(new qx.ui.basic.Label('Adm.'));
-                  header.addWidget(new qx.ui.core.Spacer(15));
-                  header.addWidget(new qx.ui.basic.Label('Subs.'));
-
-                  that.groupAASRoot.add(header);
-
-                  for (var i = 0; i < result.length; i++) {
-                    that.groupAASRoot.add(that.generateSubscriptionItem(result[i][0], false, false));
-                  }
+                  that.populateSubscriptions(that.groupAASRoot, result, true);
                 }
               ],
               'get_userlist',
@@ -1274,6 +1246,28 @@ qx.Class.define("gazebo.ui.Administration",
           that.groupAASRoot.add(note);
         }
       );
+    },
+
+    populateSubscriptions : function(treeRoot, result, isUserlist)
+    {
+      treeRoot.removeAll();
+
+      var header = new qx.ui.tree.TreeFile();
+
+      header.addWidget(new qx.ui.basic.Label(''));
+      header.addWidget(new qx.ui.core.Spacer(), { flex: 1 });
+      header.addWidget(new qx.ui.basic.Label('Adm.'));
+      header.addWidget(new qx.ui.core.Spacer(15));
+      header.addWidget(new qx.ui.basic.Label('Subs.'));
+
+      treeRoot.add(header);
+
+      for (var i = 0; i < result.length; i++) {
+        if (isUserlist)
+          treeRoot.add(this.generateSubscriptionItem(result[i][0], false, false));
+        else
+          treeRoot.add(this.generateSubscriptionItem(result[i][0], result[i][1], result[i][1] != null));
+      }
     }
   }
 });
