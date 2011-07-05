@@ -23,7 +23,10 @@ qx.Class.define("gazebo.ui.Administration",
   statics :
   {
     defaultNewUserName  : '-- enter new user name --',
-    defaultNewGroupName : '-- enter new group name --'
+    defaultNewGroupName : '-- enter new group name --',
+
+    ADDING  : 0,
+    EDITING : 1
   },
 
   construct : function(parameters, listeners, overrides)
@@ -542,6 +545,8 @@ qx.Class.define("gazebo.ui.Administration",
         if (selectionEvent &&
           selectionEvent.getData() &&
           selectionEvent.getData().length >= 1) {
+          this.userMode = gazebo.ui.Administration.EDITING;
+
           var firstSelection = selectionEvent.getData()[0];
 
           // Check if selected element is not null. Otherwise crashes
@@ -587,6 +592,8 @@ qx.Class.define("gazebo.ui.Administration",
         if (selectionEvent &&
           selectionEvent.getData() &&
           selectionEvent.getData().length >= 1) {
+          this.groupMode = gazebo.ui.Administration.EDITING;
+
           var firstSelection = selectionEvent.getData()[0];
 
           // Check if selected element is not null. Otherwise crashes
@@ -656,12 +663,14 @@ qx.Class.define("gazebo.ui.Administration",
 
     // Prepare UI for entering a new user/group. Clear input fields.
     this.userAddButton.addListener('execute', function() {
+        this.userMode = gazebo.ui.Administration.ADDING;
         this.username.setReadOnly(false);
         this.purgeUserInputFields();
       },
       this
     );
     this.groupAddButton.addListener('execute', function() {
+        this.groupMode = gazebo.ui.Administration.ADDING;
         this.groupName.setReadOnly(false);
         this.purgeGroupInputFields();
       },
@@ -936,7 +945,7 @@ qx.Class.define("gazebo.ui.Administration",
         function(result, ex, id)
         {
           if (!result || result.length != 1) {
-            // TODO Retry and eventually error handling..
+            // TODO Retry and eventually error handlsetGroupBing..
             if (failover) {
               failover(result);
             }
@@ -1218,7 +1227,7 @@ qx.Class.define("gazebo.ui.Administration",
           that.groupCreatedOn.setValue('');
 
           that.groupAASRoot.removeAll();
-          if (that.groupName.getValue() == gazebo.ui.Administration.defaultNewGroupName) {
+          if (that.groupMode == gazebo.ui.Administration.ADDING) {
             that.populateInputFields(
               [
                 function(result) {
