@@ -25,8 +25,9 @@ qx.Class.define("gazebo.ui.Administration",
     defaultNewUserName  : '-- enter new user name --',
     defaultNewGroupName : '-- enter new group name --',
 
-    ADDING  : 0,
-    EDITING : 1
+    ADDING              : 0,
+    ADDING_BOOTSTRAPPED : 1,
+    EDITING             : 2
   },
 
   construct : function(parameters, listeners, overrides)
@@ -1185,6 +1186,10 @@ qx.Class.define("gazebo.ui.Administration",
 
     setGroupButtons : function()
     {
+      // Checking for read only makes actually sense, because the
+      // user can select some group to discard changes he/she made.
+      // Alternatively, they can just leave that UI and continue
+      // their work.
       if (this.groupName.isReadOnly())
         this.groupAddButton.setEnabled(true);
       else
@@ -1197,6 +1202,9 @@ qx.Class.define("gazebo.ui.Administration",
         this.groupSubmitButton.setEnabled(true);
       else
         this.groupSubmitButton.setEnabled(false);
+
+      if (this.groupMode == gazebo.ui.Administration.ADDING_BOOTSTRAPPED)
+        return;
 
       var that = this;
       this.populateInputFields(
@@ -1228,6 +1236,8 @@ qx.Class.define("gazebo.ui.Administration",
 
           that.groupAASRoot.removeAll();
           if (that.groupMode == gazebo.ui.Administration.ADDING) {
+            that.groupMode = gazebo.ui.Administration.ADDING_BOOTSTRAPPED;
+
             that.populateInputFields(
               [
                 function(result) {
