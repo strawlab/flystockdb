@@ -691,6 +691,9 @@ qx.Class.define("gazebo.ui.Administration",
 
     this.setUserButtons();
     this.setGroupButtons();
+
+    this.pendingUserChanges = false;
+    this.pendingGroupChanges = false;
   },
 
   members :
