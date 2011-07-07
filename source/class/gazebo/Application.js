@@ -70,6 +70,9 @@ qx.Class.define("gazebo.Application",
     timeout : 8000,
     delayedTimeout : 40000,
 
+    // Global variable for keeping track of the UI's 'edited' state
+    pendingChanges : false,
+
 		// Generates the application's server URL
 		getServerURL : function()
 		{
@@ -706,9 +709,18 @@ qx.Class.define("gazebo.Application",
       this.fireEvent("screen.open", null);
 		},
 
+    confirmationDialog : function()
+    {
+      return confirm('Discard unsaved changes?');
+    },
+
     suggestScreenTransition : function()
     {
       // No intervention or post-poning yet.
+      if (gazebo.Application.pendingChanges) {
+        if (this.confirmationDialog())
+          return;
+      }
       this.screenTransition();
     },
 

@@ -704,6 +704,8 @@ qx.Class.define("gazebo.ui.Administration",
     },
 
     purgeGroupInputFields : function() {
+      gazebo.Application.pendingChanges = true;
+      this.pendingGroupChanges = true;
       this.groupList.resetSelection();
       this.groupCreatedBy.setValue('');
       this.groupCreatedOn.setValue('');
