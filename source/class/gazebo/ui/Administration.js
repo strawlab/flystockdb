@@ -730,6 +730,12 @@ qx.Class.define("gazebo.ui.Administration",
       rpc.callAsync(
         function(result, ex, id)
         {
+          // TODO Check whether user has really been saved. Assuming
+          // right now that populateList will always be fine.
+          that.pendingUserChanges = false;
+          if (!that.pendingGroupChanges && !that.pendingUserChanges)
+            gazebo.Application.pendingChanges = false;
+
           that.populateList(that.userList, 'get_userlist', 'username');
         },
         'create_user',
@@ -784,10 +790,15 @@ qx.Class.define("gazebo.ui.Administration",
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
+      var that = this;
+
       rpc.callAsync(
         function(result, ex, id)
         {
-
+          // TODO Error checking to see if it was really saved.
+          that.pendingUserChanges = false;
+          if (!that.pendingGroupChanges && !that.pendingUserChanges)
+            gazebo.Application.pendingChanges = false;
         },
         'update_user',
         {},
@@ -817,6 +828,12 @@ qx.Class.define("gazebo.ui.Administration",
       rpc.callAsync(
         function(result, ex, id)
         {
+          // TODO Error checking to see if result was saved.
+          // For now assume that populateList below will succeed.
+          that.pendingGroupChanges = false;
+          if (!that.pendingGroupChanges && !that.pendingUserChanges)
+            gazebo.Application.pendingChanges = false;
+
           that.populateList(that.groupList, 'get_grouplist', 'name');
         },
         'create_group',
@@ -860,10 +877,15 @@ qx.Class.define("gazebo.ui.Administration",
       rpc.setUrl(gazebo.Application.getServerURL());
       rpc.setServiceName("gazebo.cgi");
 
+      var that = this;
+
       rpc.callAsync(
         function(result, ex, id)
         {
-
+          // TODO Check whether group was really saved.
+          that.pendingGroupChanges = false;
+          if (!that.pendingGroupChanges && !that.pendingUserChanges)
+            gazebo.Application.pendingChanges = false;
         },
         'update_group',
         {},
@@ -888,7 +910,7 @@ qx.Class.define("gazebo.ui.Administration",
       rpc.callAsync(
         function(result, ex, id)
         {
-
+          // TODO For now assume that things will be fine for subscriptions.
         },
         'update_subscriptions',
         {},
@@ -922,6 +944,8 @@ qx.Class.define("gazebo.ui.Administration",
         {
           if (!result || result.length == 0) {
             // TODO Retry and eventually error handling..
+            // Complicated due to entanglement with other async
+            // user/group saving.
             return;
           }
 

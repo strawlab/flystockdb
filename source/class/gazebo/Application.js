@@ -711,6 +711,25 @@ qx.Class.define("gazebo.Application",
 
     confirmationDialog : function()
     {
+      var confirmWindow = new qx.ui.window.Window().set({
+        showMinimize: false,
+        showMaximize: false,
+        showStatusbar: false,
+        showClose: false,
+        modal: true,
+        resizable: false,
+        movable: false,
+        backgroundColor: 'rgba(200,200,200,0.5)'
+      });
+
+      confirmWindow.setLayout(new qx.ui.layout.VBox(10));
+
+      confirmWindow.add(new qx.ui.basic.Label("TODO"));
+
+      confirmWindow.addListener("resize", confirmWindow.center);
+      this.getRoot().add(confirmWindow);
+      confirmWindow.open();
+
       return confirm('Discard unsaved changes?');
     },
 
