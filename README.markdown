@@ -37,7 +37,7 @@ Contributors in alphabetical order:
 [Faculty of Life Sciences, The University of Manchester](http://www.ls.manchester.ac.uk/).  
 + *Grant applicant.*
 
-Licences
+Licenses
 --------
 
 <span style="color: #0099cc;">fly</span><span style="color: #009966;">stock</span><span style="color: #333333;">db</span>
